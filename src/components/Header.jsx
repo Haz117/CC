@@ -124,8 +124,8 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
       className="h-16 flex items-center px-4 gap-3 flex-shrink-0 sticky top-0 z-10"
       style={{
         background: '#FFFFFF',
-        borderBottom: '1px solid #E8EEF4',
-        boxShadow: '0 1px 6px rgba(194,65,12,.06)',
+        borderBottom: '1px solid #ECEEF2',
+        boxShadow: '0 1px 0 rgba(0,0,0,.06)',
       }}
     >
       {/* Hamburger — oculto en desktop donde la sidebar está fija */}

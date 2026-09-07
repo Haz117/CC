@@ -227,24 +227,22 @@ body {
 ═══════════════════════════════════════════════════════ */
 .card {
   background: #fff;
-  border-radius: 18px;
-  border: 1px solid #E8EDF2;
-  box-shadow: 0 2px 10px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.03);
-  transition: box-shadow .22s ease, transform .22s ease, border-color .22s ease;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  transition: box-shadow .22s ease, transform .22s ease;
 }
 .card:hover {
-  box-shadow: 0 8px 28px rgba(194,65,12,.12), 0 2px 8px rgba(0,0,0,.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 12px 32px rgba(0,0,0,.08);
   transform: translateY(-2px);
-  border-color: rgba(249,115,22,.45);
 }
 .card-danger {
-  border-color: rgba(201,122,109,.3);
+  box-shadow: 0 1px 3px rgba(201,122,109,.1), 0 4px 16px rgba(201,122,109,.1);
 }
 
-.card-glow { transition: box-shadow .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1), border-color .28s }
+.card-glow { transition: box-shadow .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1) }
 .card-glow:hover {
-  box-shadow: 0 12px 36px rgba(249,115,22,.17), 0 3px 10px rgba(249,115,22,.1);
-  border-color: #FED7AA;
+  box-shadow: 0 8px 24px rgba(249,115,22,.18), 0 16px 40px rgba(249,115,22,.1);
   transform: translateY(-4px);
 }
 
@@ -442,13 +440,13 @@ body {
 }
 .modal-card {
   background:#fff; border-radius:20px; width:100%;
-  box-shadow: 0 20px 60px rgba(194,65,12,.16), 0 6px 18px rgba(0,0,0,.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,.12), 0 32px 80px rgba(0,0,0,.1);
   animation: scaleIn .25s cubic-bezier(.34,1.12,.64,1) both; overflow:hidden;
-  border: 1px solid #FDE8D0;
+  border: none;
 }
 .modal-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:16px 24px; border-bottom:1px solid #FDE8D0;
+  padding:18px 24px; border-bottom:1px solid #F0F2F5;
   background:#fff;
 }
 
@@ -591,11 +589,11 @@ body {
 /* ═══════════════════════════════════════════════════════
    CARD ACCENT
 ═══════════════════════════════════════════════════════ */
-.card-accent-blue   { border-top: 3px solid #F97316 }
-.card-accent-green  { border-top: 3px solid #059669 }
-.card-accent-red    { border-top: 3px solid #C97A6D }
-.card-accent-amber  { border-top: 3px solid #d97706 }
-.card-accent-purple { border-top: 3px solid #7c3aed }
+.card-accent-blue   { border-top: 3px solid #F97316 !important }
+.card-accent-green  { border-top: 3px solid #059669 !important }
+.card-accent-red    { border-top: 3px solid #C97A6D !important }
+.card-accent-amber  { border-top: 3px solid #d97706 !important }
+.card-accent-purple { border-top: 3px solid #7c3aed !important }
 
 /* ═══════════════════════════════════════════════════════
    STAT PILL
@@ -618,20 +616,20 @@ body {
   width: 100%; border-collapse: separate; border-spacing: 0;
 }
 .table-modern thead th {
-  padding: 11px 16px;
-  font-size: .6rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .1em; color: #627080;
-  background: #F8F9FB;
-  border-bottom: 1px solid #E8EDF2;
+  padding: 10px 16px;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #8FA1B2;
+  background: #fff;
+  border-bottom: 1px solid #F0F2F5;
   white-space: nowrap;
   position: sticky; top: 0; z-index: 2;
 }
 .table-modern thead th:first-child { border-radius: 0 }
 .table-modern thead th:last-child  { border-radius: 0 }
 .table-modern tbody td {
-  padding: 13px 16px;
+  padding: 14px 16px;
   font-size: .8125rem; color: #263442;
-  border-bottom: 1px solid #F2F3F5;
+  border-bottom: 1px solid #F5F6FA;
   vertical-align: middle;
 }
 .table-modern tbody tr:last-child td { border-bottom: none }
@@ -1401,6 +1399,8 @@ input[type="checkbox"], input[type="radio"] {
 .kpi-bar {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
+.kpi-cell { cursor: default }
+.kpi-cell:hover { transform: none !important; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06) !important }
 /* On very small phones, 2-column minimum */
 @media (max-width: 480px) {
   .kpi-bar { grid-template-columns: repeat(2, 1fr); }

@@ -14,8 +14,10 @@ export default function KpiBar({ items = [] }) {
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
-              borderLeft: `3px solid ${accentColor}`,
+              borderLeft: `4px solid ${accentColor}`,
               borderTop: 'none',
+              borderRight: 'none',
+              borderBottom: 'none',
             }}
           >
             <p style={{
