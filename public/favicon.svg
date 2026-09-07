@@ -1,20 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FB923C"/>
-      <stop offset="100%" stop-color="#C2410C"/>
-    </linearGradient>
-  </defs>
-  <!-- Rounded square background -->
-  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
-  <!-- Milk carton body -->
-  <rect x="9" y="14" width="14" height="12" rx="2" fill="white" opacity="0.95"/>
-  <!-- Milk carton top gable -->
-  <path d="M9 14 L13 9 L19 9 L23 14 Z" fill="white" opacity="0.85"/>
-  <!-- Spout line -->
-  <rect x="13" y="8" width="6" height="2" rx="1" fill="white"/>
-  <!-- Horizontal stripe detail -->
-  <rect x="11" y="19" width="10" height="1.5" rx="0.75" fill="#EA580C" opacity="0.35"/>
-  <!-- Dot drop accent -->
-  <circle cx="16" cy="22.5" r="1.5" fill="#FB923C" opacity="0.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#EA580C"/>
+  <text x="16" y="23" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif"
+    font-weight="900" font-size="14.5" fill="white" letter-spacing="-0.8">CA</text>
 </svg>

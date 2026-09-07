@@ -128,8 +128,8 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
         boxShadow: '0 1px 6px rgba(194,65,12,.06)',
       }}
     >
-      {/* Hamburger */}
-      <button className="header-icon-btn" onClick={onMenuClick} title="Menú">
+      {/* Hamburger — oculto en desktop donde la sidebar está fija */}
+      <button className="header-icon-btn lg:hidden" onClick={onMenuClick} title="Menú">
         <Menu className="w-5 h-5" />
       </button>
 

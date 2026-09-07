@@ -51,8 +51,8 @@ export default function Layout({ children, user, onLogout }) {
         user={user}
       />
 
-      {/* Main content — always full width */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main content — offset por sidebar en desktop */}
+      <div className="flex-1 flex flex-col overflow-hidden lg:pl-72">
         <Header
           user={user}
           onLogout={onLogout}

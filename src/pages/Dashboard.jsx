@@ -251,14 +251,20 @@ export default function Dashboard({ user }) {
 
               {/* gráfica */}
               <ResponsiveContainer width="100%" height={175}>
-                <BarChart data={perfData} barCategoryGap="36%" margin={{ top: 18, left: -30, right: 4, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="4 4" stroke="#F0F2F8" vertical={false} />
+                <BarChart data={perfData} barCategoryGap="38%" margin={{ top: 18, left: -30, right: 4, bottom: 20 }}>
+                  <defs>
+                    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor="#F97316" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#C2410C" stopOpacity={0.85} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 0" stroke="#F5EDE6" vertical={false} />
                   <XAxis dataKey="name"
-                    tick={{ fontSize: 9, fill: C.textSub, fontWeight: 500 }}
+                    tick={{ fontSize: 9, fill: C.textSub, fontWeight: 600 }}
                     axisLine={false} tickLine={false}
                     interval={0} angle={-30} textAnchor="end" height={36} />
-                  <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(249,115,22,.06)', radius: 4 }} />
-                  <Bar dataKey="pct" fill={C.blue} radius={[5, 5, 0, 0]}>
+                  <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(249,115,22,.07)', radius: [6,6,0,0] }} />
+                  <Bar dataKey="pct" fill="url(#barGrad)" radius={[7, 7, 2, 2]}>
                     <LabelList content={<BarLbl />} />
                   </Bar>
                 </BarChart>

@@ -103,9 +103,9 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — solo visible en móvil cuando está abierto */}
       <div
-        className="fixed inset-0 z-30 transition-all duration-300"
+        className="fixed inset-0 z-30 lg:hidden transition-all duration-300"
         style={{
           background: open ? 'rgba(10,22,40,.45)' : 'transparent',
           backdropFilter: open ? 'blur(3px)' : 'none',
@@ -114,9 +114,9 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel — overlay en móvil, fijo en desktop */}
       <aside
-        className="fixed top-0 left-0 h-full z-40 flex flex-col w-72"
+        className="fixed top-0 left-0 h-full z-40 flex flex-col w-72 lg:translate-x-0"
         style={{
           transform: open ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform .28s cubic-bezier(.4,0,.2,1)',
@@ -160,7 +160,7 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
           <button
             onClick={onClose}
             aria-label="Cerrar menú"
-            className="sidebar-close relative z-10 w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
+            className="sidebar-close lg:hidden relative z-10 w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
             style={{ color: 'rgba(255,255,255,.45)' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.12)'; e.currentTarget.style.color = '#fff' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,.45)' }}
