@@ -52,10 +52,10 @@ export default function Login({ onLogin }) {
         {/* Accent bar */}
         <div style={{ height: 4, background: 'linear-gradient(to right,#C2410C,#F97316,#FB923C)' }} />
 
-        <div className="px-8 py-8">
+        <div className="px-10 py-10">
 
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-10">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: '#FFF7ED', border: '1.5px solid #FDE8D0' }}
@@ -71,11 +71,11 @@ export default function Login({ onLogin }) {
           </div>
 
           {/* Heading */}
-          <div className="mb-6">
-            <h1 className="font-black text-[1.5rem] leading-none tracking-tight" style={{ color: '#1A1A1A' }}>
+          <div className="mb-8">
+            <h1 className="font-black text-[1.6rem] leading-none tracking-tight" style={{ color: '#1A1A1A' }}>
               Inicia sesión
             </h1>
-            <p className="text-sm mt-1.5" style={{ color: '#8FA1B2' }}>
+            <p className="text-sm mt-2" style={{ color: '#8FA1B2' }}>
               Ingresa tus credenciales para continuar
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function Login({ onLogin }) {
           )}
 
           {/* Form */}
-          <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
 
             <div>
               <label htmlFor="login-email" className="block text-xs font-semibold mb-1.5" style={{ color: '#627080' }}>
@@ -186,8 +186,8 @@ export default function Login({ onLogin }) {
           </form>
 
           {/* Demo */}
-          <div className="mt-6 rounded-xl p-4" style={{ background: '#FFF8F0', border: '1px solid #FDE8D0' }}>
-            <p className="text-[11px] font-bold uppercase tracking-wider mb-2.5" style={{ color: '#FB923C' }}>
+          <div className="mt-8 rounded-xl p-5" style={{ background: '#FFF8F0', border: '1px solid #FDE8D0' }}>
+            <p className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#FB923C' }}>
               Acceso de demostración
             </p>
             <div className="flex gap-2 mb-3">
@@ -213,7 +213,7 @@ export default function Login({ onLogin }) {
             </button>
           </div>
 
-          <p className="text-center text-[11px] mt-5" style={{ color: '#C8D0D8' }}>
+          <p className="text-center text-[11px] mt-8" style={{ color: '#C8D0D8' }}>
             © 2026 Cremerías Admin · Acceso seguro SSL
           </p>
         </div>
