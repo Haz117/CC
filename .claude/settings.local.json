@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx vite *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const deps=p.dependencies; console.log\\(['framer-motion','cmdk','sonner','@floating-ui/react','@tanstack/react-table'].map\\(k=>k+': '+\\(deps[k]||'NOT FOUND'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(curl *)",
+      "Bash(cat src/utils/toast.js)",
+      "Bash(cat src/utils/toast.jsx)",
+      "Bash(grep -E \"\\\\.\\(jsx?|ts\\)$\")",
+      "Bash(sort -t: -k2 -rn)",
+      "Bash(pnpm --version)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(pnpm build *)",
+      "Bash(npx tsc *)",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git add *)"
+    ]
+  }
+}
