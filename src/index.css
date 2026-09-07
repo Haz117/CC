@@ -1314,15 +1314,15 @@ input[type="checkbox"], input[type="radio"] {
 /* Dashboard two-column layout — stacks vertically on tablet/mobile */
 .dashboard-grid {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   align-items: flex-start;
 }
 .dashboard-right {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 @media (max-width: 1100px) {
   .dashboard-grid { flex-direction: column; }
@@ -1396,7 +1396,8 @@ input[type="checkbox"], input[type="radio"] {
 
 /* ── KpiBar: responsive grid — wraps to 2 rows on narrow screens ── */
 .kpi-bar {
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
 }
 .kpi-cell { cursor: default }
 .kpi-cell:hover { transform: none !important; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06) !important }

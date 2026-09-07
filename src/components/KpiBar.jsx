@@ -10,7 +10,7 @@ export default function KpiBar({ items = [] }) {
             className="card animate-fade-in-up kpi-cell"
             style={{
               animationDelay: `${Math.min(i * 55, 200)}ms`,
-              padding: '14px 16px',
+              padding: '18px 20px',
               display: 'flex',
               flexDirection: 'column',
               gap: 8,

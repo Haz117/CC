@@ -194,14 +194,14 @@ export default function Dashboard({ user }) {
   const best      = [...perfData].sort((a, b) => b.pct - a.pct)[0]
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
       {/* ═══════════════════════════════════════════════════════
           RESUMEN RÁPIDO — tira de mini KPI chips
       ══════════════════════════════════════════════════════ */}
       <div style={{
-        display: 'flex', gap: 10, flexWrap: 'wrap',
-        padding: '2px 0',
+        display: 'flex', gap: 12, flexWrap: 'wrap',
+        padding: '0',
       }}>
         <KpiChip Icon={TrendingUp}    value="$28,900"  label="Ventas hoy"         accent="#F97316" />
         <KpiChip Icon={Store}         value="5"         label="Sucursales activas" accent="#FB923C" />

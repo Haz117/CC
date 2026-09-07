@@ -125,18 +125,10 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
         style={{
           transform: open ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform .28s cubic-bezier(.4,0,.2,1)',
-          background: 'linear-gradient(180deg,#431407 0%,#C2410C 35%,#EA580C 70%,#9a2d08 100%)',
+          background: 'linear-gradient(180deg,#1C0A00 0%,#7C2D12 40%,#9A3412 100%)',
           boxShadow: open ? '12px 0 40px rgba(10,22,40,.4)' : 'none',
         }}
       >
-        {/* Subtle grid texture */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
 
         {/* Logo row */}
         <div
