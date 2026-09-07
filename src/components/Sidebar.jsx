@@ -44,7 +44,7 @@ const groups = [
   },
 ]
 
-function NavItem({ path, icon: Icon, label, badge, badgeRed, badgeAmber, onClose }) {
+function NavItem({ path, icon: Icon, label, badge, badgeRed, badgeAmber, onClose, index = 0 }) {
   const resolved = useResolvedPath(path)
   const isActive = !!useMatch({ path: resolved.pathname, end: true })
   const badgeBg  = badgeRed ? '#C97A6D' : badgeAmber ? '#d97706' : 'rgba(255,255,255,.28)'
@@ -54,8 +54,13 @@ function NavItem({ path, icon: Icon, label, badge, badgeRed, badgeAmber, onClose
       to={path}
       onClick={onClose}
       aria-current={isActive ? 'page' : undefined}
-      className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200"
-      style={{ background: isActive ? 'rgba(255,255,255,.15)' : 'transparent' }}
+      className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 animate-slide-left"
+      style={{
+        background: isActive ? 'rgba(255,255,255,.18)' : 'transparent',
+        boxShadow: isActive ? 'inset 0 1px 0 rgba(255,255,255,.12), 0 2px 8px rgba(0,0,0,.12)' : 'none',
+        animationDelay: `${index * 35}ms`,
+        animationFillMode: 'both',
+      }}
     >
       {isActive && (
         <span
@@ -183,9 +188,10 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
               )}
 
               <div className="space-y-0.5">
-                {group.items.map(item => (
-                  <NavItem key={item.path} {...item} onClose={onClose} />
-                ))}
+                {group.items.map((item, ii) => {
+                  const globalIdx = groups.slice(0, gi).reduce((s, g) => s + g.items.length, 0) + ii
+                  return <NavItem key={item.path} {...item} index={globalIdx} onClose={onClose} />
+                })}
               </div>
             </div>
           ))}

@@ -16,17 +16,28 @@ function BottomTab({ path, icon: Icon, label }) {
     <NavLink
       to={path}
       aria-current={isActive ? 'page' : undefined}
-      className="flex flex-col items-center justify-center gap-0.5 py-3 relative transition-colors"
-      style={isActive ? { color: '#C2410C' } : { color: '#8FA1B2' }}
+      className="flex flex-col items-center justify-center gap-0.5 py-2 relative transition-colors"
+      style={{ color: isActive ? '#C2410C' : '#8FA1B2' }}
     >
-      {isActive && (
-        <span
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full"
-          style={{ background: '#F97316' }}
+      {/* Pill background on active */}
+      <div
+        className="flex items-center justify-center w-12 h-7 rounded-full transition-all duration-200"
+        style={isActive
+          ? { background: 'rgba(249,115,22,.13)', transform: 'scale(1.05)' }
+          : { background: 'transparent' }
+        }
+      >
+        <Icon
+          className="w-5 h-5 transition-transform duration-200"
+          style={isActive ? { transform: 'scale(1.12)' } : {}}
         />
-      )}
-      <Icon className="w-5 h-5" style={isActive ? { transform: 'scale(1.1)' } : {}} />
-      <span className="text-[10px] font-bold">{label}</span>
+      </div>
+      <span
+        className="text-[10px] font-bold transition-all duration-200"
+        style={isActive ? { color: '#C2410C' } : { color: '#8FA1B2' }}
+      >
+        {label}
+      </span>
     </NavLink>
   )
 }
@@ -49,10 +60,12 @@ export default function BottomNav({ onMoreClick }) {
       <button
         onClick={onMoreClick}
         aria-label="Más opciones de navegación"
-        className="flex flex-col items-center justify-center gap-0.5 py-3 transition-colors"
+        className="flex flex-col items-center justify-center gap-0.5 py-2 transition-colors"
         style={{ color: '#8FA1B2', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}
       >
-        <MoreHorizontal className="w-5 h-5" />
+        <div className="flex items-center justify-center w-12 h-7 rounded-full">
+          <MoreHorizontal className="w-5 h-5" />
+        </div>
         <span className="text-[10px] font-bold">Más</span>
       </button>
     </nav>
