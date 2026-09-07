@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { ShoppingBag, Plus, Search, Check, Package, DollarSign, Eye, FileText, Edit, Trash2, Building2, Phone, Mail, X, TrendingUp } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { SkeletonTableRows } from '../components/Skeleton'
@@ -169,7 +169,7 @@ export default function Compras() {
         {/* Gasto por proveedor */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Gasto por proveedor</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
@@ -177,10 +177,10 @@ export default function Compras() {
               data={ordenStats.chartData}
               barSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
             >
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#EBF5FF' }} content={props => <ChartTooltip {...props} format={fmt} />} />
-              <Bar dataKey="total" radius={[5, 5, 0, 0]} fill="#2F8CEB" />
+              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
+              <Bar dataKey="total" radius={[5, 5, 0, 0]} fill="#F97316" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -188,7 +188,7 @@ export default function Compras() {
         {/* Estado de pagos */}
         <div className="card p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de pagos</span>
           </div>
           {ordenStats.pagoRows.map(s => (
@@ -200,22 +200,22 @@ export default function Compras() {
               <span className="text-sm font-black" style={{ color: s.color }}>{fmt(s.total)}</span>
             </div>
           ))}
-          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Total gastado</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(ordenStats.totalGastado)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(ordenStats.totalGastado)}</span>
           </div>
         </div>
       </div>
 
       {/* ── TAB SWITCHER ── */}
-      <div className="inline-flex gap-1 p-1 rounded-2xl mb-5" style={{ background: '#F2F3F5', border: '1px solid #E2EAF2' }}>
+      <div className="inline-flex gap-1 p-1 rounded-2xl mb-5" style={{ background: '#F2F3F5', border: '1px solid #FDE8D0' }}>
         {[['ordenes','Órdenes de compra',FileText],['proveedores','Proveedores',Building2]].map(([key,label,Icon])=>(
           <button
             key={key}
             onClick={()=>setTab(key)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={tab === key
-              ? { background: '#fff', color: '#2F8CEB', boxShadow: '0 1px 4px rgba(15,79,163,.1)', border: '1px solid #E2EAF2' }
+              ? { background: '#fff', color: '#F97316', boxShadow: '0 1px 4px rgba(194,65,12,.1)', border: '1px solid #FDE8D0' }
               : { background: 'transparent', color: '#8FA1B2', border: '1px solid transparent' }
             }
           >
@@ -236,7 +236,7 @@ export default function Compras() {
             </div>
             <div className="section-head">
               <div className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+                <ShoppingBag className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="section-head-text"><strong>Órdenes de Compra</strong></span>
                 <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} orden{filtered.length !== 1 ? 'es' : ''}</span>
                 <span className="badge" style={{ background: 'rgba(217,119,6,.1)', color: '#d97706' }}>{ordenStats.enTransito} en tránsito</span>
@@ -260,8 +260,8 @@ export default function Compras() {
                       <td><span className="folio">{o.id}</span></td>
                       <td>
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#EBF4FC' }}>
-                            <ShoppingBag className="w-3.5 h-3.5" style={{ color: '#2F8CEB' }} />
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
+                            <ShoppingBag className="w-3.5 h-3.5" style={{ color: '#F97316' }} />
                           </div>
                           <span className="font-medium truncate" style={{ color: '#263442' }}>{o.proveedor}</span>
                         </div>
@@ -323,10 +323,10 @@ export default function Compras() {
             return (
             <div key={p.id} className="card card-glow p-5 animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 75, 200)}ms` }}>
               <div className="flex items-start justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#EBF4FC' }}>
-                  <ShoppingBag className="w-5 h-5" style={{ color: '#2F8CEB' }} />
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#FFF7ED' }}>
+                  <ShoppingBag className="w-5 h-5" style={{ color: '#F97316' }} />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#EBF4FC', color: '#0F4FA3' }}>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#FFF7ED', color: '#C2410C' }}>
                   {p.categoria}
                 </span>
               </div>
@@ -335,11 +335,11 @@ export default function Compras() {
               <p className="text-xs mb-3" style={{ color: '#627080' }}>{p.contacto}</p>
               <div className="space-y-1.5 mb-4">
                 <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#A6C3DA' }} />
+                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#FED7AA' }} />
                   <p className="text-xs" style={{ color: '#627080' }}>{p.telefono}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#A6C3DA' }} />
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#FED7AA' }} />
                   <p className="text-xs truncate" style={{ color: '#627080' }}>{p.email}</p>
                 </div>
               </div>
@@ -349,8 +349,8 @@ export default function Compras() {
                   <p className="text-base font-black" style={{ color: '#263442' }}>{provOrdenesCount}</p>
                   <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Órdenes</p>
                 </div>
-                <div className="text-center" style={{ borderLeft: '1px solid #E2EAF2' }}>
-                  <p className="text-base font-black" style={{ color: '#2F8CEB' }}>{fmt(provTotal)}</p>
+                <div className="text-center" style={{ borderLeft: '1px solid #FDE8D0' }}>
+                  <p className="text-base font-black" style={{ color: '#F97316' }}>{fmt(provTotal)}</p>
                   <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Total</p>
                 </div>
               </div>

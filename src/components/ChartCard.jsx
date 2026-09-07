@@ -12,9 +12,9 @@ export default function ChartCard({ title, subtitle, onExport, exportLabel = 'Ex
           <button
             aria-label={exportLabel}
             className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors"
-            style={{ color: '#2F8CEB', background: '#EBF4FC' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(47,140,235,.15)'}
-            onMouseLeave={e => e.currentTarget.style.background = '#EBF4FC'}
+            style={{ color: '#F97316', background: '#FFF7ED' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,.15)'}
+            onMouseLeave={e => e.currentTarget.style.background = '#FFF7ED'}
             onClick={onExport}
           >
             <Download className="w-3.5 h-3.5" aria-hidden="true" /> {exportLabel}

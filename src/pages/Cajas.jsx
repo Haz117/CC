@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { Monitor, Plus, DollarSign, ArrowUpCircle, ArrowDownCircle, Eye, Scissors, TrendingUp, User, Clock } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
@@ -22,8 +22,8 @@ import ChartTooltip from '../components/ChartTooltip'
 
 const statusColor = { Abierta: 'green', Cerrada: 'gray', Inactiva: 'red' }
 const iconStyle = {
-  Abierta:  { bg: '#EBF5FF', color: '#2F8CEB' },
-  Cerrada:  { bg: '#F0F4F9', color: '#8FA1B2' },
+  Abierta:  { bg: '#FFF7ED', color: '#F97316' },
+  Cerrada:  { bg: '#FFF8F0', color: '#8FA1B2' },
   Inactiva: { bg: 'rgba(201,122,109,.08)', color: '#C97A6D' },
 }
 
@@ -90,17 +90,17 @@ export default function Cajas() {
         {/* Ventas por caja */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Ventas del día por caja</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(c => ({ name: c.nombre, total: c.ventasDia, status: c.status }))} barSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#EBF5FF' }} content={props => <ChartTooltip {...props} format={fmt} />} />
+              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="total" radius={[5, 5, 0, 0]}>
                 {data.map(c => (
-                  <Cell key={c.id} fill={c.status === 'Abierta' ? '#2F8CEB' : c.status === 'Cerrada' ? '#A6C3DA' : '#E2EAF2'} />
+                  <Cell key={c.id} fill={c.status === 'Abierta' ? '#F97316' : c.status === 'Cerrada' ? '#FED7AA' : '#FDE8D0'} />
                 ))}
               </Bar>
             </BarChart>
@@ -110,7 +110,7 @@ export default function Cajas() {
         {/* Estado de cajas */}
         <div className="card p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de cajas</span>
           </div>
           <div className="flex flex-col gap-3 flex-1 justify-center">
@@ -130,7 +130,7 @@ export default function Cajas() {
                       <span className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</span>
                       <span className="text-xs font-bold" style={{ color: s.color }}>{pct}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                    <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                       <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: s.color }} />
                     </div>
                   </div>
@@ -138,9 +138,9 @@ export default function Cajas() {
               )
             })}
           </div>
-          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Total acumulado</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(totalDia)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalDia)}</span>
           </div>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function Cajas() {
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="section-head-text"><strong>Cajas</strong></span>
             <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{abiertas} abiertas</span>
             <span className="badge" style={{ background: 'rgba(143,161,178,.12)', color: '#627080' }}>{cerradas} cerradas</span>
@@ -201,7 +201,7 @@ export default function Cajas() {
                 {/* Saldo prominente */}
                 <div>
                   <p style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.09em', color: '#8FA1B2', marginBottom: '2px' }}>Saldo estimado</p>
-                  <p className="font-black leading-none" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.55rem)', color: isActive ? '#0F4FA3' : '#627080', letterSpacing: '-.03em' }}>
+                  <p className="font-black leading-none" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.55rem)', color: isActive ? '#C2410C' : '#627080', letterSpacing: '-.03em' }}>
                     {fmt(saldo)}
                   </p>
                 </div>
@@ -210,7 +210,7 @@ export default function Cajas() {
                 <div className="grid grid-cols-3 gap-1.5">
                   {[
                     { label: 'Ventas',   value: fmt(c.ventasDia),        color: '#059669', bg: 'rgba(5,150,105,.08)'    },
-                    { label: 'Ingresos', value: `+${fmt(c.ingresos)}`,   color: '#2F8CEB', bg: '#EBF5FF'                },
+                    { label: 'Ingresos', value: `+${fmt(c.ingresos)}`,   color: '#F97316', bg: '#FFF7ED'                },
                     { label: 'Retiros',  value: `-${fmt(c.retiros)}`,    color: '#C97A6D', bg: 'rgba(201,122,109,.08)' },
                   ].map(item => (
                     <div key={item.label} className="rounded-lg px-2 py-1.5" style={{ background: item.bg }}>
@@ -221,13 +221,13 @@ export default function Cajas() {
                 </div>
 
                 {/* Cajero + apertura */}
-                <div className="flex items-center gap-4 text-xs" style={{ borderTop: '1px solid #F0F4F9', paddingTop: '10px' }}>
+                <div className="flex items-center gap-4 text-xs" style={{ borderTop: '1px solid #FFF8F0', paddingTop: '10px' }}>
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <User className="w-3 h-3 flex-shrink-0" style={{ color: '#A6C3DA' }} />
+                    <User className="w-3 h-3 flex-shrink-0" style={{ color: '#FED7AA' }} />
                     <span className="truncate" style={{ color: '#627080' }}>{c.cajero}</span>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Clock className="w-3 h-3" style={{ color: '#A6C3DA' }} />
+                    <Clock className="w-3 h-3" style={{ color: '#FED7AA' }} />
                     <span style={{ color: '#627080' }}>{c.apertura}</span>
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export default function Cajas() {
                   <div>
                     <div className="flex justify-between mb-1" style={{ fontSize: '10px', color: '#8FA1B2' }}>
                       <span>Avance vs meta $20K</span>
-                      <span className="font-bold" style={{ color: metaPct >= 100 ? '#059669' : '#2F8CEB' }}>{metaPct}%</span>
+                      <span className="font-bold" style={{ color: metaPct >= 100 ? '#059669' : '#F97316' }}>{metaPct}%</span>
                     </div>
                     <div className="progress-track">
                       <div
@@ -289,14 +289,14 @@ export default function Cajas() {
                 ))}
               </div>
 
-              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E2EAF2' }}>
-                <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #E2EAF2' }}>
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
+                <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #FDE8D0' }}>
                   <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Resumen del día</p>
                 </div>
-                <div className="divide-y" style={{ borderColor: '#E2EAF2' }}>
+                <div className="divide-y" style={{ borderColor: '#FDE8D0' }}>
                   {[
                     { label: 'Ventas del día', value: fmt(selectedCaja.ventasDia),            color: '#059669', icon: TrendingUp },
-                    { label: 'Ingresos (+)',   value: `+${fmt(selectedCaja.ingresos)}`,        color: '#2F8CEB', icon: ArrowUpCircle },
+                    { label: 'Ingresos (+)',   value: `+${fmt(selectedCaja.ingresos)}`,        color: '#F97316', icon: ArrowUpCircle },
                     { label: 'Retiros (−)',    value: `-${fmt(selectedCaja.retiros)}`,          color: '#C97A6D', icon: ArrowDownCircle },
                   ].map(item => (
                     <div key={item.label} className="flex items-center justify-between px-4 py-3">
@@ -307,12 +307,12 @@ export default function Cajas() {
                       <span className="text-sm font-bold" style={{ color: item.color }}>{item.value}</span>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#EBF4FC' }}>
+                  <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#FFF7ED' }}>
                     <div className="flex items-center gap-2.5">
-                      <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#0F4FA3' }} />
+                      <DollarSign className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} />
                       <span className="text-sm font-bold" style={{ color: '#263442' }}>Saldo estimado en caja</span>
                     </div>
-                    <span className="text-base font-black" style={{ color: '#0F4FA3' }}>
+                    <span className="text-base font-black" style={{ color: '#C2410C' }}>
                       {fmt(selectedCaja.ventasDia + selectedCaja.ingresos - selectedCaja.retiros)}
                     </span>
                   </div>
@@ -342,7 +342,7 @@ export default function Cajas() {
                 </div>
               )}
             </div>
-            <div className="px-6 py-4 flex justify-between gap-3" style={{ borderTop: '1px solid #E2EAF2' }}>
+            <div className="px-6 py-4 flex justify-between gap-3" style={{ borderTop: '1px solid #FDE8D0' }}>
               <button onClick={() => setSelectedCaja(null)} className="btn-secondary">Cerrar</button>
               {selectedCaja.status === 'Abierta' && (
                 <button
@@ -361,23 +361,23 @@ export default function Cajas() {
       {showCorte && (
         <Modal maxWidth="sm" onClose={() => setShowCorte(null)} header={<div><div className="flex items-center gap-2"><h3 className="font-bold" style={{ color: '#263442' }}>Registrar corte</h3><span className="chip active">{showCorte.nombre}</span></div><p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>Suc. {showCorte.sucursal} · {showCorte.cajero}</p></div>}>
             <div className="p-6 space-y-3">
-              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E2EAF2' }}>
-                <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #E2EAF2' }}>
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
+                <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #FDE8D0' }}>
                   <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Resumen del turno</p>
                 </div>
                 {[
                   { label: 'Ventas del día', value: fmt(showCorte.ventasDia),         color: '#059669' },
-                  { label: 'Ingresos (+)',   value: `+${fmt(showCorte.ingresos)}`,     color: '#2F8CEB' },
+                  { label: 'Ingresos (+)',   value: `+${fmt(showCorte.ingresos)}`,     color: '#F97316' },
                   { label: 'Retiros (−)',    value: `-${fmt(showCorte.retiros)}`,       color: '#C97A6D' },
                 ].map(item => (
-                  <div key={item.label} className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid #E2EAF2' }}>
+                  <div key={item.label} className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid #FDE8D0' }}>
                     <span className="text-sm" style={{ color: '#627080' }}>{item.label}</span>
                     <span className="text-sm font-bold" style={{ color: item.color }}>{item.value}</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#EBF4FC' }}>
+                <div className="flex items-center justify-between px-4 py-3.5" style={{ background: '#FFF7ED' }}>
                   <span className="text-sm font-bold" style={{ color: '#263442' }}>Saldo en caja</span>
-                  <span className="text-lg font-black" style={{ color: '#0F4FA3' }}>
+                  <span className="text-lg font-black" style={{ color: '#C2410C' }}>
                     {fmt(showCorte.ventasDia + showCorte.ingresos - showCorte.retiros)}
                   </span>
                 </div>

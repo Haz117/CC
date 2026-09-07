@@ -25,10 +25,10 @@ const cfg = {
   },
   info: {
     Icon: Info,
-    bar: '#2F8CEB',
-    iconBg: '#EBF5FF',
-    wash: 'rgba(47,140,235,.04)',
-    iconColor: '#2F8CEB',
+    bar: '#F97316',
+    iconBg: '#FFF7ED',
+    wash: 'rgba(249,115,22,.04)',
+    iconColor: '#F97316',
   },
 }
 
@@ -71,7 +71,7 @@ function ToastItem({ toast, onRemove }) {
         background: '#fff',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(38,52,66,.14), 0 2px 8px rgba(38,52,66,.06)',
-        border: '1px solid #E2EAF2',
+        border: '1px solid #FDE8D0',
         borderTop: `2.5px solid ${c.bar}`,
         padding: '14px 14px 14px 16px',
         width: '360px',

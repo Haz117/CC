@@ -41,7 +41,7 @@ export default function Layout({ children, user, onLogout }) {
     <>
       <a href="#main-content" className="skip-nav">Ir al contenido principal</a>
 
-    <div className="flex h-screen overflow-hidden" style={{ background: '#F0F4F9' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: '#FFF8F0' }}>
 
       {/* Floating sidebar — always overlay, never pushes content */}
       <Sidebar

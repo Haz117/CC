@@ -1,6 +1,6 @@
 const palette = {
-  orange: { bg: '#EBF4FC',                   text: '#0F4FA3', border: '#C8DCE9',                   dot: '#2F8CEB' },
-  blue:   { bg: '#EBF4FC',                   text: '#0F4FA3', border: '#C8DCE9',                   dot: '#2F8CEB' },
+  orange: { bg: '#FFF7ED',                   text: '#C2410C', border: '#FDBA74',                   dot: '#F97316' },
+  blue:   { bg: '#FFF7ED',                   text: '#C2410C', border: '#FDBA74',                   dot: '#F97316' },
   green:  { bg: 'rgba(5,150,105,.09)',        text: '#059669', border: 'rgba(5,150,105,.22)',        dot: '#059669' },
   red:    { bg: 'rgba(201,122,109,.1)',       text: '#A05A52', border: 'rgba(201,122,109,.28)',      dot: '#C97A6D' },
   amber:  { bg: 'rgba(217,119,6,.09)',        text: '#d97706', border: 'rgba(217,119,6,.22)',        dot: '#d97706' },

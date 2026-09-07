@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { ShoppingCart, Search, Eye, XCircle, RotateCcw, Download, DollarSign, CreditCard, Smartphone, Plus, TrendingDown, AlertTriangle, CheckCircle2, Milk, TrendingUp } from 'lucide-react'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
@@ -136,17 +136,17 @@ export default function Ventas() {
         {/* Tendencia semanal */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Tendencia semanal</span>
             <span className="text-xs ml-auto" style={{ color: '#8FA1B2' }}>últimos 7 días</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={ventasSemana} barSize={24} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#EBF5FF' }} content={props => <ChartTooltip {...props} format={fmt} />} />
+              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="total" radius={[5, 5, 0, 0]}>
-                {ventasSemana.map((v, i) => <Cell key={v.dia} fill={i === 5 ? '#2F8CEB' : '#C8DEFA'} />)}
+                {ventasSemana.map((v, i) => <Cell key={v.dia} fill={i === 5 ? '#F97316' : '#FDBA74'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -155,7 +155,7 @@ export default function Ventas() {
         {/* Distribución por estado */}
         <div className="card p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Por estado</span>
           </div>
           <div className="flex flex-col gap-3 flex-1 justify-center">
@@ -176,7 +176,7 @@ export default function Ventas() {
                       <span className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</span>
                       <span className="text-xs font-bold" style={{ color: s.color }}>{pct}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                    <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                       <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: s.color }} />
                     </div>
                   </div>
@@ -184,9 +184,9 @@ export default function Ventas() {
               )
             })}
           </div>
-          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Total hoy</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(totalHoy)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalHoy)}</span>
           </div>
         </div>
       </div>
@@ -254,7 +254,7 @@ export default function Ventas() {
         {/* Section head */}
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="section-head-text"><strong>Transacciones</strong></span>
             <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{sorted.length} resultado{sorted.length !== 1 ? 's' : ''}</span>
             {canceladas.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{canceladas.length} canceladas</span>}
@@ -291,7 +291,7 @@ export default function Ventas() {
                       className="cursor-pointer"
                       style={{
                         ...rowStyle(v.status),
-                        ...(isExpanded ? { background: '#EBF4FC' } : {})
+                        ...(isExpanded ? { background: '#FFF7ED' } : {})
                       }}
                       onClick={() => setExpandedId(isExpanded ? null : v.id)}
                     >
@@ -300,8 +300,8 @@ export default function Ventas() {
                           <span
                             className="inline-block w-3.5 h-3.5 rounded-sm text-center leading-none transition-transform duration-200 flex-shrink-0"
                             style={{
-                              background: isExpanded ? '#2F8CEB' : '#EBF4FC',
-                              color: isExpanded ? '#fff' : '#2F8CEB',
+                              background: isExpanded ? '#F97316' : '#FFF7ED',
+                              color: isExpanded ? '#fff' : '#F97316',
                               fontSize: 9, fontWeight: 800,
                               transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
                             }}
@@ -324,7 +324,7 @@ export default function Ventas() {
                       </td>
                       <td className="hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <MIcon className="w-3.5 h-3.5" style={{ color: '#A6C3DA' }} />
+                          <MIcon className="w-3.5 h-3.5" style={{ color: '#FED7AA' }} />
                           <span className="text-sm" style={{ color: '#627080' }}>{v.metodo}</span>
                         </div>
                       </td>
@@ -365,7 +365,7 @@ export default function Ventas() {
                       </td>
                     </tr>
                     {isExpanded && (
-                      <tr key={`${v.id}-exp`} style={{ background: '#EBF4FC' }}>
+                      <tr key={`${v.id}-exp`} style={{ background: '#FFF7ED' }}>
                         <td colSpan={8} className="px-6 py-3">
                           <div className="flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-1.5">
@@ -375,7 +375,7 @@ export default function Ventas() {
                             <div className="flex items-center gap-1.5">
                               <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Método</span>
                               <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: '#263442' }}>
-                                <MIcon className="w-3 h-3" style={{ color: '#A6C3DA' }} />{v.metodo}
+                                <MIcon className="w-3 h-3" style={{ color: '#FED7AA' }} />{v.metodo}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -388,7 +388,7 @@ export default function Ventas() {
                             </div>
                             <button
                               className="ml-auto text-xs font-semibold px-3 py-1 rounded-lg transition-colors"
-                              style={{ color: '#2F8CEB', background: 'rgba(47,140,235,.1)' }}
+                              style={{ color: '#F97316', background: 'rgba(249,115,22,.1)' }}
                               onClick={() => { setSelectedVenta(v); setExpandedId(null) }}
                             >
                               Ver ticket completo →
@@ -414,16 +414,16 @@ export default function Ventas() {
         <Modal id="ticket-print-area" maxWidth="sm" onClose={() => setSelectedVenta(null)} header={<div><div className="flex items-center gap-2"><h3 className="font-bold" style={{ color: '#263442' }}>{selectedVenta.id}</h3><Badge label={selectedVenta.status} color={statusColor[selectedVenta.status]} /></div><p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>{selectedVenta.fecha}</p></div>}>
             <div className="p-0">
               {/* Receipt header */}
-              <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #E2EAF2' }}>
+              <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #FDE8D0' }}>
                 <div
                   className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center"
-                  style={{ background: '#EBF5FF' }}
+                  style={{ background: '#FFF7ED' }}
                 >
-                  <Milk className="w-6 h-6" style={{ color: '#2F8CEB' }} />
+                  <Milk className="w-6 h-6" style={{ color: '#F97316' }} />
                 </div>
                 <p className="font-black text-sm" style={{ color: '#263442' }}>Cremerías Admin</p>
                 <p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>Suc. {selectedVenta.sucursal} · {selectedVenta.caja}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#A6C3DA' }}>{selectedVenta.fecha}</p>
+                <p className="text-xs mt-0.5" style={{ color: '#FED7AA' }}>{selectedVenta.fecha}</p>
               </div>
 
               {/* Status alert for cancelled */}
@@ -435,7 +435,7 @@ export default function Ventas() {
               )}
 
               {/* Info rows */}
-              <div className="px-6 py-4 space-y-3" style={{ borderBottom: '2px dashed #E2EAF2' }}>
+              <div className="px-6 py-4 space-y-3" style={{ borderBottom: '2px dashed #FDE8D0' }}>
                 {[
                   ['Cajero', selectedVenta.cajero],
                   ['Método de pago', selectedVenta.metodo],
@@ -452,13 +452,13 @@ export default function Ventas() {
               <div className="px-6 py-5 text-center">
                 <p
                   className="text-[10px] font-bold uppercase tracking-widest mb-2"
-                  style={{ color: selectedVenta.status === 'Cancelada' ? '#C97A6D' : '#2F8CEB' }}
+                  style={{ color: selectedVenta.status === 'Cancelada' ? '#C97A6D' : '#F97316' }}
                 >
                   Total de venta
                 </p>
                 <p
                   className="text-4xl font-black"
-                  style={{ color: selectedVenta.status === 'Cancelada' ? '#C97A6D' : '#0F4FA3' }}
+                  style={{ color: selectedVenta.status === 'Cancelada' ? '#C97A6D' : '#C2410C' }}
                 >
                   {fmt(selectedVenta.total)}
                 </p>
@@ -488,7 +488,7 @@ export default function Ventas() {
                 )}
               </div>
             </div>
-            <div className="px-6 py-4 flex justify-between gap-3" style={{ borderTop: '1px solid #E2EAF2' }}>
+            <div className="px-6 py-4 flex justify-between gap-3" style={{ borderTop: '1px solid #FDE8D0' }}>
               <button
                 className="btn-secondary flex items-center gap-2"
                 onClick={() => window.print()}

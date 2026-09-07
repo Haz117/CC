@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Menu, Search, Bell, ChevronDown, RefreshCw, LogOut,
@@ -49,11 +49,11 @@ const searchIndex = [
 ]
 
 const typeColor = {
-  Sucursal:     { bg: '#EBF4FC', text: '#0F4FA3' },
+  Sucursal:     { bg: '#FFF7ED', text: '#C2410C' },
   Producto:     { bg: 'rgba(5,150,105,.08)', text: '#059669' },
   Usuario:      { bg: 'rgba(124,58,237,.08)', text: '#7c3aed' },
   Distribuidor: { bg: 'rgba(217,119,6,.08)',  text: '#d97706' },
-  Venta:        { bg: '#EBF4FC', text: '#0F4FA3' },
+  Venta:        { bg: '#FFF7ED', text: '#C2410C' },
   Reporte:      { bg: '#F2F3F5', text: '#627080' },
 }
 
@@ -69,7 +69,7 @@ const notifications = [
 const notifStyle = {
   error:   { bg: 'rgba(201,122,109,.12)', icon: '#C97A6D', dot: '#C97A6D' },
   success: { bg: 'rgba(5,150,105,.08)',   icon: '#059669', dot: '#059669' },
-  info:    { bg: 'rgba(47,140,235,.07)',  icon: '#2F8CEB', dot: '#2F8CEB' },
+  info:    { bg: 'rgba(249,115,22,.07)',  icon: '#F97316', dot: '#F97316' },
 }
 
 /* ═══════════════════════════════════════════════════════════ */
@@ -125,7 +125,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
       style={{
         background: '#FFFFFF',
         borderBottom: '1px solid #E8EEF4',
-        boxShadow: '0 1px 6px rgba(15,79,163,.06)',
+        boxShadow: '0 1px 6px rgba(194,65,12,.06)',
       }}
     >
       {/* Hamburger */}
@@ -150,12 +150,12 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
         <button
           onClick={onOpenPalette}
           className="header-search-input w-full text-left flex items-center"
-          style={{ paddingLeft: '2.25rem', cursor: 'text', color: '#A6C3DA', userSelect: 'none' }}
+          style={{ paddingLeft: '2.25rem', cursor: 'text', color: '#8FA1B2', userSelect: 'none' }}
         >
           Buscar páginas y acciones...
           <span
             className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
-            style={{ background: '#EBF4FC', color: '#2F8CEB', border: '1px solid #C8DCE9' }}
+            style={{ background: '#FFF7ED', color: '#F97316', border: '1px solid #FDBA74' }}
           >
             ⌘K
           </span>
@@ -181,7 +181,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
         {searchOpen && results.length > 0 && (
           <div
             className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl overflow-hidden animate-scale-in"
-            style={{ background: '#fff', border: '1px solid #E2EAF2', boxShadow: '0 16px 48px rgba(15,79,163,.14)', zIndex: 60 }}
+            style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)', zIndex: 60 }}
           >
             <div className="px-3 pt-2.5 pb-1">
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8FA1B2' }}>
@@ -221,7 +221,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
         {searchOpen && searchVal.length >= 2 && results.length === 0 && (
           <div
             className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl px-4 py-5 text-center animate-scale-in"
-            style={{ background: '#fff', border: '1px solid #E2EAF2', boxShadow: '0 16px 48px rgba(15,79,163,.14)', zIndex: 60 }}
+            style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)', zIndex: 60 }}
           >
             <p className="text-sm font-medium" style={{ color: '#627080' }}>Sin resultados para "{searchVal}"</p>
           </div>
@@ -254,8 +254,8 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
               : { color: '#8FA1B2' }
             }
             onMouseEnter={e => {
-              e.currentTarget.style.background = hasErrors ? 'rgba(201,122,109,.16)' : '#EBF4FC'
-              e.currentTarget.style.color = hasErrors ? '#C97A6D' : '#0F4FA3'
+              e.currentTarget.style.background = hasErrors ? 'rgba(201,122,109,.16)' : '#FFF7ED'
+              e.currentTarget.style.color = hasErrors ? '#C97A6D' : '#C2410C'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.background = hasErrors ? 'rgba(201,122,109,.08)' : 'transparent'
@@ -266,7 +266,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
             {unreadCount > 0 && (
               <span
                 className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 animate-badge-pop red-badge-pulse"
-                style={{ background: hasErrors ? '#C97A6D' : '#2F8CEB' }}
+                style={{ background: hasErrors ? '#C97A6D' : '#F97316' }}
               >
                 {unreadCount}
               </span>
@@ -280,7 +280,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                 role="menu"
                 aria-label="Notificaciones"
                 className="absolute right-0 top-12 w-80 max-w-[calc(100vw-1rem)] rounded-2xl overflow-hidden animate-scale-in z-50"
-                style={{ background: '#fff', border: '1px solid #E2EAF2', boxShadow: '0 16px 48px rgba(15,79,163,.14)' }}
+                style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
               >
                 <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid #F2F3F5' }}>
                   <div className="flex items-center gap-2">
@@ -296,7 +296,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                   </div>
                   <button
                     className="text-xs font-semibold transition-opacity"
-                    style={{ color: '#2F8CEB', opacity: unreadCount > 0 ? 1 : 0.4 }}
+                    style={{ color: '#F97316', opacity: unreadCount > 0 ? 1 : 0.4 }}
                     onClick={markAllRead}
                     disabled={unreadCount === 0}
                   >
@@ -312,7 +312,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                         key={n.id}
                         className="px-4 py-3.5 flex items-start gap-3 cursor-pointer transition-colors border-b group"
                         style={{ borderColor: '#F2F3F5', background: n.unread ? ns.bg : 'transparent' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#EBF5FF'}
+                        onMouseEnter={e => e.currentTarget.style.background = '#FFF7ED'}
                         onMouseLeave={e => e.currentTarget.style.background = n.unread ? ns.bg : 'transparent'}
                         onClick={() => markRead(n.id)}
                       >
@@ -353,7 +353,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                 </div>
 
                 <div className="px-4 py-3" style={{ borderTop: '1px solid #F2F3F5', background: '#F2F3F5' }}>
-                  <button className="text-xs font-semibold w-full text-center" style={{ color: '#2F8CEB' }}>
+                  <button className="text-xs font-semibold w-full text-center" style={{ color: '#F97316' }}>
                     Ver todas las notificaciones →
                   </button>
                 </div>
@@ -376,7 +376,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
-              style={{ background: '#EBF5FF', color: '#0F4FA3' }}
+              style={{ background: '#FFF7ED', color: '#C2410C' }}
             >
               {initials}
             </div>
@@ -401,14 +401,14 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                 role="menu"
                 aria-label="Menú de perfil"
                 className="absolute right-0 top-12 w-56 rounded-2xl overflow-hidden animate-scale-in z-50"
-                style={{ background: '#fff', border: '1px solid #E2EAF2', boxShadow: '0 16px 48px rgba(15,79,163,.14)' }}
+                style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
               >
                 {/* Profile card */}
                 <div className="px-4 py-3.5" style={{ borderBottom: '1px solid #F2F3F5' }}>
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ background: '#EBF5FF', color: '#0F4FA3' }}
+                      style={{ background: '#FFF7ED', color: '#C2410C' }}
                     >
                       {initials}
                     </div>
@@ -427,7 +427,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
                     { icon: ClipboardList, label: 'Bitácora de acciones', action: () => { closeAll(); navigate('/configuracion') } },
                   ].map(({ icon: Icon, label, action }) => (
                     <button key={label} role="menuitem" onClick={action} className="header-menu-btn">
-                      <Icon className="w-4 h-4" style={{ color: '#A6C3DA' }} />
+                      <Icon className="w-4 h-4" style={{ color: '#FB923C' }} />
                       {label}
                     </button>
                   ))}

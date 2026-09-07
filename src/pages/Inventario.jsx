@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { Package, Plus, Search, AlertTriangle, ArrowUp, ArrowDown, RotateCcw, Filter, LayoutGrid, List, TrendingUp } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
@@ -92,18 +92,18 @@ export default function Inventario() {
         subtitle={`${productos.length} productos registrados · ${lowStock.length} con stock bajo`}
       >
         {/* View toggle */}
-        <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: '#C8DCE9' }}>
+        <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: '#FDBA74' }}>
           <button
             onClick={() => setViewMode('grid')}
             className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5`}
-            style={viewMode === 'grid' ? { background: '#2F8CEB', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }}
+            style={viewMode === 'grid' ? { background: '#F97316', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }}
           >
             <LayoutGrid className="w-3.5 h-3.5" /> Grid
           </button>
           <button
             onClick={() => setViewMode('list')}
             className={`px-3 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5`}
-            style={viewMode === 'list' ? { background: '#2F8CEB', color: '#fff', borderLeft: '1px solid #C8DCE9' } : { background: '#F2F3F5', color: '#8FA1B2', borderLeft: '1px solid #C8DCE9' }}
+            style={viewMode === 'list' ? { background: '#F97316', color: '#fff', borderLeft: '1px solid #FDBA74' } : { background: '#F2F3F5', color: '#8FA1B2', borderLeft: '1px solid #FDBA74' }}
           >
             <List className="w-3.5 h-3.5" /> Lista
           </button>
@@ -125,26 +125,26 @@ export default function Inventario() {
         {/* Stock por producto */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Stock actual por producto</span>
             <span className="text-xs ml-auto" style={{ color: '#8FA1B2' }}>unidades</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={productos.map(p => ({ name: p.codigo, stock: p.stock, min: p.min, lowStock: p.stock < p.min }))} barSize={20} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip
-                cursor={{ fill: '#EBF5FF' }}
+                cursor={{ fill: '#FFF7ED' }}
                 content={({ active, payload, label }) => active && payload?.length ? (
-                  <div style={{ background: '#fff', border: '1px solid #E2EAF2', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(47,140,235,.12)' }}>
+                  <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
                     <p style={{ fontSize: 10, color: '#8FA1B2', fontWeight: 700 }}>{label}</p>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: payload[0].payload.lowStock ? '#C97A6D' : '#2F8CEB' }}>Stock: {payload[0].value}</p>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: payload[0].payload.lowStock ? '#C97A6D' : '#F97316' }}>Stock: {payload[0].value}</p>
                     <p style={{ fontSize: 11, color: '#8FA1B2' }}>Mínimo: {payload[0].payload.min}</p>
                   </div>
                 ) : null}
               />
               <Bar dataKey="stock" radius={[5, 5, 0, 0]}>
-                {productos.map(p => <Cell key={p.id} fill={p.stock < p.min ? '#C97A6D' : p.stock < p.min * 2 ? '#d97706' : '#2F8CEB'} />)}
+                {productos.map(p => <Cell key={p.id} fill={p.stock < p.min ? '#C97A6D' : p.stock < p.min * 2 ? '#d97706' : '#F97316'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -153,13 +153,13 @@ export default function Inventario() {
         {/* Por categoría */}
         <div className="card p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2 mb-1">
-            <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Por categoría</span>
           </div>
           {categorias.filter(c => c !== 'Todos').map((cat, i) => {
             const { count = 0, hasLow = false } = catStats[cat] || {}
             const pct = Math.round(count / productos.length * 100)
-            const colors = ['#2F8CEB', '#059669', '#d97706', '#7c3aed']
+            const colors = ['#F97316', '#059669', '#d97706', '#7c3aed']
             return (
               <div key={cat} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hasLow ? 'rgba(201,122,109,.1)' : `${colors[i]}18` }}>
@@ -170,16 +170,16 @@ export default function Inventario() {
                     <span className="text-xs font-semibold" style={{ color: '#627080' }}>{cat}</span>
                     {hasLow && <span className="text-[10px] font-bold" style={{ color: '#C97A6D' }}>bajo stock</span>}
                   </div>
-                  <div className="h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                  <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                     <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: hasLow ? '#C97A6D' : colors[i] }} />
                   </div>
                 </div>
               </div>
             )
           })}
-          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Valor total</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(totalValor)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalValor)}</span>
           </div>
         </div>
       </div>
@@ -234,7 +234,7 @@ export default function Inventario() {
                     style={{
                       background: p.stock <= p.min * 0.5 ? 'rgba(201,122,109,.12)'
                         : p.stock <= p.min ? 'rgba(217,119,6,.1)'
-                        : '#EBF4FC',
+                        : '#FFF7ED',
                     }}
                   >
                     <Package
@@ -242,7 +242,7 @@ export default function Inventario() {
                       style={{
                         color: p.stock <= p.min * 0.5 ? '#C97A6D'
                           : p.stock <= p.min ? '#d97706'
-                          : '#2F8CEB',
+                          : '#F97316',
                       }}
                     />
                   </div>
@@ -263,7 +263,7 @@ export default function Inventario() {
                         min="0"
                         autoFocus
                         className="w-16 text-xs text-center font-bold rounded-md px-1 py-0.5"
-                        style={{ border: '1.5px solid #2F8CEB', color: '#263442', outline: 'none' }}
+                        style={{ border: '1.5px solid #F97316', color: '#263442', outline: 'none' }}
                         value={editingStock}
                         onChange={e => setEditingStock(e.target.value)}
                         onKeyDown={e => {
@@ -351,7 +351,7 @@ export default function Inventario() {
           </div>
           <div className="section-head">
             <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
               <span className="section-head-text"><strong>Catálogo de Productos</strong></span>
               <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} producto{filtered.length !== 1 ? 's' : ''}</span>
               {lowStock.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{lowStock.length} bajo mínimo</span>}
@@ -379,8 +379,8 @@ export default function Inventario() {
                     <tr key={p.id}>
                       <td>
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#EBF4FC' }}>
-                            <Package className="w-4 h-4" style={{ color: '#2F8CEB' }} />
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
+                            <Package className="w-4 h-4" style={{ color: '#F97316' }} />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{p.nombre}</p>
@@ -398,7 +398,7 @@ export default function Inventario() {
                             min="0"
                             autoFocus
                             className="w-20 text-sm text-center font-bold rounded-lg px-2 py-1"
-                            style={{ border: '1.5px solid #2F8CEB', color: '#263442', outline: 'none' }}
+                            style={{ border: '1.5px solid #F97316', color: '#263442', outline: 'none' }}
                             value={editingStock}
                             onChange={e => setEditingStock(e.target.value)}
                             onKeyDown={e => {
@@ -474,9 +474,9 @@ export default function Inventario() {
       {showMov && (
         <Modal title="Movimiento de inventario" subtitle={showMov.type} onClose={() => setShowMov(null)}>
             <div className="p-6 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: '#EBF4FC', border: '1px solid #C8DCE9' }}>
+              <div className="rounded-xl p-3" style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}>
                 <p className="text-sm font-semibold" style={{ color: '#263442' }}>{showMov.product.nombre}</p>
-                <p className="text-xs" style={{ color: '#8FA1B2' }}>Stock actual: <strong style={{ color: '#2F8CEB' }}>{showMov.product.stock}</strong> unidades</p>
+                <p className="text-xs" style={{ color: '#8FA1B2' }}>Stock actual: <strong style={{ color: '#F97316' }}>{showMov.product.stock}</strong> unidades</p>
               </div>
               <FormField label="Tipo de movimiento">
                 <select className="input-field" defaultValue={showMov.type}>

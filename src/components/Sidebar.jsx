@@ -1,4 +1,4 @@
-import { NavLink, useMatch, useResolvedPath } from 'react-router-dom'
+﻿import { NavLink, useMatch, useResolvedPath } from 'react-router-dom'
 import {
   LayoutDashboard, Building2, Monitor, Users, Package,
   ShoppingCart, Truck, Map, ShoppingBag, BarChart3,
@@ -60,20 +60,20 @@ function NavItem({ path, icon: Icon, label, badge, badgeRed, badgeAmber, onClose
       {isActive && (
         <span
           className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
-          style={{ background: '#A6C3DA', boxShadow: '0 0 10px rgba(166,195,218,.65)' }}
+          style={{ background: '#FED7AA', boxShadow: '0 0 10px rgba(254,215,170,.65)' }}
         />
       )}
 
       <div
         className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
         style={isActive
-          ? { background: 'rgba(255,255,255,.94)', boxShadow: '0 2px 12px rgba(47,140,235,.38)' }
+          ? { background: 'rgba(255,255,255,.94)', boxShadow: '0 2px 12px rgba(249,115,22,.38)' }
           : { background: 'rgba(255,255,255,.08)' }
         }
       >
         <Icon
           className="w-4 h-4"
-          style={{ color: isActive ? '#2F8CEB' : 'rgba(255,255,255,.68)' }}
+          style={{ color: isActive ? '#F97316' : 'rgba(255,255,255,.68)' }}
         />
       </div>
 
@@ -120,7 +120,7 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
         style={{
           transform: open ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform .28s cubic-bezier(.4,0,.2,1)',
-          background: 'linear-gradient(180deg,#0c2d6b 0%,#0F4FA3 35%,#1254a8 70%,#0d3d8a 100%)',
+          background: 'linear-gradient(180deg,#431407 0%,#C2410C 35%,#EA580C 70%,#9a2d08 100%)',
           boxShadow: open ? '12px 0 40px rgba(10,22,40,.4)' : 'none',
         }}
       >

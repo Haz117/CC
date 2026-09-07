@@ -1,4 +1,4 @@
-import { Package, Monitor } from 'lucide-react'
+﻿import { Package, Monitor } from 'lucide-react'
 import { createElement } from 'react'
 
 export const perfData = [
@@ -20,7 +20,7 @@ export const donutData = [
 ]
 
 export const distribuidores = [
-  { nombre: 'Carlos Mendoza',    rol: 'Distribuidor · Ruta Norte', bg: 'rgba(47,140,235,.1)',  color: '#2F8CEB' },
+  { nombre: 'Carlos Mendoza',    rol: 'Distribuidor · Ruta Norte', bg: 'rgba(249,115,22,.1)',  color: '#F97316' },
   { nombre: 'Roberto Sánchez',   rol: 'Distribuidor · Ruta Sur',   bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
   { nombre: 'Miguel Ángel Cruz', rol: 'Distribuidor · Ruta Centro',bg: 'rgba(5,150,105,.1)',   color: '#059669' },
 ]
@@ -42,8 +42,8 @@ export const eventosProximos = [
   {
     title: 'Cierre mensual de inventario "Agosto Fest"',
     date:  '14 agosto 2026', time: '12:00 pm',
-    bg:    '#EBF5FF',
-    icon:  createElement(Package, { size: 18, color: '#2F8CEB' }),
+    bg:    '#FFF7ED',
+    icon:  createElement(Package, { size: 18, color: '#F97316' }),
   },
   {
     title: 'Webinar de nuevas herramientas en logística',

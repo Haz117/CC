@@ -27,9 +27,9 @@ export default function NotificationBanner() {
 
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[150] w-[calc(100%-2rem)] max-w-md animate-fade-in-up">
-      <div className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ border: '1px solid #E2EAF2', boxShadow: '0 20px 60px rgba(15,79,163,.18), 0 4px 16px rgba(0,0,0,.08)' }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#EBF4FC' }}>
-          <Bell className="w-5 h-5" style={{ color: '#2F8CEB' }} />
+      <div className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ border: '1px solid #FDE8D0', boxShadow: '0 20px 60px rgba(194,65,12,.18), 0 4px 16px rgba(0,0,0,.08)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
+          <Bell className="w-5 h-5" style={{ color: '#F97316' }} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: '#263442' }}>Activar notificaciones</p>

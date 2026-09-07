@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
@@ -20,7 +20,7 @@ import ChartCard from '../components/ChartCard'
 import TableCard from '../components/TableCard'
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
-const COLORS = ['#2F8CEB', '#059669', '#d97706', '#7c3aed']
+const COLORS = ['#F97316', '#059669', '#d97706', '#7c3aed']
 
 const statusInvSt = {
   Normal:  { color: '#059669', background: 'rgba(5,150,105,.1)'     },
@@ -207,15 +207,15 @@ export default function Reportes() {
               onClick={() => setActive(r.id)}
               className="p-4 rounded-2xl border text-left transition-all animate-fade-in-up"
               style={{ animationDelay: `${Math.min(i * 55, 200)}ms`, ...(isAct
-                ? { background: '#EBF4FC', border: '1px solid #2F8CEB', boxShadow: '0 2px 12px rgba(47,140,235,.15)', color: '#0F4FA3' }
-                : { background: '#fff', border: '1px solid #E2EAF2', boxShadow: '0 1px 3px rgba(38,52,66,.06)' }
+                ? { background: '#FFF7ED', border: '1px solid #F97316', boxShadow: '0 2px 12px rgba(249,115,22,.15)', color: '#C2410C' }
+                : { background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 1px 3px rgba(38,52,66,.06)' }
               ) }}
             >
               <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: isAct ? 'rgba(47,140,235,.15)' : '#EBF4FC' }}>
-                <r.icon className="w-4 h-4" style={{ color: '#2F8CEB' }} />
+                style={{ background: isAct ? 'rgba(249,115,22,.15)' : '#FFF7ED' }}>
+                <r.icon className="w-4 h-4" style={{ color: '#F97316' }} />
               </div>
-              <p className="text-xs font-bold leading-tight" style={{ color: isAct ? '#0F4FA3' : '#263442' }}>{r.label}</p>
+              <p className="text-xs font-bold leading-tight" style={{ color: isAct ? '#C2410C' : '#263442' }}>{r.label}</p>
               <p className="text-[10px] mt-1 leading-tight" style={{ color: '#8FA1B2' }}>{r.desc}</p>
             </button>
           )
@@ -295,7 +295,7 @@ export default function Reportes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
                 <XAxis dataKey="dia" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v/1000}k`} />
-                <Tooltip formatter={(v,n)=>[fmt(v),n.charAt(0).toUpperCase()+n.slice(1)]} contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                <Tooltip formatter={(v,n)=>[fmt(v),n.charAt(0).toUpperCase()+n.slice(1)]} contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                 <Legend wrapperStyle={{fontSize:12}} />
                 {['centro','norte','sur','oriente'].filter(k => activeSucKeys.includes(k)).map((k,i)=>(
                   <Bar key={k} dataKey={k} stackId="a" fill={COLORS[activeSucKeys.indexOf(k)]} name={k.charAt(0).toUpperCase()+k.slice(1)} radius={i===activeSucKeys.length-1?[4,4,0,0]:[0,0,0,0]} />
@@ -315,18 +315,18 @@ export default function Reportes() {
                       <td style={{ color: '#263442' }}>{r.txs}</td>
                       <td style={{ color: '#263442' }}>{fmt(r.ventas/r.txs)}</td>
                       <td className="font-medium" style={{ color: '#C97A6D' }}>{fmt(r.dev)}</td>
-                      <td className="font-bold" style={{ color: '#2F8CEB' }}>{fmt((r.ventas-r.dev)*0.35)}</td>
+                      <td className="font-bold" style={{ color: '#F97316' }}>{fmt((r.ventas-r.dev)*0.35)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{ background: '#EBF4FC', borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                  <tr style={{ background: '#FFF7ED', borderTop: '1px solid rgba(249,115,22,.15)' }}>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }}>Total</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#059669' }}>{fmt(358700)}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }}>147</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }}>{fmt(358700/147)}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#C97A6D' }}>{fmt(2340)}</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#2F8CEB' }}>{fmt((358700-2340)*0.35)}</td>
+                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#F97316' }}>{fmt((358700-2340)*0.35)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -344,10 +344,10 @@ export default function Reportes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
                 <XAxis dataKey="name" tick={{fontSize:10,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                <Tooltip contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                 <Legend wrapperStyle={{fontSize:12}} />
-                <Bar dataKey="stock"  fill="#2F8CEB" name="Stock actual"      radius={[4,4,0,0]} />
-                <Bar dataKey="minimo" fill="#E2EAF2" name="Mínimo requerido"  radius={[4,4,0,0]} />
+                <Bar dataKey="stock"  fill="#F97316" name="Stock actual"      radius={[4,4,0,0]} />
+                <Bar dataKey="minimo" fill="#FDE8D0" name="Mínimo requerido"  radius={[4,4,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -368,9 +368,9 @@ export default function Reportes() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{ background: '#EBF4FC', borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                  <tr style={{ background: '#FFF7ED', borderTop: '1px solid rgba(249,115,22,.15)' }}>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }} colSpan={5}>Valor total inventario</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#2F8CEB' }}>{fmt(totalInvVal)}</td>
+                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#F97316' }}>{fmt(totalInvVal)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -389,9 +389,9 @@ export default function Reportes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
                 <XAxis dataKey="name" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v/1000}k`} />
-                <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                 <Legend wrapperStyle={{fontSize:12}} />
-                <Bar dataKey="ventas" fill="#2F8CEB" name="Ventas"  radius={[4,4,0,0]} />
+                <Bar dataKey="ventas" fill="#F97316" name="Ventas"  radius={[4,4,0,0]} />
                 <Bar dataKey="cobros" fill="#059669" name="Cobros"  radius={[4,4,0,0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -407,17 +407,17 @@ export default function Reportes() {
                       <td><span className="tag tag-orange">{d.ruta}</span></td>
                       <td style={{ color: '#263442' }}>{d.clientes}</td>
                       <td className="font-bold" style={{ color: '#059669' }}>{fmt(d.ventas)}</td>
-                      <td className="font-semibold" style={{ color: '#2F8CEB' }}>{fmt(d.cobros)}</td>
+                      <td className="font-semibold" style={{ color: '#F97316' }}>{fmt(d.cobros)}</td>
                       <td className="font-medium" style={{ color: '#C97A6D' }}>{fmt(d.devol)}</td>
                       <td className="font-bold" style={{ color: d.saldo>0 ? '#d97706' : '#8FA1B2' }}>{d.saldo>0?fmt(d.saldo):'—'}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{ background: '#EBF4FC', borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                  <tr style={{ background: '#FFF7ED', borderTop: '1px solid rgba(249,115,22,.15)' }}>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }} colSpan={3}>Total</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#059669' }}>{fmt(filteredDistTable.reduce((a,d)=>a+d.ventas,0))}</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#2F8CEB' }}>{fmt(filteredDistTable.reduce((a,d)=>a+d.cobros,0))}</td>
+                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#F97316' }}>{fmt(filteredDistTable.reduce((a,d)=>a+d.cobros,0))}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#C97A6D' }}>{fmt(filteredDistTable.reduce((a,d)=>a+d.devol,0))}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#d97706' }}>{fmt(filteredDistTable.reduce((a,d)=>a+d.saldo,0))}</td>
                   </tr>
@@ -436,8 +436,8 @@ export default function Reportes() {
               <AreaChart data={ganChart}>
                 <defs>
                   <linearGradient id="gIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#2F8CEB" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#2F8CEB" stopOpacity={0}    />
+                    <stop offset="5%"  stopColor="#F97316" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#F97316" stopOpacity={0}    />
                   </linearGradient>
                   <linearGradient id="gCogs" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%"  stopColor="#d97706" stopOpacity={0.15} />
@@ -451,9 +451,9 @@ export default function Reportes() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
                 <XAxis dataKey="dia" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v/1000}k`} />
-                <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                 <Legend wrapperStyle={{fontSize:12}} />
-                <Area type="monotone" dataKey="ingresos"  stroke="#2F8CEB" fill="url(#gIngresos)" strokeWidth={2} name="Ingresos"      dot={false} />
+                <Area type="monotone" dataKey="ingresos"  stroke="#F97316" fill="url(#gIngresos)" strokeWidth={2} name="Ingresos"      dot={false} />
                 <Area type="monotone" dataKey="cogs"      stroke="#d97706" fill="url(#gCogs)"    strokeWidth={2} name="COGS"           dot={false} />
                 <Area type="monotone" dataKey="ganancia"  stroke="#059669" fill="url(#gGan)"     strokeWidth={2} name="Utilidad neta"  dot={false} />
               </AreaChart>
@@ -467,7 +467,7 @@ export default function Reportes() {
                   {filteredGanTable.map(r=>(
                     <tr key={r.suc}>
                       <td className="font-semibold" style={{ color: '#263442' }}>{r.suc}</td>
-                      <td className="font-bold" style={{ color: '#2F8CEB' }}>{fmt(r.ingresos)}</td>
+                      <td className="font-bold" style={{ color: '#F97316' }}>{fmt(r.ingresos)}</td>
                       <td className="font-medium" style={{ color: '#d97706' }}>{fmt(r.cogs)}</td>
                       <td style={{ color: '#8FA1B2' }}>{fmt(r.gastos)}</td>
                       <td className="font-bold" style={{ color: '#059669' }}>{fmt(r.ganancia)}</td>
@@ -476,9 +476,9 @@ export default function Reportes() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{ background: '#EBF4FC', borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                  <tr style={{ background: '#FFF7ED', borderTop: '1px solid rgba(249,115,22,.15)' }}>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }}>Total</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#2F8CEB' }}>{fmt(ganTable.reduce((a,r)=>a+r.ingresos,0))}</td>
+                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#F97316' }}>{fmt(ganTable.reduce((a,r)=>a+r.ingresos,0))}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#d97706' }}>{fmt(ganTable.reduce((a,r)=>a+r.cogs,0))}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#8FA1B2' }}>{fmt(ganTable.reduce((a,r)=>a+r.gastos,0))}</td>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#059669' }}>{fmt(ganTable.reduce((a,r)=>a+r.ganancia,0))}</td>
@@ -501,7 +501,7 @@ export default function Reportes() {
                 <XAxis dataKey="dia" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis yAxisId="l" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} />
                 <YAxis yAxisId="r" orientation="right" tick={{fontSize:11,fill:'#8FA1B2'}} axisLine={false} tickLine={false} tickFormatter={v=>`$${v}`} />
-                <Tooltip formatter={(v,n)=>[n==='monto'?fmt(v):v, n==='monto'?'Monto':'Cantidad']} contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                <Tooltip formatter={(v,n)=>[n==='monto'?fmt(v):v, n==='monto'?'Monto':'Cantidad']} contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                 <Legend wrapperStyle={{fontSize:12}} />
                 <Bar yAxisId="l" dataKey="cantidad" fill="#C97A6D" name="Cantidad"  radius={[4,4,0,0]} />
                 <Bar yAxisId="r" dataKey="monto"    fill="rgba(201,122,109,.35)" name="Monto $"   radius={[4,4,0,0]} />
@@ -553,7 +553,7 @@ export default function Reportes() {
                   <Pie data={cxcDonut} cx="50%" cy="50%" innerRadius={65} outerRadius={95} dataKey="value" paddingAngle={3}>
                     {cxcDonut.map((e)=><Cell key={e.label} fill={e.color} />)}
                   </Pie>
-                  <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #E2EAF2'}} />
+                  <Tooltip formatter={v=>[fmt(v)]} contentStyle={{borderRadius:12,border:'1px solid #FDE8D0'}} />
                   <Legend wrapperStyle={{fontSize:12}} />
                 </PieChart>
               </ResponsiveContainer>
@@ -577,9 +577,9 @@ export default function Reportes() {
                     <p className="text-sm font-bold" style={{color:item.color}}>{fmt(item.monto)}</p>
                   </div>
                 ))}
-                <div className="pt-3 mt-1 flex items-center justify-between" style={{ borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                <div className="pt-3 mt-1 flex items-center justify-between" style={{ borderTop: '1px solid rgba(249,115,22,.15)' }}>
                   <p className="text-xs font-semibold" style={{ color: '#263442' }}>Total CxC</p>
-                  <p className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(totalCxC)}</p>
+                  <p className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalCxC)}</p>
                 </div>
               </div>
             </div>
@@ -609,9 +609,9 @@ export default function Reportes() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{ background: '#EBF4FC', borderTop: '1px solid rgba(47,140,235,.15)' }}>
+                  <tr style={{ background: '#FFF7ED', borderTop: '1px solid rgba(249,115,22,.15)' }}>
                     <td className="px-4 py-3 text-sm font-bold" style={{ color: '#263442' }} colSpan={3}>Total CxC</td>
-                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#2F8CEB' }}>{fmt(totalCxC)}</td>
+                    <td className="px-4 py-3 text-sm font-bold" style={{ color: '#F97316' }}>{fmt(totalCxC)}</td>
                     <td colSpan={3} />
                   </tr>
                 </tfoot>

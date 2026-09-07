@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import {
   Building, Percent, CreditCard, FileText, Shield, Printer,
   ClipboardList, ChevronRight, Save, Upload, CheckCircle2, X
@@ -35,7 +35,7 @@ const bitacora = [
   { user: 'Carlos Mendoza', action: 'Bloqueó usuario "Pedro García"',       ip: '192.168.1.10', time: '2026-07-29 11:45', type: 'warn' },
 ]
 
-const logDot = { info: '#2F8CEB', edit: '#d97706', create: '#059669', report: '#7c3aed', warn: '#C97A6D' }
+const logDot = { info: '#F97316', edit: '#d97706', create: '#059669', report: '#7c3aed', warn: '#C97A6D' }
 
 /* ── Toggle switch ──────────────────────────────────────────── */
 function Toggle({ on, onChange }) {
@@ -44,7 +44,7 @@ function Toggle({ on, onChange }) {
       type="button"
       onClick={onChange}
       className="w-11 h-6 rounded-full relative transition-all duration-200 flex-shrink-0"
-      style={{ background: on ? '#2F8CEB' : '#D4DDE6', boxShadow: on ? '0 0 0 3px rgba(47,140,235,.15)' : 'none' }}
+      style={{ background: on ? '#F97316' : '#D4DDE6', boxShadow: on ? '0 0 0 3px rgba(249,115,22,.15)' : 'none' }}
     >
       <div
         className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"
@@ -59,7 +59,7 @@ function SettingRow({ label, sub, on, onChange }) {
   return (
     <div
       className="flex items-center justify-between p-4 rounded-xl cursor-pointer select-none transition-colors"
-      style={{ background: on ? '#EBF4FC' : '#F2F3F5', border: `1px solid ${on ? '#C8DCE9' : '#E2EAF2'}` }}
+      style={{ background: on ? '#FFF7ED' : '#F2F3F5', border: `1px solid ${on ? '#FDBA74' : '#FDE8D0'}` }}
       onClick={onChange}
     >
       <div className="min-w-0 mr-4">
@@ -108,11 +108,11 @@ export default function Configuracion() {
                   onClick={() => setActiveSection(s.id)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0"
                   style={active
-                    ? { background: '#EBF4FC', color: '#0F4FA3', border: '1px solid #C8DCE9' }
+                    ? { background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDBA74' }
                     : { color: '#627080', border: '1px solid transparent' }
                   }
                 >
-                  <s.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#2F8CEB' : '#A6C3DA' }} />
+                  <s.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#F97316' : '#FED7AA' }} />
                   {s.label}
                 </button>
               )
@@ -134,20 +134,20 @@ export default function Configuracion() {
                   onClick={() => setActiveSection(s.id)}
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all"
                   style={{
-                    color:      active ? '#0F4FA3' : '#627080',
-                    background: active ? '#EBF4FC' : 'transparent',
-                    borderLeft: `3px solid ${active ? '#2F8CEB' : 'transparent'}`,
+                    color:      active ? '#C2410C' : '#627080',
+                    background: active ? '#FFF7ED' : 'transparent',
+                    borderLeft: `3px solid ${active ? '#F97316' : 'transparent'}`,
                     borderBottom: i < sections.length - 1 ? '1px solid #F2F3F5' : 'none',
                   }}
                 >
                   <s.icon
                     className="w-4 h-4 flex-shrink-0"
-                    style={{ color: active ? '#2F8CEB' : '#A6C3DA' }}
+                    style={{ color: active ? '#F97316' : '#FED7AA' }}
                   />
                   <span className="flex-1 text-left">{s.label}</span>
                   <ChevronRight
                     className="w-3.5 h-3.5"
-                    style={{ color: active ? '#2F8CEB' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
+                    style={{ color: active ? '#F97316' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
                   />
                 </button>
               )
@@ -185,16 +185,16 @@ export default function Configuracion() {
                   />
                   <div
                     className="w-24 h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden flex-shrink-0"
-                    style={{ background: logoSrc ? 'transparent' : '#EBF4FC', border: '2px dashed #A6C3DA' }}
+                    style={{ background: logoSrc ? 'transparent' : '#FFF7ED', border: '2px dashed #FED7AA' }}
                     onClick={() => logoInputRef.current?.click()}
-                    onMouseEnter={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#2F8CEB'; e.currentTarget.style.background='#C8DEFA' } }}
-                    onMouseLeave={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#A6C3DA'; e.currentTarget.style.background='#EBF4FC' } }}
+                    onMouseEnter={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#F97316'; e.currentTarget.style.background='#FDBA74' } }}
+                    onMouseLeave={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#FED7AA'; e.currentTarget.style.background='#FFF7ED' } }}
                   >
                     {logoSrc
                       ? <img src={logoSrc} alt="Logo" className="w-full h-full object-contain" />
                       : <>
-                          <Upload className="w-6 h-6 mb-1" style={{ color: '#2F8CEB' }} />
-                          <span className="text-xs font-semibold" style={{ color: '#2F8CEB' }}>Subir logo</span>
+                          <Upload className="w-6 h-6 mb-1" style={{ color: '#F97316' }} />
+                          <span className="text-xs font-semibold" style={{ color: '#F97316' }}>Subir logo</span>
                         </>
                     }
                   </div>
@@ -303,17 +303,17 @@ export default function Configuracion() {
                       onClick={() => togglePayment(m)}
                       className="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
                       style={{
-                        background:   on ? '#EBF4FC' : '#F2F3F5',
-                        borderColor:  on ? '#C8DCE9' : '#E2EAF2',
+                        background:   on ? '#FFF7ED' : '#F2F3F5',
+                        borderColor:  on ? '#FDBA74' : '#FDE8D0',
                         opacity:      on ? 1 : 0.65,
                       }}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className="w-8 h-8 rounded-xl flex items-center justify-center"
-                          style={{ background: on ? 'rgba(47,140,235,.15)' : '#F2F3F5' }}
+                          style={{ background: on ? 'rgba(249,115,22,.15)' : '#F2F3F5' }}
                         >
-                          <CreditCard className="w-4 h-4" style={{ color: on ? '#2F8CEB' : '#8FA1B2' }} />
+                          <CreditCard className="w-4 h-4" style={{ color: on ? '#F97316' : '#8FA1B2' }} />
                         </div>
                         <span className="text-sm font-semibold" style={{ color: on ? '#263442' : '#627080' }}>{m}</span>
                       </div>
@@ -375,24 +375,24 @@ export default function Configuracion() {
                   <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: '#8FA1B2' }}>
                     Vista previa
                   </p>
-                  <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #E2EAF2', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
+                  <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #FDE8D0', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
                     <p className="text-center font-bold text-sm mb-0.5">CREMERÍAS EL RANCHO</p>
                     <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Av. Morelos 145, Centro</p>
                     <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Tel: 442-100-2000</p>
                     {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>RFC: XAXX010101000</p>}
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E2EAF2' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p>Venta: V-00522</p>
                     <p>Fecha: 29/07/2026 09:45</p>
                     <p>Cajero: María López</p>
                     <p>Caja: Caja 1 - Centro</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E2EAF2' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p>Queso Oaxaca 500g x2 &nbsp;$90.00</p>
                     <p>Crema Ácida 1L x1 &nbsp;&nbsp;&nbsp;&nbsp;$38.00</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E2EAF2' }} />
-                    <p className="font-bold" style={{ color: '#0F4FA3' }}>TOTAL: $128.00</p>
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <p className="font-bold" style={{ color: '#C2410C' }}>TOTAL: $128.00</p>
                     <p className="text-[10px]" style={{ color: '#8FA1B2' }}>IVA incluido (16%): $17.66</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E2EAF2' }} />
-                    <p className="text-center font-medium" style={{ color: '#2F8CEB' }}>¡Gracias por su compra!</p>
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <p className="text-center font-medium" style={{ color: '#F97316' }}>¡Gracias por su compra!</p>
                   </div>
                 </div>
               </div>
@@ -420,13 +420,13 @@ export default function Configuracion() {
               </div>
               <div
                 className="flex items-center gap-3 rounded-xl p-4 mb-5"
-                style={{ background: isSuperAdmin ? 'rgba(47,140,235,.07)' : '#F2F3F5', border: `1px solid ${isSuperAdmin ? '#C8DCE9' : '#E2EAF2'}` }}
+                style={{ background: isSuperAdmin ? 'rgba(249,115,22,.07)' : '#F2F3F5', border: `1px solid ${isSuperAdmin ? '#FDBA74' : '#FDE8D0'}` }}
               >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: isSuperAdmin ? 'rgba(47,140,235,.15)' : '#F2F3F5' }}
+                  style={{ background: isSuperAdmin ? 'rgba(249,115,22,.15)' : '#F2F3F5' }}
                 >
-                  <Shield className="w-4 h-4" style={{ color: isSuperAdmin ? '#2F8CEB' : '#8FA1B2' }} />
+                  <Shield className="w-4 h-4" style={{ color: isSuperAdmin ? '#F97316' : '#8FA1B2' }} />
                 </div>
                 <div>
                   <p className="text-sm font-bold" style={{ color: '#263442' }}>Rol: {selectedRole}</p>
@@ -445,14 +445,14 @@ export default function Configuracion() {
                       className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all"
                       style={{
                         background:  on ? 'rgba(5,150,105,.08)' : '#F2F3F5',
-                        borderColor: on ? 'rgba(5,150,105,.22)' : '#E2EAF2',
+                        borderColor: on ? 'rgba(5,150,105,.22)' : '#FDE8D0',
                         cursor:      isSuperAdmin ? 'default' : 'pointer',
                         opacity:     isSuperAdmin ? 0.85 : 1,
                       }}
                     >
                       <div
                         className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                        style={{ background: on ? '#059669' : '#E2EAF2', border: `1.5px solid ${on ? '#059669' : '#D4DDE6'}` }}
+                        style={{ background: on ? '#059669' : '#FDE8D0', border: `1.5px solid ${on ? '#059669' : '#D4DDE6'}` }}
                       >
                         {on && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
                       </div>
@@ -482,7 +482,7 @@ export default function Configuracion() {
 
               {/* Timeline */}
               <div className="relative">
-                <div className="absolute left-[19px] top-0 bottom-0 w-px" style={{ background: '#E2EAF2' }} />
+                <div className="absolute left-[19px] top-0 bottom-0 w-px" style={{ background: '#FDE8D0' }} />
                 <div className="space-y-1">
                   {bitacora.map((b, i) => {
                     const color = logDot[b.type] || '#8FA1B2'
@@ -492,7 +492,7 @@ export default function Configuracion() {
                         key={b.user + b.time}
                         className="flex items-start gap-3 p-3 rounded-xl transition-colors cursor-pointer animate-fade-in-up"
                         style={{ animationDelay: `${Math.min(i * 40, 200)}ms` }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#EBF5FF'}
+                        onMouseEnter={e => e.currentTarget.style.background = '#FFF7ED'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <div
@@ -507,7 +507,7 @@ export default function Configuracion() {
                             <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
                             <p className="text-xs font-medium" style={{ color: '#627080' }}>{b.action}</p>
                           </div>
-                          <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#A6C3DA' }}>
+                          <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#FED7AA' }}>
                             {b.ip} · {b.time}
                           </p>
                         </div>
@@ -517,7 +517,7 @@ export default function Configuracion() {
                 </div>
               </div>
 
-              <button className="mt-4 pt-3 w-full text-xs font-semibold flex items-center justify-center gap-1 py-1.5 transition-colors border-t" style={{ color: '#2F8CEB', borderColor: '#F2F3F5' }}>
+              <button className="mt-4 pt-3 w-full text-xs font-semibold flex items-center justify-center gap-1 py-1.5 transition-colors border-t" style={{ color: '#F97316', borderColor: '#F2F3F5' }}>
                 Cargar más registros →
               </button>
             </div>

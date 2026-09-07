@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+﻿import { useState, useEffect, useMemo, useRef } from 'react'
 import { Users, Plus, Search, Shield, Edit, Trash2, Lock, Unlock, KeyRound, Eye, AlertTriangle, UserX, Mail, Building2, Clock, TrendingUp } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { SkeletonTableRows, SkeletonCardGrid } from '../components/Skeleton'
@@ -31,7 +31,7 @@ const roleColor = {
 
 const avatarBg = {
   'Superadmin':        { bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
-  'Administrador':     { bg: '#EBF5FF',              color: '#2F8CEB' },
+  'Administrador':     { bg: '#FFF7ED',              color: '#F97316' },
   'Cajero':            { bg: 'rgba(5,150,105,.1)',   color: '#059669' },
   'Distribuidor':      { bg: 'rgba(217,119,6,.1)',   color: '#d97706' },
   'Encargado de ruta': { bg: '#F2F3F5',              color: '#627080' },
@@ -154,7 +154,7 @@ export default function Usuarios() {
         {/* Usuarios por rol */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Distribución por rol</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
@@ -162,10 +162,10 @@ export default function Usuarios() {
               data={roles.map(r => ({ name: r === 'Encargado de ruta' ? 'Enc. ruta' : r, count: roleCounts[r] }))}
               barSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
             >
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#EBF5FF' }} content={props => <ChartTooltip {...props} format={v => `${v} usuario${v !== 1 ? 's' : ''}`} />} />
-              <Bar dataKey="count" radius={[5, 5, 0, 0]} fill="#2F8CEB" />
+              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={v => `${v} usuario${v !== 1 ? 's' : ''}`} />} />
+              <Bar dataKey="count" radius={[5, 5, 0, 0]} fill="#F97316" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -173,7 +173,7 @@ export default function Usuarios() {
         {/* Por estado y sucursal */}
         <div className="card p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de acceso</span>
           </div>
           {[
@@ -191,21 +191,21 @@ export default function Usuarios() {
                     <span className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</span>
                     <span className="text-xs font-bold" style={{ color: s.color }}>{pct}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                  <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                     <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: s.color }} />
                   </div>
                 </div>
               </div>
             )
           })}
-          <div className="mt-2 rounded-xl p-3" style={{ background: '#EBF5FF' }}>
+          <div className="mt-2 rounded-xl p-3" style={{ background: '#FFF7ED' }}>
             <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#8FA1B2' }}>Sucursales con usuarios</p>
             {['Centro', 'Norte', 'Sur', 'Oriente', 'Global'].map(suc => {
               const n = sucursalCounts[suc]
               return n > 0 ? (
                 <div key={suc} className="flex justify-between items-center py-0.5">
                   <span className="text-xs" style={{ color: '#627080' }}>{suc}</span>
-                  <span className="text-xs font-bold" style={{ color: '#2F8CEB' }}>{n}</span>
+                  <span className="text-xs font-bold" style={{ color: '#F97316' }}>{n}</span>
                 </div>
               ) : null
             })}
@@ -238,7 +238,7 @@ export default function Usuarios() {
             <div
               key={r}
               className="card card-glow p-4 cursor-pointer animate-fade-in-up"
-              style={{ ...(isSelected ? { borderColor: '#C8DCE9', background: '#EBF4FC' } : {}), animationDelay: `${Math.min(i * 55, 200)}ms` }}
+              style={{ ...(isSelected ? { borderColor: '#FDBA74', background: '#FFF7ED' } : {}), animationDelay: `${Math.min(i * 55, 200)}ms` }}
               onClick={() => setFilterRol(isSelected ? 'Todos' : r)}
             >
               <div className="flex items-center gap-3 mb-3">
@@ -250,7 +250,7 @@ export default function Usuarios() {
                 </div>
                 <p className="text-2xl font-black" style={{ color: '#263442' }}>{count}</p>
               </div>
-              <p className="text-xs font-semibold leading-tight" style={{ color: isSelected ? '#0F4FA3' : '#8FA1B2' }}>{r}</p>
+              <p className="text-xs font-semibold leading-tight" style={{ color: isSelected ? '#C2410C' : '#8FA1B2' }}>{r}</p>
             </div>
           )
         })}
@@ -385,7 +385,7 @@ export default function Usuarios() {
           <Modal title="Perfil de usuario" onClose={() => setSelectedUser(null)}>
 
               {/* Avatar + name */}
-              <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #E2EAF2' }}>
+              <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
                 <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0"
                   style={{
@@ -575,7 +575,7 @@ export default function Usuarios() {
                           ? nuevoForm.password.length < 6 ? '#C97A6D'
                           : nuevoForm.password.length < 10 ? '#d97706'
                           : '#059669'
-                          : '#E2EAF2'
+                          : '#FDE8D0'
                       }} />
                     ))}
                   </div>

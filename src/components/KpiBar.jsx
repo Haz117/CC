@@ -14,7 +14,7 @@ export default function KpiBar({ items = [] }) {
               ? '3px solid #C97A6D'
               : item.good
               ? '3px solid #059669'
-              : '3px solid #2F8CEB',
+              : '3px solid #F97316',
           }}
         >
           <p style={{

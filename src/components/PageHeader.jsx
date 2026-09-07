@@ -4,8 +4,8 @@ export default function PageHeader({ breadcrumb, title, subtitle, children }) {
       className="flex items-start justify-between gap-4 flex-wrap mb-5 animate-fade-in rounded-[18px] px-5 py-4"
       style={{
         background: '#fff',
-        border: '1px solid #E2EAF2',
-        boxShadow: '0 2px 12px rgba(15,79,163,.07)',
+        border: '1px solid #FDE8D0',
+        boxShadow: '0 2px 12px rgba(194,65,12,.07)',
       }}
     >
       <div>
@@ -16,7 +16,7 @@ export default function PageHeader({ breadcrumb, title, subtitle, children }) {
         )}
         <h1
           className="font-black leading-none tracking-tight"
-          style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', color: '#0F4FA3' }}
+          style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', color: '#C2410C' }}
         >
           {title}
         </h1>

@@ -1,7 +1,7 @@
-export function SkeletonLine({ w = 'w-full', h = 'h-4' }) {
+﻿export function SkeletonLine({ w = 'w-full', h = 'h-4' }) {
   return (
     <div className={`${w} ${h} rounded-lg`}
-      style={{ background: 'linear-gradient(90deg,#EBF4FC 0%,#D4EAFB 50%,#EBF4FC 100%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s ease-in-out infinite' }} />
+      style={{ background: 'linear-gradient(90deg,#FFF7ED 0%,#FDBA74 50%,#FFF7ED 100%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s ease-in-out infinite' }} />
   )
 }
 
@@ -25,7 +25,7 @@ export function SkeletonTableRows({ rows = 5 }) {
         ))}
       </div>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #E2EAF2' }}>
+        <div key={i} className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
           {widths.map((w, j) => (
             <div key={j} style={{ width: w }}>
               <SkeletonLine h={j === 0 ? 'h-4' : 'h-3'} />
@@ -58,7 +58,7 @@ export function SkeletonReport() {
       </div>
       <div className="card p-5 space-y-4">
         <SkeletonLine w="w-1/3" h="h-4" />
-        <div style={{ height: 240, borderRadius: 12, background: 'linear-gradient(90deg,#EBF4FC 0%,#D4EAFB 50%,#EBF4FC 100%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s ease-in-out infinite' }} />
+        <div style={{ height: 240, borderRadius: 12, background: 'linear-gradient(90deg,#FFF7ED 0%,#FDBA74 50%,#FFF7ED 100%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s ease-in-out infinite' }} />
       </div>
       <SkeletonTableRows rows={4} />
     </div>

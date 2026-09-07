@@ -1,6 +1,6 @@
 const palette = {
-  orange: { bg: '#EBF5FF',              iconColor: '#2F8CEB', accent: 'accent-blue',   line: '#2F8CEB' },
-  blue:   { bg: '#EBF5FF',              iconColor: '#2F8CEB', accent: 'accent-blue',   line: '#2F8CEB' },
+  orange: { bg: '#FFF7ED',              iconColor: '#F97316', accent: 'accent-blue',   line: '#F97316' },
+  blue:   { bg: '#FFF7ED',              iconColor: '#F97316', accent: 'accent-blue',   line: '#F97316' },
   green:  { bg: 'rgba(5,150,105,.1)',   iconColor: '#059669', accent: 'accent-green',  line: '#059669' },
   red:    { bg: 'rgba(201,122,109,.1)', iconColor: '#C97A6D', accent: 'accent-red',    line: '#C97A6D' },
   purple: { bg: 'rgba(124,58,237,.1)',   iconColor: '#7c3aed', accent: 'accent-purple', line: '#7c3aed' },

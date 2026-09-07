@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import {
   Milk, Eye, EyeOff, Lock, Mail, AlertCircle, Loader2,
   CheckCircle2, Shield, ArrowRight, TrendingUp, Users, Monitor, Package, Zap,
@@ -57,7 +57,7 @@ export default function Login({ onLogin }) {
       ══════════════════════════════════════════════ */}
       <div
         className="hidden lg:flex lg:w-[52%] xl:w-[54%] flex-col relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg,#061829 0%,#0a2d5e 42%,#0F4FA3 100%)' }}
+        style={{ background: 'linear-gradient(160deg,#1C0702 0%,#7c2d12 42%,#C2410C 100%)' }}
       >
         {/* Anillos decorativos sutiles */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
@@ -78,7 +78,7 @@ export default function Login({ onLogin }) {
         {/* Resplandor esquina superior derecha */}
         <div
           className="absolute -top-32 -right-32 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle,rgba(47,140,235,.18) 0%,transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle,rgba(249,115,22,.18) 0%,transparent 70%)' }}
         />
 
         {/* Contenido */}
@@ -94,7 +94,7 @@ export default function Login({ onLogin }) {
             </div>
             <div>
               <p className="text-white font-bold text-[15px] leading-tight tracking-tight">Cremerías Admin</p>
-              <p className="text-[11px] font-medium mt-0.5" style={{ color: 'rgba(166,195,218,.52)' }}>
+              <p className="text-[11px] font-medium mt-0.5" style={{ color: 'rgba(251,146,60,.52)' }}>
                 Sistema de Punto de Venta
               </p>
             </div>
@@ -106,10 +106,10 @@ export default function Login({ onLogin }) {
               style={{ fontSize: 'clamp(2rem, 3.2vw, 2.75rem)' }}>
               Administra toda<br />
               tu red de cremerías<br />
-              <span style={{ color: '#A6C3DA' }}>desde un solo lugar.</span>
+              <span style={{ color: '#FED7AA' }}>desde un solo lugar.</span>
             </h1>
             <p className="text-[14.5px] leading-relaxed max-w-[360px] mb-10"
-              style={{ color: 'rgba(166,195,218,.58)' }}>
+              style={{ color: 'rgba(251,146,60,.58)' }}>
               Ventas, inventario, rutas y distribuidores unificados para la industria láctea.
             </p>
 
@@ -129,7 +129,7 @@ export default function Login({ onLogin }) {
                     style={{ fontSize: 'clamp(1.2rem,2vw,1.5rem)', letterSpacing: '-.03em' }}>
                     {s.value}
                   </p>
-                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(166,195,218,.52)' }}>
+                  <p className="text-[11px] font-semibold" style={{ color: 'rgba(251,146,60,.52)' }}>
                     {s.label}
                   </p>
                 </div>
@@ -149,7 +149,7 @@ export default function Login({ onLogin }) {
                 </div>
                 <div>
                   <p className="text-white text-[13.5px] font-semibold leading-tight">{label}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(166,195,218,.48)' }}>{sub}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'rgba(251,146,60,.48)' }}>{sub}</p>
                 </div>
               </div>
             ))}
@@ -163,11 +163,11 @@ export default function Login({ onLogin }) {
             <span className="live-dot flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-white font-semibold text-[13.5px]">Sistema operando al 100%</p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(166,195,218,.48)' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: 'rgba(251,146,60,.48)' }}>
                 5 sucursales · 18 cajas activas
               </p>
             </div>
-            <Zap className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(166,195,218,.22)' }} />
+            <Zap className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(251,146,60,.22)' }} />
           </div>
 
         </div>
@@ -180,19 +180,19 @@ export default function Login({ onLogin }) {
 
         {/* Barra de acento */}
         <div className="h-[3px] flex-shrink-0"
-          style={{ background: 'linear-gradient(to right,#0F4FA3,#2F8CEB)' }} />
+          style={{ background: 'linear-gradient(to right,#C2410C,#F97316)' }} />
 
         {/* Formulario centrado */}
-        <div className="flex-1 flex items-center justify-center py-12 px-8 overflow-y-auto">
+        <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-5 sm:px-8 overflow-y-auto">
           <div className="w-full max-w-[400px] animate-fade-in-up">
 
             {/* Logo móvil */}
             <div className="lg:hidden flex items-center gap-3 mb-10">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: '#EBF5FF' }}
+                style={{ background: '#FFF7ED' }}
               >
-                <Milk className="w-5 h-5" style={{ color: '#2F8CEB' }} />
+                <Milk className="w-5 h-5" style={{ color: '#F97316' }} />
               </div>
               <div>
                 <p className="font-bold text-[15px]" style={{ color: '#263442' }}>Cremerías Admin</p>
@@ -204,13 +204,13 @@ export default function Login({ onLogin }) {
             <div className="mb-8">
               <p
                 className="text-[10px] font-black uppercase tracking-[.18em] mb-3"
-                style={{ color: '#2F8CEB' }}
+                style={{ color: '#F97316' }}
               >
                 Bienvenido de nuevo
               </p>
               <h2
                 className="font-black tracking-tight leading-tight"
-                style={{ fontSize: 'clamp(1.75rem,3vw,2.1rem)', color: '#0F4FA3' }}
+                style={{ fontSize: 'clamp(1.75rem,3vw,2.1rem)', color: '#C2410C' }}
               >
                 Inicia sesión
               </h2>
@@ -245,7 +245,7 @@ export default function Login({ onLogin }) {
                 <div className="relative">
                   <Mail
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                    style={{ color: '#A6C3DA' }}
+                    style={{ color: '#FB923C' }}
                   />
                   <input
                     id="login-email"
@@ -256,7 +256,7 @@ export default function Login({ onLogin }) {
                     autoComplete="email"
                     autoFocus
                     className="input-field pl-11"
-                    style={{ padding: '13px 14px 13px 44px', background: '#F0F4F9' }}
+                    style={{ padding: '13px 14px 13px 44px', background: '#FFF8F0' }}
                   />
                 </div>
               </div>
@@ -274,7 +274,7 @@ export default function Login({ onLogin }) {
                   <button
                     type="button"
                     className="text-xs font-semibold transition-opacity hover:opacity-70"
-                    style={{ color: '#2F8CEB' }}
+                    style={{ color: '#F97316' }}
                     onClick={() => toast.info('Modo demo', 'Usa las credenciales del recuadro para ingresar.')}
                   >
                     ¿Olvidaste?
@@ -283,7 +283,7 @@ export default function Login({ onLogin }) {
                 <div className="relative">
                   <Lock
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                    style={{ color: '#A6C3DA' }}
+                    style={{ color: '#FB923C' }}
                   />
                   <input
                     id="login-password"
@@ -293,16 +293,16 @@ export default function Login({ onLogin }) {
                     placeholder="••••••••"
                     autoComplete="current-password"
                     className="input-field pr-12"
-                    style={{ padding: '13px 48px 13px 44px', background: '#F0F4F9' }}
+                    style={{ padding: '13px 48px 13px 44px', background: '#FFF8F0' }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass(v => !v)}
                     aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors"
-                    style={{ color: '#A6C3DA' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#627080' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#A6C3DA' }}
+                    style={{ color: '#FB923C' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#C2410C' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#FB923C' }}
                   >
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -319,7 +319,7 @@ export default function Login({ onLogin }) {
                   onClick={() => setRemember(v => !v)}
                   className="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200"
                   style={remember
-                    ? { background: '#2F8CEB', borderColor: '#2F8CEB', boxShadow: '0 0 0 3px rgba(47,140,235,.18)' }
+                    ? { background: '#F97316', borderColor: '#F97316', boxShadow: '0 0 0 3px rgba(249,115,22,.18)' }
                     : { borderColor: '#D4DDE6', background: '#fff' }
                   }
                 >
@@ -359,21 +359,21 @@ export default function Login({ onLogin }) {
             {/* Demo box — gris neutro */}
             <div
               className="rounded-2xl p-5"
-              style={{ background: '#F0F4F9', border: '1px solid #E2EAF2' }}
+              style={{ background: '#FFF8F0', border: '1px solid #FDE8D0' }}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className="live-dot" />
                   <p
                     className="text-[10px] font-black uppercase tracking-[.14em]"
-                    style={{ color: '#2F8CEB' }}
+                    style={{ color: '#F97316' }}
                   >
                     Modo demo
                   </p>
                 </div>
                 <span
                   className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: '#EBF5FF', color: '#0F4FA3', border: '1px solid #C8DCE9' }}
+                  style={{ background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDBA74' }}
                 >
                   Sin registro
                 </span>
@@ -387,12 +387,12 @@ export default function Login({ onLogin }) {
                   <div
                     key={item.label}
                     className="rounded-xl px-3.5 py-2.5"
-                    style={{ background: '#fff', border: '1px solid #E2EAF2' }}
+                    style={{ background: '#fff', border: '1px solid #FDE8D0' }}
                   >
                     <p className="text-[10px] font-medium mb-1" style={{ color: '#8FA1B2' }}>
                       {item.label}
                     </p>
-                    <p className="text-xs font-bold font-mono truncate" style={{ color: '#0F4FA3' }}>
+                    <p className="text-xs font-bold font-mono truncate" style={{ color: '#C2410C' }}>
                       {item.value}
                     </p>
                   </div>

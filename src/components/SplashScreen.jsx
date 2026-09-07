@@ -38,7 +38,7 @@ export default function SplashScreen({ onDone }) {
           <p className="text-white font-black text-[1.6rem] tracking-tight leading-none">
             Cremerías Admin
           </p>
-          <p className="text-sm font-medium mt-2" style={{ color: 'rgba(200,222,250,.75)' }}>
+          <p className="text-sm font-medium mt-2" style={{ color: 'rgba(255,220,170,.75)' }}>
             Sistema de Punto de Venta
           </p>
         </div>

@@ -34,7 +34,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
         {value && resultCount !== undefined && (
           <span
             className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap animate-scale-in"
-            style={{ background: '#EBF4FC', color: '#0F4FA3' }}
+            style={{ background: '#FFF7ED', color: '#C2410C' }}
           >
             {resultCount}
           </span>
@@ -44,7 +44,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
             onClick={() => onChange('')}
             className="w-5 h-5 flex items-center justify-center rounded-md transition-all"
             style={{ color: '#8FA1B2' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = '#E2EAF2' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = '#FDE8D0' }}
             onMouseLeave={e => { e.currentTarget.style.color = '#8FA1B2'; e.currentTarget.style.background = 'transparent' }}
           >
             <X className="w-3 h-3" />

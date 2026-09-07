@@ -10,10 +10,10 @@ export default function ConfirmDialog({
   onCancel,
 }) {
   const isDanger   = type === 'danger'
-  const accentColor = isDanger ? '#C97A6D' : '#2F8CEB'
-  const iconBg      = isDanger ? 'rgba(201,122,109,.12)' : '#EBF5FF'
-  const btnBg       = isDanger ? '#C97A6D' : '#2F8CEB'
-  const ringColor   = isDanger ? 'rgba(201,122,109,.14)' : 'rgba(47,140,235,.14)'
+  const accentColor = isDanger ? '#C97A6D' : '#F97316'
+  const iconBg      = isDanger ? 'rgba(201,122,109,.12)' : '#FFF7ED'
+  const btnBg       = isDanger ? '#C97A6D' : '#F97316'
+  const ringColor   = isDanger ? 'rgba(201,122,109,.14)' : 'rgba(249,115,22,.14)'
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>

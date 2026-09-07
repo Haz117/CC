@@ -1,1 +1,19 @@
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='#f97316'/><text x='256' y='340' font-size='290' text-anchor='middle' fill='white' font-family='sans-serif'>🧀</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Milk carton body -->
+  <rect x="138" y="234" width="236" height="204" rx="26" fill="white" opacity="0.95"/>
+  <!-- Milk carton top gable -->
+  <path d="M138 234 L202 128 L310 128 L374 234 Z" fill="white" opacity="0.88"/>
+  <!-- Carton spout -->
+  <rect x="208" y="108" width="96" height="36" rx="18" fill="white"/>
+  <!-- Horizontal label stripe -->
+  <rect x="170" y="314" width="172" height="26" rx="13" fill="#EA580C" opacity="0.3"/>
+  <!-- Cream drop detail -->
+  <ellipse cx="256" cy="390" rx="38" ry="24" fill="#FB923C" opacity="0.4"/>
+</svg>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { Truck, Plus, Package, DollarSign, Eye, Edit, Trash2, Users, TrendingUp } from 'lucide-react'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
@@ -125,28 +125,28 @@ export default function Distribuidores() {
         {/* Mercancía vs vendido */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Mercancía vs vendido</span>
             <div className="ml-auto flex items-center gap-3">
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#2F8CEB' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Vendido</span></div>
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#C8DEFA' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Mercancía</span></div>
+              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#F97316' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Vendido</span></div>
+              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#FDBA74' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Mercancía</span></div>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(d => ({ name: d.nombre.split(' ')[0], vendido: d.vendido, mercancia: d.mercancia - d.vendido }))} barSize={14} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip
-                cursor={{ fill: '#EBF5FF' }}
+                cursor={{ fill: '#FFF7ED' }}
                 content={({ active, payload, label }) => active && payload?.length ? (
-                  <div style={{ background: '#fff', border: '1px solid #E2EAF2', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(47,140,235,.12)' }}>
+                  <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
                     <p style={{ fontSize: 10, color: '#8FA1B2', fontWeight: 700 }}>{label}</p>
                     {payload.map(p => <p key={p.name} style={{ fontSize: 12, color: p.fill, fontWeight: 700 }}>{p.name === 'vendido' ? 'Vendido' : 'Restante'}: {fmt(p.value)}</p>)}
                   </div>
                 ) : null}
               />
-              <Bar dataKey="vendido" stackId="a" radius={[0, 0, 0, 0]} fill="#2F8CEB" name="vendido" />
-              <Bar dataKey="mercancia" stackId="a" radius={[4, 4, 0, 0]} fill="#C8DEFA" name="mercancia" />
+              <Bar dataKey="vendido" stackId="a" radius={[0, 0, 0, 0]} fill="#F97316" name="vendido" />
+              <Bar dataKey="mercancia" stackId="a" radius={[4, 4, 0, 0]} fill="#FDBA74" name="mercancia" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -154,7 +154,7 @@ export default function Distribuidores() {
         {/* Métricas clave */}
         <div className="card p-5 flex flex-col gap-3">
           <div className="flex items-center gap-2 mb-1">
-            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Métricas clave</span>
           </div>
           {[
@@ -167,10 +167,10 @@ export default function Distribuidores() {
               <span className="text-sm font-black" style={{ color: m.color }}>{m.value}</span>
             </div>
           ))}
-          <div className="rounded-xl p-3 mt-auto" style={{ background: '#EBF5FF' }}>
+          <div className="rounded-xl p-3 mt-auto" style={{ background: '#FFF7ED' }}>
             <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#8FA1B2' }}>Eficiencia promedio</p>
             <div className="flex items-end gap-1.5">
-              <span className="text-2xl font-black" style={{ color: '#2F8CEB' }}>
+              <span className="text-2xl font-black" style={{ color: '#F97316' }}>
                 {distCounts.withSales.length
                   ? Math.round(distCounts.withSales.reduce((a, d) => a + (d.vendido / d.mercancia * 100), 0) / distCounts.withSales.length)
                   : 0}%
@@ -191,7 +191,7 @@ export default function Distribuidores() {
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="section-head-text"><strong>Distribuidores</strong></span>
             <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
             <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{distCounts.activos} activos</span>
@@ -224,8 +224,8 @@ export default function Distribuidores() {
                     <td><span className="folio">{d.codigo}</span></td>
                     <td>
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#EBF4FC' }}>
-                          <Truck className="w-4 h-4" style={{ color: '#2F8CEB' }} />
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
+                          <Truck className="w-4 h-4" style={{ color: '#F97316' }} />
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-xs truncate" style={{ color: '#263442' }}>{d.nombre}</p>
@@ -236,7 +236,7 @@ export default function Distribuidores() {
                     <td><span style={{ color: '#627080' }}>{d.ruta}</span></td>
                     <td>
                       <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" style={{ color: '#A6C3DA' }} />
+                        <Users className="w-3.5 h-3.5" style={{ color: '#FED7AA' }} />
                         <span className="font-semibold" style={{ color: '#263442' }}>{d.clientes}</span>
                       </span>
                     </td>
@@ -299,9 +299,9 @@ export default function Distribuidores() {
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: '#EBF5FF' }}
+                  style={{ background: '#FFF7ED' }}
                 >
-                  <Truck className="w-5 h-5" style={{ color: '#2F8CEB' }} />
+                  <Truck className="w-5 h-5" style={{ color: '#F97316' }} />
                 </div>
                 <div className="min-w-0">
                   <p className="font-bold text-sm truncate" style={{ color: '#263442' }}>{d.nombre}</p>
@@ -310,7 +310,7 @@ export default function Distribuidores() {
                     <span style={{ color: '#D4DDE6' }}>·</span>
                     <span className="text-xs truncate" style={{ color: '#8FA1B2' }}>{d.telefono}</span>
                   </div>
-                  <p className="text-xs font-medium mt-0.5 truncate" style={{ color: '#2F8CEB' }}>{d.ruta}</p>
+                  <p className="text-xs font-medium mt-0.5 truncate" style={{ color: '#F97316' }}>{d.ruta}</p>
                 </div>
               </div>
               <Badge label={d.status} color={statusColor[d.status]} />
@@ -343,7 +343,7 @@ export default function Distribuidores() {
             <div className="mb-3">
               <div className="flex justify-between text-[10px] mb-1" style={{ color: '#8FA1B2' }}>
                 <span>Utilización de mercancía</span>
-                <span className="font-bold" style={{ color: '#2F8CEB' }}>
+                <span className="font-bold" style={{ color: '#F97316' }}>
                   {d.mercancia > 0 ? Math.round((d.vendido / d.mercancia) * 100) : 0}%
                 </span>
               </div>
@@ -374,8 +374,8 @@ export default function Distribuidores() {
             <div className="p-6 space-y-3">
               {/* Avatar + progreso */}
               <div className="flex items-center gap-4 mb-1">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: '#EBF5FF' }}>
-                  <Truck className="w-7 h-7" style={{ color: '#2F8CEB' }} />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
+                  <Truck className="w-7 h-7" style={{ color: '#F97316' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#8FA1B2' }}>Utilización de mercancía</p>
@@ -386,7 +386,7 @@ export default function Distribuidores() {
                         <div className="progress-track" style={{ marginBottom: 4 }}>
                           <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
                         </div>
-                        <p className="text-xs font-black" style={{ color: '#2F8CEB' }}>{pct}% <span className="font-normal" style={{ color: '#8FA1B2' }}>de mercancía vendida</span></p>
+                        <p className="text-xs font-black" style={{ color: '#F97316' }}>{pct}% <span className="font-normal" style={{ color: '#8FA1B2' }}>de mercancía vendida</span></p>
                       </>
                     )
                   })()}
@@ -422,7 +422,7 @@ export default function Distribuidores() {
                 </div>
               </div>
             </div>
-            <div className="modal-footer px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #E2EAF2' }}>
+            <div className="modal-footer px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #FDE8D0' }}>
               <button onClick={() => setSelected(null)} className="btn-secondary">Cerrar</button>
             </div>
         </Modal>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Search, LayoutDashboard, Building2, Monitor, ShoppingCart, Package,
@@ -32,7 +32,7 @@ const ACTIONS = [
 const ALL = [...NAV, ...ACTIONS]
 
 const GROUP_COLORS = {
-  'Navegar':          { bg: '#EBF4FC', icon: '#2F8CEB', activeBg: '#2F8CEB' },
+  'Navegar':          { bg: '#FFF7ED', icon: '#F97316', activeBg: '#F97316' },
   'Acciones rápidas': { bg: 'rgba(5,150,105,.08)', icon: '#059669', activeBg: '#059669' },
 }
 
@@ -124,13 +124,13 @@ export default function CommandPalette({ open, onClose }) {
         className="w-full max-w-lg rounded-2xl overflow-hidden animate-scale-in"
         style={{
           background: '#fff',
-          boxShadow: '0 40px 100px rgba(15,79,163,.32), 0 0 0 1px rgba(0,0,0,.06)',
+          boxShadow: '0 40px 100px rgba(194,65,12,.32), 0 0 0 1px rgba(0,0,0,.06)',
         }}
         onClick={e => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #E2EAF2' }}>
-          <Search className="w-5 h-5 flex-shrink-0" style={{ color: '#A6C3DA' }} />
+        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
+          <Search className="w-5 h-5 flex-shrink-0" style={{ color: '#FED7AA' }} />
           <input
             ref={inputRef}
             id="command-palette-input"
@@ -151,7 +151,7 @@ export default function CommandPalette({ open, onClose }) {
             aria-label="Cerrar paleta de comandos"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
             style={{ background: '#F2F3F5', color: '#8FA1B2' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#E2EAF2' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#FDE8D0' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#F2F3F5' }}
           >
             <X className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ export default function CommandPalette({ open, onClose }) {
             return (
               <div key={group}>
                 <div className="px-4 pt-3 pb-1.5">
-                  <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#A6C3DA' }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#FED7AA' }}>
                     {group}
                   </p>
                 </div>
@@ -189,7 +189,7 @@ export default function CommandPalette({ open, onClose }) {
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setActiveIdx(idx)}
                       className="group w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
-                      style={{ background: isActive ? '#EBF4FC' : 'transparent' }}
+                      style={{ background: isActive ? '#FFF7ED' : 'transparent' }}
                     >
                       <div
                         className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
@@ -200,13 +200,13 @@ export default function CommandPalette({ open, onClose }) {
                       >
                         <item.Icon className="w-4 h-4" style={{ color: isActive ? '#fff' : gc.icon }} />
                       </div>
-                      <span className="text-sm font-medium flex-1" style={{ color: isActive ? '#0F4FA3' : '#263442' }}>
+                      <span className="text-sm font-medium flex-1" style={{ color: isActive ? '#C2410C' : '#263442' }}>
                         {item.label}
                       </span>
                       {isActive ? (
                         <span
                           className="text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
-                          style={{ background: '#2F8CEB', color: '#fff' }}
+                          style={{ background: '#F97316', color: '#fff' }}
                         >
                           ↵
                         </span>
@@ -236,10 +236,10 @@ export default function CommandPalette({ open, onClose }) {
           style={{ borderTop: '1px solid #F2F3F5', background: '#F2F3F5' }}
         >
           {[['↑↓', 'navegar'], ['↵', 'abrir'], ['esc', 'cerrar']].map(([key, label]) => (
-            <span key={key} className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: '#A6C3DA' }}>
+            <span key={key} className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: '#FED7AA' }}>
               <kbd
                 className="px-1.5 py-0.5 rounded-md text-[9px] font-bold"
-                style={{ background: '#E2EAF2', color: '#627080', border: '1px solid #D4DDE6' }}
+                style={{ background: '#FDE8D0', color: '#627080', border: '1px solid #D4DDE6' }}
               >
                 {key}
               </kbd>

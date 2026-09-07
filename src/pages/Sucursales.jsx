@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { Building2, Plus, MapPin, Users, Monitor, TrendingUp, Edit, Trash2, ToggleLeft, ToggleRight, LayoutGrid, LayoutList, Search, BarChart2 } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
@@ -23,15 +23,15 @@ import ChartTooltip from '../components/ChartTooltip'
 
 function ViewToggle({ viewMode, setViewMode }) {
   return (
-    <div className="flex rounded-xl overflow-hidden flex-shrink-0" style={{ border: '1px solid #E2EAF2', height: 36 }}>
+    <div className="flex rounded-xl overflow-hidden flex-shrink-0" style={{ border: '1px solid #FDE8D0', height: 36 }}>
       <button onClick={() => setViewMode('table')} title="Vista tabla"
         className="px-3 flex items-center transition-colors"
-        style={viewMode === 'table' ? { background: '#2F8CEB', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }}>
+        style={viewMode === 'table' ? { background: '#F97316', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }}>
         <LayoutList className="w-4 h-4" />
       </button>
       <button onClick={() => setViewMode('cards')} title="Vista tarjetas"
         className="px-3 flex items-center transition-colors"
-        style={{ ...(viewMode === 'cards' ? { background: '#2F8CEB', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }), borderLeft: '1px solid #E2EAF2' }}>
+        style={{ ...(viewMode === 'cards' ? { background: '#F97316', color: '#fff' } : { background: '#F2F3F5', color: '#8FA1B2' }), borderLeft: '1px solid #FDE8D0' }}>
         <LayoutGrid className="w-4 h-4" />
       </button>
     </div>
@@ -125,16 +125,16 @@ export default function Sucursales() {
         {/* Ventas por sucursal */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Ventas del mes por sucursal</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(s => ({ name: s.nombre.replace('Sucursal ', ''), ventas: s.ventasMes, activa: s.status }))} barSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#EBF5FF' }} content={props => <ChartTooltip {...props} format={fmt} />} />
+              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="ventas" radius={[5, 5, 0, 0]}>
-                {data.map((s, i) => <Cell key={s.id} fill={!s.status ? '#E2EAF2' : i === 0 ? '#2F8CEB' : '#C8DEFA'} />)}
+                {data.map((s, i) => <Cell key={s.id} fill={!s.status ? '#FDE8D0' : i === 0 ? '#F97316' : '#FDBA74'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -143,18 +143,18 @@ export default function Sucursales() {
         {/* Participación */}
         <div className="card p-5 flex flex-col gap-2.5">
           <div className="flex items-center gap-2 mb-1">
-            <BarChart2 className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <BarChart2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Participación</span>
           </div>
           {(() => {
             const total = sucStats.ventasMes
             return data.map((s, i) => {
               const pct = total ? Math.round(s.ventasMes / total * 100) : 0
-              const colors = ['#2F8CEB', '#0F4FA3', '#059669', '#d97706', '#D4DDE6']
+              const colors = ['#F97316', '#C2410C', '#059669', '#d97706', '#D4DDE6']
               return (
                 <div key={s.id} className="flex items-center gap-2">
                   <span className="text-[10px] font-semibold w-14 truncate flex-shrink-0" style={{ color: '#627080' }}>{s.nombre.replace('Sucursal ', '')}</span>
-                  <div className="flex-1 h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                  <div className="flex-1 h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                     <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: s.status ? colors[i] : '#D4DDE6' }} />
                   </div>
                   <span className="text-[10px] font-bold w-7 text-right flex-shrink-0" style={{ color: s.status ? colors[i] : '#D4DDE6' }}>{pct}%</span>
@@ -162,9 +162,9 @@ export default function Sucursales() {
               )
             })
           })()}
-          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Total mes</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(sucStats.ventasMes)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(sucStats.ventasMes)}</span>
           </div>
         </div>
       </div>
@@ -218,8 +218,8 @@ export default function Sucursales() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: s.status ? '#EBF5FF' : 'rgba(201,122,109,.08)' }}>
-                        <Building2 className="w-5 h-5" style={{ color: s.status ? '#2F8CEB' : '#C97A6D' }} />
+                        style={{ background: s.status ? '#FFF7ED' : 'rgba(201,122,109,.08)' }}>
+                        <Building2 className="w-5 h-5" style={{ color: s.status ? '#F97316' : '#C97A6D' }} />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
@@ -237,9 +237,9 @@ export default function Sucursales() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-xl p-2.5 text-center" style={{ background: '#EBF4FC' }}>
-                      <Monitor className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#2F8CEB' }} />
-                      <p className="text-xs font-bold leading-none" style={{ color: '#0F4FA3' }}>{s.cajas}</p>
+                    <div className="rounded-xl p-2.5 text-center" style={{ background: '#FFF7ED' }}>
+                      <Monitor className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#F97316' }} />
+                      <p className="text-xs font-bold leading-none" style={{ color: '#C2410C' }}>{s.cajas}</p>
                       <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Cajas</p>
                     </div>
                     <div className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(124,58,237,.08)' }}>
@@ -257,18 +257,18 @@ export default function Sucursales() {
                   <div>
                     <div className="flex justify-between text-[10px] mb-1.5">
                       <span className="font-medium" style={{ color: '#8FA1B2' }}>Participación en ventas</span>
-                      <span className="font-bold" style={{ color: '#2F8CEB' }}>{pct}%</span>
+                      <span className="font-bold" style={{ color: '#F97316' }}>{pct}%</span>
                     </div>
                     <div className="progress-track">
                       <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 border-t pt-3" style={{ borderColor: '#F0F4F9' }}>
+                  <div className="flex items-center gap-2.5 border-t pt-3" style={{ borderColor: '#FFF8F0' }}>
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
                       style={{
-                        background: s.admin !== 'Sin asignar' ? '#EBF5FF' : '#F0F4F9',
-                        color: s.admin !== 'Sin asignar' ? '#2F8CEB' : '#8FA1B2',
+                        background: s.admin !== 'Sin asignar' ? '#FFF7ED' : '#FFF8F0',
+                        color: s.admin !== 'Sin asignar' ? '#F97316' : '#8FA1B2',
                       }}>
                       {adminInitials}
                     </div>
@@ -323,7 +323,7 @@ export default function Sucursales() {
 
             <div className="section-head">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="section-head-text"><strong>Sucursales</strong></span>
                 <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} encontrada{filtered.length !== 1 ? 's' : ''}</span>
                 <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{sucStats.activas} activas</span>
@@ -352,8 +352,8 @@ export default function Sucursales() {
                       <td>
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: s.status ? '#EBF4FC' : 'rgba(201,122,109,.1)' }}>
-                            <Building2 className="w-4 h-4" style={{ color: s.status ? '#2F8CEB' : '#C97A6D' }} />
+                            style={{ background: s.status ? '#FFF7ED' : 'rgba(201,122,109,.1)' }}>
+                            <Building2 className="w-4 h-4" style={{ color: s.status ? '#F97316' : '#C97A6D' }} />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{s.nombre}</p>

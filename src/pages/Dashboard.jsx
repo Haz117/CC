@@ -1,4 +1,4 @@
-import { useState, memo } from 'react'
+﻿import { useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 import { Mail, Phone, MoreVertical, Clock } from 'lucide-react'
@@ -8,12 +8,12 @@ import { perfData, donutData, distribuidores, timeline, eventosProximos } from '
    COLORES
 ═══════════════════════════════════════════════════════════════ */
 const C = {
-  blue:      '#2F8CEB',
-  blueLight: '#EBF5FF',
-  blueRing:  '#E2EAF2',
+  blue:      '#F97316',
+  blueLight: '#FFF7ED',
+  blueRing:  '#FDE8D0',
   text:      '#263442',
   textSub:   '#8FA1B2',
-  border:    '#E2EAF2',
+  border:    '#FDE8D0',
   dot:       '#D4DDE6',
 }
 
@@ -75,7 +75,7 @@ function ChartTip({ active, payload, label }) {
   return (
     <div style={{
       background: '#fff', borderRadius: 10, padding: '7px 12px',
-      boxShadow: '0 4px 16px rgba(47,140,235,.12)',
+      boxShadow: '0 4px 16px rgba(249,115,22,.12)',
       border: `1px solid ${C.blueRing}`,
     }}>
       <p style={{ fontSize: 10, fontWeight: 700, color: C.textSub }}>{label}</p>
@@ -145,7 +145,7 @@ export default function Dashboard({ user }) {
                 ¡Es un día movido! ¡Vamos a trabajar!
               </p>
               <button onClick={() => navigate('/inventario')} style={{
-                background: C.blueLight, border: `1.5px solid rgba(47,140,235,.22)`,
+                background: C.blueLight, border: `1.5px solid rgba(249,115,22,.22)`,
                 padding: '6px 14px', borderRadius: 99, cursor: 'pointer',
                 fontSize: 11, fontWeight: 700, color: C.blue, fontFamily: 'inherit',
                 display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -157,22 +157,22 @@ export default function Dashboard({ user }) {
             {/* Ilustración */}
             <div className="dashboard-welcome-illus" style={{
               width: 210,
-              background: '#EBF5FF',
+              background: '#FFF7ED',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <svg viewBox="0 0 210 148" width="210" height="148">
                 {/* sombra círculos decorativos */}
-                <circle cx="165" cy="28" r="28" fill="rgba(47,140,235,.18)" />
-                <circle cx="45"  cy="128" r="18" fill="rgba(47,140,235,.13)" />
+                <circle cx="165" cy="28" r="28" fill="rgba(249,115,22,.18)" />
+                <circle cx="45"  cy="128" r="18" fill="rgba(249,115,22,.13)" />
 
                 {/* mesa */}
-                <rect x="14" y="106" width="164" height="10" rx="4" fill="#A6C3DA"/>
-                <rect x="26"  y="116" width="10" height="24" rx="3" fill="#2F8CEB"/>
-                <rect x="158" y="116" width="10" height="24" rx="3" fill="#2F8CEB"/>
+                <rect x="14" y="106" width="164" height="10" rx="4" fill="#FED7AA"/>
+                <rect x="26"  y="116" width="10" height="24" rx="3" fill="#F97316"/>
+                <rect x="158" y="116" width="10" height="24" rx="3" fill="#F97316"/>
 
                 {/* monitor */}
                 <rect x="44"  y="54"  width="108" height="50" rx="7" fill={C.blue}/>
-                <rect x="51"  y="61"  width="94"  height="36" rx="4" fill="#1D7EE0"/>
+                <rect x="51"  y="61"  width="94"  height="36" rx="4" fill="#EA580C"/>
 
                 {/* gráfica en pantalla */}
                 <rect x="60"  y="84"  width="11" height="10" rx="2" fill="#34d399"/>
@@ -185,8 +185,8 @@ export default function Dashboard({ user }) {
                   strokeLinecap="round" strokeLinejoin="round"/>
 
                 {/* soporte monitor */}
-                <rect x="94" y="104" width="14" height="5" rx="2" fill="#A6C3DA"/>
-                <rect x="84" y="109" width="34" height="3" rx="2" fill="#A6C3DA"/>
+                <rect x="94" y="104" width="14" height="5" rx="2" fill="#FED7AA"/>
+                <rect x="84" y="109" width="34" height="3" rx="2" fill="#FED7AA"/>
 
                 {/* cuerpo personaje */}
                 <rect x="136" y="68" width="32" height="32" rx="8" fill={C.blue}/>
@@ -212,7 +212,7 @@ export default function Dashboard({ user }) {
                   fill="none" stroke="#263442" strokeWidth="1.4" strokeLinecap="round"/>
 
                 {/* planta */}
-                <rect x="18" y="94" width="10" height="14" rx="2" fill="#A6C3DA"/>
+                <rect x="18" y="94" width="10" height="14" rx="2" fill="#FED7AA"/>
                 <ellipse cx="23" cy="90" rx="9" ry="7" fill="#34d399"/>
                 <ellipse cx="16" cy="94" rx="7" ry="5" fill="#059669"/>
                 <ellipse cx="30" cy="94" rx="7" ry="5" fill="#059669"/>
@@ -257,7 +257,7 @@ export default function Dashboard({ user }) {
                     tick={{ fontSize: 9, fill: C.textSub, fontWeight: 500 }}
                     axisLine={false} tickLine={false}
                     interval={0} angle={-30} textAnchor="end" height={36} />
-                  <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(47,140,235,.06)', radius: 4 }} />
+                  <Tooltip content={<ChartTip />} cursor={{ fill: 'rgba(249,115,22,.06)', radius: 4 }} />
                   <Bar dataKey="pct" fill={C.blue} radius={[5, 5, 0, 0]}>
                     <LabelList content={<BarLbl />} />
                   </Bar>
@@ -336,7 +336,7 @@ export default function Dashboard({ user }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0, transition: 'background .15s',
                     }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#C8DEFA' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#FDBA74' }}
                       onMouseLeave={e => { e.currentTarget.style.background = C.blueLight }}
                     >
                       <Icon size={14} color={C.blue} />
@@ -376,7 +376,7 @@ export default function Dashboard({ user }) {
                 if (item.type === 'divider') {
                   return (
                     <div key="tl-divider" style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '6px 0', paddingLeft: 42 }}>
-                      <div style={{ flex: 1, height: 0, borderTop: '2px dashed #C8DEFA' }} />
+                      <div style={{ flex: 1, height: 0, borderTop: '2px dashed #FDBA74' }} />
                     </div>
                   )
                 }
@@ -414,7 +414,7 @@ export default function Dashboard({ user }) {
                           <div style={{
                             width: 12, height: 12, borderRadius: '50%', flexShrink: 0, marginTop: 10,
                             background: C.blue, border: '2.5px solid #fff',
-                            boxShadow: `0 0 0 3px rgba(47,140,235,.22)`,
+                            boxShadow: `0 0 0 3px rgba(249,115,22,.22)`,
                           }} />
                           <div style={{ width: 1, flex: 1, background: C.border, minHeight: 8, marginTop: 3 }} />
                         </>
@@ -434,7 +434,7 @@ export default function Dashboard({ user }) {
                       {item.active ? (
                         <div style={{
                           background: C.blue, borderRadius: 12, padding: '10px 12px',
-                          boxShadow: '0 4px 18px rgba(47,140,235,.28)',
+                          boxShadow: '0 4px 18px rgba(249,115,22,.28)',
                         }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                             <div style={{

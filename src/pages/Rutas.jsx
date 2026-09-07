@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+﻿import { useState, useEffect, useMemo, useRef } from 'react'
 import { Map, Plus, Clock, CheckCircle, AlertCircle, Truck, Eye, Navigation, Edit, Trash2, RotateCcw, TrendingUp } from 'lucide-react'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
@@ -161,25 +161,25 @@ export default function Rutas() {
         {/* Clientes visitados por ruta */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Cobertura de clientes</span>
             <span className="text-xs ml-auto" style={{ color: '#8FA1B2' }}>visitados / total</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(r => ({ name: r.nombre.replace('Ruta ', ''), visitados: r.clientesVisitados, pendientes: r.clientesTotal - r.clientesVisitados }))} barSize={14} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#E2EAF2" />
+              <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip
-                cursor={{ fill: '#EBF5FF' }}
+                cursor={{ fill: '#FFF7ED' }}
                 content={({ active, payload, label }) => active && payload?.length ? (
-                  <div style={{ background: '#fff', border: '1px solid #E2EAF2', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(47,140,235,.12)' }}>
+                  <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
                     <p style={{ fontSize: 10, color: '#8FA1B2', fontWeight: 700 }}>{label}</p>
                     {payload.map(p => <p key={p.name} style={{ fontSize: 12, color: p.fill, fontWeight: 700 }}>{p.name === 'visitados' ? 'Visitados' : 'Pendientes'}: {p.value}</p>)}
                   </div>
                 ) : null}
               />
-              <Bar dataKey="visitados" radius={[4, 4, 0, 0]} fill="#2F8CEB" name="visitados" />
-              <Bar dataKey="pendientes" radius={[4, 4, 0, 0]} fill="#C8DEFA" name="pendientes" />
+              <Bar dataKey="visitados" radius={[4, 4, 0, 0]} fill="#F97316" name="visitados" />
+              <Bar dataKey="pendientes" radius={[4, 4, 0, 0]} fill="#FDBA74" name="pendientes" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -187,7 +187,7 @@ export default function Rutas() {
         {/* Estado de rutas */}
         <div className="card p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <Map className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+            <Map className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de rutas</span>
           </div>
           <div className="flex flex-col gap-3 flex-1 justify-center">
@@ -208,7 +208,7 @@ export default function Rutas() {
                       <span className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</span>
                       <span className="text-xs font-bold" style={{ color: s.color }}>{pct}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: '#E2EAF2' }}>
+                    <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
                       <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: s.color }} />
                     </div>
                   </div>
@@ -216,9 +216,9 @@ export default function Rutas() {
               )
             })}
           </div>
-          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #E2EAF2' }}>
+          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#8FA1B2' }}>Ventas totales</span>
-            <span className="text-sm font-black" style={{ color: '#2F8CEB' }}>{fmt(totalVentas)}</span>
+            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalVentas)}</span>
           </div>
         </div>
       </div>
@@ -288,7 +288,7 @@ export default function Rutas() {
                     </td>
                     <td>
                       <div className="flex items-center gap-1.5">
-                        <Truck className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+                        <Truck className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F97316' }} />
                         <span style={{ color: '#627080' }}>{r.distribuidor}</span>
                       </div>
                     </td>
@@ -395,9 +395,9 @@ export default function Rutas() {
 
               <div
                 className="flex items-center gap-2 mb-4 rounded-xl p-3"
-                style={{ background: '#EBF4FC', border: '1px solid #C8DCE9' }}
+                style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}
               >
-                <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+                <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="text-sm font-medium" style={{ color: '#627080' }}>{r.distribuidor}</span>
               </div>
 
@@ -435,7 +435,7 @@ export default function Rutas() {
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {[
                   ['Ventas',      fmt(r.ventas),       r.ventas > 0 ? '#059669' : '#8FA1B2'],
-                  ['Cobros',      fmt(r.cobros),        r.cobros > 0 ? '#2F8CEB' : '#8FA1B2'],
+                  ['Cobros',      fmt(r.cobros),        r.cobros > 0 ? '#F97316' : '#8FA1B2'],
                   ['Devoluciones',fmt(r.devoluciones),  r.devoluciones > 0 ? '#C97A6D' : '#8FA1B2'],
                 ].map(([label, val, col]) => (
                   <div key={label} className="text-center">
@@ -469,9 +469,9 @@ export default function Rutas() {
               )}
               <div
                 className="flex items-center gap-2 rounded-xl p-3"
-                style={{ background: '#EBF4FC', border: '1px solid #C8DCE9' }}
+                style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}
               >
-                <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#2F8CEB' }} />
+                <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="text-sm font-medium" style={{ color: '#627080' }}>{selected.distribuidor}</span>
                 <Badge label={selected.status} color={statusColor[selected.status]} />
               </div>
@@ -497,14 +497,14 @@ export default function Rutas() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   ['Ventas',       fmt(selected.ventas),       selected.ventas > 0 ? '#059669' : '#8FA1B2'],
-                  ['Cobros',       fmt(selected.cobros),        selected.cobros > 0 ? '#2F8CEB' : '#8FA1B2'],
+                  ['Cobros',       fmt(selected.cobros),        selected.cobros > 0 ? '#F97316' : '#8FA1B2'],
                   ['Devoluciones', fmt(selected.devoluciones),  selected.devoluciones > 0 ? '#C97A6D' : '#8FA1B2'],
                 ].map(([label, val, col]) => (
                   <InfoCell key={label} label={label} value={val} color={col} bold center />
                 ))}
               </div>
             </div>
-            <div className="modal-footer px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #E2EAF2' }}>
+            <div className="modal-footer px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #FDE8D0' }}>
               <button onClick={() => setSelected(null)} className="btn-secondary">Cerrar</button>
             </div>
         </Modal>
