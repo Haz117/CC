@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react'
-import { Package, Plus, Search, AlertTriangle, ArrowUp, ArrowDown, RotateCcw, Filter, LayoutGrid, List, TrendingUp } from 'lucide-react'
+import { Package, Plus, Search, AlertTriangle, ArrowUp, ArrowDown, RotateCcw, Filter, LayoutGrid, List, TrendingUp, Download } from 'lucide-react'
+import { downloadCSV } from '../utils/csv'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
 import Badge from '../components/Badge'
@@ -83,6 +84,21 @@ export default function Inventario() {
   useEffect(() => { setPage(1) }, [debouncedSearch, cat])
   useEscapeKey(() => { setShowModal(false); setShowMov(null) })
 
+  const handleExportCSV = () => {
+    const csvRows = filtered.map(p => ({
+      id: p.id,
+      codigo: p.codigo,
+      nombre: p.nombre,
+      categoria: p.categoria,
+      precio: p.precio,
+      costo: p.costo,
+      stock: p.stock,
+      minimo: p.min,
+      estado: getStockStatus(p).label,
+    }))
+    downloadCSV(csvRows, 'inventario')
+  }
+
   return (
     <div className="space-y-5">
 
@@ -91,6 +107,9 @@ export default function Inventario() {
         title="Inventario"
         subtitle={`${productos.length} productos registrados · ${lowStock.length} con stock bajo`}
       >
+        <button onClick={handleExportCSV} className="btn-secondary">
+          <Download className="w-4 h-4" /> Exportar CSV
+        </button>
         {/* View toggle */}
         <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: '#FDBA74' }}>
           <button

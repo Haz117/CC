@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react'
-import { ShoppingCart, Search, Eye, XCircle, RotateCcw, Download, DollarSign, CreditCard, Smartphone, Plus, TrendingDown, AlertTriangle, CheckCircle2, Milk, TrendingUp } from 'lucide-react'
+import { ShoppingCart, Search, Eye, XCircle, RotateCcw, Download, DollarSign, CreditCard, Smartphone, Plus, TrendingDown, AlertTriangle, CheckCircle2, Milk, TrendingUp, X } from 'lucide-react'
+import { downloadCSV } from '../utils/csv'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
 import { useSort } from '../hooks/useSort'
@@ -48,6 +49,7 @@ export default function Ventas() {
   const [dateTo, setDateTo] = useState('2026-07-29')
   const { sortKey, sortDir, handleSort } = useSort('fecha', 'desc')
   const [activePreset, setActivePreset] = useState('hoy')
+  const [selectedIds, setSelectedIds] = useState(new Set())
 
   const applyPreset = (preset) => {
     const today = new Date('2026-07-31')
@@ -74,6 +76,52 @@ export default function Ventas() {
     setVentas(prev => prev.map(v => v.id === id ? { ...v, status: 'Cancelada' } : v))
     toast.error('Venta cancelada', id, { label: 'Deshacer', fn: () => setVentas(snapshot) })
     setConfirmCancelId(null)
+  }
+
+  const toggleSelect = (id) =>
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+
+  const toggleSelectAll = () => {
+    const visibleIds = paginated.map(v => v.id)
+    const allSelected = visibleIds.every(id => selectedIds.has(id))
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (allSelected) visibleIds.forEach(id => next.delete(id))
+      else visibleIds.forEach(id => next.add(id))
+      return next
+    })
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const cancelSelected = () => {
+    const snapshot = ventas.map(x => ({ ...x }))
+    setVentas(prev =>
+      prev.map(v => selectedIds.has(v.id) && v.status !== 'Cancelada' ? { ...v, status: 'Cancelada' } : v)
+    )
+    const count = selectedIds.size
+    toast.error(`${count} venta${count > 1 ? 's' : ''} cancelada${count > 1 ? 's' : ''}`, '', {
+      label: 'Deshacer',
+      fn: () => setVentas(snapshot),
+    })
+    clearSelection()
+  }
+
+  const handleExportCSV = (rows) => {
+    const csvRows = rows.map(v => ({
+      id: v.id,
+      fecha: v.fecha,
+      cajero: v.cajero,
+      sucursal: v.sucursal,
+      metodo: v.metodo,
+      total: v.total,
+      status: v.status,
+    }))
+    downloadCSV(csvRows, 'ventas')
   }
 
   const filtered = useMemo(() => ventas.filter(v =>
@@ -107,7 +155,7 @@ export default function Ventas() {
     [filtered]
   )
 
-  useEffect(() => { setPage(1) }, [debouncedSearch, filterStatus, sortKey, sortDir])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [debouncedSearch, filterStatus, sortKey, sortDir])
   useEscapeKey(() => { setSelectedVenta(null); setModalOpen(false); setExpandedId(null) })
 
   return (
@@ -118,6 +166,9 @@ export default function Ventas() {
         title="Registro de Ventas"
         subtitle={`Control de transacciones · ${ventas.length} registros totales`}
       >
+        <button onClick={() => handleExportCSV(filtered)} className="btn-secondary">
+          <Download className="w-4 h-4" /> Exportar CSV
+        </button>
         <button onClick={() => setModalOpen(true)} className="btn-primary">
           <Plus className="w-4 h-4" /> Nueva venta
         </button>
@@ -261,7 +312,7 @@ export default function Ventas() {
             {devueltas.length > 0 && <span className="badge" style={{ background: 'rgba(124,58,237,.1)', color: '#7c3aed' }}>{devueltas.length} devueltas</span>}
           </div>
           <button className="btn-ghost" style={{ fontSize: '.75rem', gap: 5, padding: '5px 10px' }} onClick={() => window.print()}>
-            <Download className="w-3.5 h-3.5" /> Exportar
+            <Download className="w-3.5 h-3.5" /> Imprimir
           </button>
         </div>
 
@@ -270,6 +321,15 @@ export default function Ventas() {
           <table className="table-modern animate-rows">
             <thead>
               <tr>
+                <th style={{ width: 36, paddingLeft: 14, paddingRight: 0 }}>
+                  <input
+                    type="checkbox"
+                    aria-label="Seleccionar todos"
+                    checked={paginated.length > 0 && paginated.every(v => selectedIds.has(v.id))}
+                    onChange={toggleSelectAll}
+                    style={{ accentColor: '#F97316', width: 15, height: 15, cursor: 'pointer' }}
+                  />
+                </th>
                 <SortTh col="id" label="Folio" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                 <SortTh col="fecha" label="Fecha" className="hidden sm:table-cell" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                 <SortTh col="sucursal" label="Sucursal / Caja" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
@@ -284,6 +344,7 @@ export default function Ventas() {
               {paginated.map(v => {
                 const MIcon = metodoIcon[v.metodo] || DollarSign
                 const isExpanded = expandedId === v.id
+                const isSelected = selectedIds.has(v.id)
                 return (
                   <>
                     <tr
@@ -291,10 +352,20 @@ export default function Ventas() {
                       className="cursor-pointer"
                       style={{
                         ...rowStyle(v.status),
-                        ...(isExpanded ? { background: '#FFF7ED' } : {})
+                        ...(isSelected ? { background: 'rgba(249,115,22,.06)' } : {}),
+                        ...(isExpanded && !isSelected ? { background: '#FFF7ED' } : {}),
                       }}
                       onClick={() => setExpandedId(isExpanded ? null : v.id)}
                     >
+                      <td style={{ paddingLeft: 14, paddingRight: 0 }} onClick={e => { e.stopPropagation(); toggleSelect(v.id) }}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Seleccionar ${v.id}`}
+                          checked={isSelected}
+                          onChange={() => toggleSelect(v.id)}
+                          style={{ accentColor: '#F97316', width: 15, height: 15, cursor: 'pointer' }}
+                        />
+                      </td>
                       <td>
                         <div className="flex items-center gap-1.5">
                           <span
@@ -366,7 +437,7 @@ export default function Ventas() {
                     </tr>
                     {isExpanded && (
                       <tr key={`${v.id}-exp`} style={{ background: '#FFF7ED' }}>
-                        <td colSpan={8} className="px-6 py-3">
+                        <td colSpan={9} className="px-6 py-3">
                           <div className="flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-1.5">
                               <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Cajero</span>
@@ -406,6 +477,70 @@ export default function Ventas() {
         {filtered.length === 0 && (
           <EmptyState icon={Search} title="Sin resultados" subtitle="Intenta con otro término de búsqueda o limpia los filtros." />
         )}
+
+        {/* ── Bulk action bar ─────────────────────────────────── */}
+        <div
+          style={{
+            overflow: 'hidden',
+            maxHeight: selectedIds.size > 0 ? 64 : 0,
+            opacity: selectedIds.size > 0 ? 1 : 0,
+            transition: 'max-height .28s cubic-bezier(.16,1,.3,1), opacity .22s ease',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 16px',
+              background: '#FFF7ED',
+              borderTop: '1px solid #FDE8D0',
+              borderBottom: '1px solid #FDE8D0',
+            }}
+          >
+            <span style={{ fontSize: '.82rem', fontWeight: 700, color: '#C2410C', flex: 1 }}>
+              {selectedIds.size} seleccionada{selectedIds.size !== 1 ? 's' : ''}
+            </span>
+            {/* Cancel selected — only if at least one non-cancelled row is selected */}
+            {(() => {
+              const selectableIds = [...selectedIds].filter(id => {
+                const v = ventas.find(x => x.id === id)
+                return v && v.status !== 'Cancelada'
+              })
+              return selectableIds.length > 0 ? (
+                <button
+                  onClick={cancelSelected}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    fontSize: '.78rem', fontWeight: 700,
+                    padding: '6px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                    background: 'rgba(201,122,109,.12)', color: '#A05A52',
+                    transition: 'background .15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,122,109,.22)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(201,122,109,.12)' }}
+                >
+                  <XCircle style={{ width: 14, height: 14 }} /> Cancelar selección
+                </button>
+              ) : null
+            })()}
+            <button
+              onClick={clearSelection}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                fontSize: '.78rem', fontWeight: 600,
+                padding: '6px 12px', borderRadius: 10, border: '1px solid #FDE8D0', cursor: 'pointer',
+                background: '#fff', color: '#8FA1B2',
+                transition: 'border-color .15s, color .15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#FDBA74'; e.currentTarget.style.color = '#F97316' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#FDE8D0'; e.currentTarget.style.color = '#8FA1B2' }}
+            >
+              <X style={{ width: 13, height: 13 }} /> Descartar
+            </button>
+          </div>
+        </div>
+
         <Pagination total={sorted.length} page={page} perPage={PER_PAGE} onChange={setPage} />
       </div>}
 

@@ -1,8 +1,12 @@
-﻿import { useState, memo } from 'react'
+import { useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
-import { Mail, Phone, MoreVertical, Clock } from 'lucide-react'
+import {
+  BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
+  AreaChart, Area,
+} from 'recharts'
+import { Mail, Phone, MoreVertical, Clock, TrendingUp, Store, AlertTriangle, Truck } from 'lucide-react'
 import { perfData, donutData, distribuidores, timeline, eventosProximos } from '../data/dashboard'
+import { ventasSemana } from '../data/ventas'
 
 /* ═══════════════════════════════════════════════════════════════
    COLORES
@@ -69,9 +73,21 @@ function BarLbl(props) {
   )
 }
 
-/* Tooltip del gráfico */
+/* Tooltip del gráfico de barras — con indicador de tendencia */
 function ChartTip({ active, payload, label }) {
   if (!active || !payload?.length) return null
+  const pct = payload[0].value
+  let arrow, arrowColor
+  if (pct >= 80) {
+    arrow = '↑'
+    arrowColor = '#059669'
+  } else if (pct < 70) {
+    arrow = '↓'
+    arrowColor = '#C97A6D'
+  } else {
+    arrow = '—'
+    arrowColor = '#d97706'
+  }
   return (
     <div style={{
       background: '#fff', borderRadius: 10, padding: '7px 12px',
@@ -79,7 +95,29 @@ function ChartTip({ active, payload, label }) {
       border: `1px solid ${C.blueRing}`,
     }}>
       <p style={{ fontSize: 10, fontWeight: 700, color: C.textSub }}>{label}</p>
-      <p style={{ fontSize: 13, fontWeight: 800, color: C.blue }}>{payload[0].value}%</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <p style={{ fontSize: 13, fontWeight: 800, color: C.blue }}>{pct}%</p>
+        <span style={{ fontSize: 15, fontWeight: 800, color: arrowColor, lineHeight: 1 }}>{arrow}</span>
+      </div>
+    </div>
+  )
+}
+
+/* Tooltip del gráfico de área semanal */
+function AreaTip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  const val = payload[0].value
+  const formatted = val >= 1000
+    ? `$${(val / 1000).toFixed(1)}k`
+    : `$${val}`
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 10, padding: '6px 12px',
+      boxShadow: '0 4px 16px rgba(249,115,22,.14)',
+      border: `1px solid ${C.blueRing}`,
+    }}>
+      <p style={{ fontSize: 10, fontWeight: 700, color: C.textSub, marginBottom: 2 }}>{label}</p>
+      <p style={{ fontSize: 13, fontWeight: 800, color: C.blue }}>{formatted}</p>
     </div>
   )
 }
@@ -108,6 +146,40 @@ function PeriodChip({ value, onChange }) {
 /* Iniciales de nombre */
 const ini = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
+/* ── Mini KPI chip ─────────────────────────────────────────── */
+function KpiChip({ Icon, value, label, accent = C.blue }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      background: '#fff',
+      border: `1.5px solid ${C.blueRing}`,
+      borderRadius: 99,
+      padding: '7px 16px 7px 10px',
+      boxShadow: '0 1px 6px rgba(249,115,22,.08)',
+      flexShrink: 0,
+    }}>
+      {/* icon bubble */}
+      <div style={{
+        width: 30, height: 30, borderRadius: '50%',
+        background: C.blueLight,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <Icon size={14} color={accent} strokeWidth={2.2} />
+      </div>
+      {/* text */}
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 900, color: C.text, lineHeight: 1, marginBottom: 1 }}>
+          {value}
+        </p>
+        <p style={{ fontSize: 10, fontWeight: 600, color: C.textSub, lineHeight: 1 }}>
+          {label}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 /* ═══════════════════════════════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════════════════════════════ */
@@ -123,6 +195,19 @@ export default function Dashboard({ user }) {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* ═══════════════════════════════════════════════════════
+          RESUMEN RÁPIDO — tira de mini KPI chips
+      ══════════════════════════════════════════════════════ */}
+      <div style={{
+        display: 'flex', gap: 10, flexWrap: 'wrap',
+        padding: '2px 0',
+      }}>
+        <KpiChip Icon={TrendingUp}    value="$28,900"  label="Ventas hoy"         accent="#F97316" />
+        <KpiChip Icon={Store}         value="5"         label="Sucursales activas" accent="#FB923C" />
+        <KpiChip Icon={AlertTriangle} value="4"         label="Alertas activas"    accent="#C2410C" />
+        <KpiChip Icon={Truck}         value="3"         label="Rutas en proceso"   accent="#F97316" />
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           GRID PRINCIPAL: col-izq (flex:1)  +  col-der (280px)
@@ -301,6 +386,73 @@ export default function Dashboard({ user }) {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* ━━━ 2b. VENTAS DE LA SEMANA (área chart) ━━━━━━ */}
+          <div className="card p-5">
+            {/* header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 800, color: C.text }}>Ventas de la semana</span>
+                <span style={{
+                  marginLeft: 10, fontSize: 10, fontWeight: 700,
+                  color: '#059669', background: '#D1FAE5',
+                  padding: '2px 8px', borderRadius: 99,
+                }}>
+                  +14% vs sem. anterior
+                </span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: C.textSub }}>
+                $136,000 total
+              </span>
+            </div>
+
+            {/* area chart */}
+            <ResponsiveContainer width="100%" height={160}>
+              <AreaChart
+                data={ventasSemana}
+                margin={{ top: 4, right: 4, left: -30, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stopColor="#F97316" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#F97316" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                {/* solo líneas horizontales, sin ejes */}
+                <CartesianGrid
+                  strokeDasharray="3 0"
+                  stroke="#F5EDE6"
+                  vertical={false}
+                />
+
+                <XAxis
+                  dataKey="dia"
+                  tick={{ fontSize: 9, fill: C.textSub, fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+
+                <Tooltip
+                  content={<AreaTip />}
+                  cursor={{ stroke: 'rgba(249,115,22,.25)', strokeWidth: 1.5, strokeDasharray: '4 3' }}
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#F97316"
+                  strokeWidth={2.5}
+                  fill="url(#areaGrad)"
+                  dot={{ r: 3.5, fill: '#F97316', strokeWidth: 2, stroke: '#fff' }}
+                  activeDot={{ r: 5.5, fill: '#C2410C', stroke: '#fff', strokeWidth: 2 }}
+                  isAnimationActive={true}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
 
           {/* ━━━ 3. DISTRIBUIDORES (Linked Teachers) ━━━━━━━ */}
