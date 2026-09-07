@@ -66,7 +66,7 @@ export default function Cajas() {
   const { abiertas, cerradas, inactivas, totalDia } = counts
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader
         breadcrumb="Cajas"
@@ -86,7 +86,7 @@ export default function Cajas() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Ventas por caja */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
@@ -172,7 +172,7 @@ export default function Cajas() {
 
       {/* Caja cards grid */}
       {!loaded ? <SkeletonCardGrid count={6} /> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {filtered.map((c, i) => {
             const saldo   = c.ventasDia + c.ingresos - c.retiros
             const metaPct = Math.min(100, Math.round((c.ventasDia / 20000) * 100))

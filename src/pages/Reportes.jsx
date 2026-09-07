@@ -177,7 +177,7 @@ export default function Reportes() {
   const kpis = kpiMap[active]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader breadcrumb="Reportes" title="Reportes y Analítica" subtitle="Análisis detallado de ventas, inventario y operaciones">
         <button className="btn-secondary flex items-center gap-2"

@@ -105,7 +105,7 @@ export default function Distribuidores() {
   useEscapeKey(() => { setShowModal(false); setSelected(null); setEditItem(null) })
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader breadcrumb="Distribuidores" title="Distribuidores" subtitle={`${data.length} distribuidores registrados`}>
         <button onClick={() => setShowModal(true)} className="btn-primary">
@@ -121,7 +121,7 @@ export default function Distribuidores() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Mercancía vs vendido */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
@@ -287,7 +287,7 @@ export default function Distribuidores() {
       </div>
 
       {/* ── CARDS (mobile / tablet) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6 lg:hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-6 lg:hidden">
         {filtered.map((d, i) => (
           <div
             key={d.id}

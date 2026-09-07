@@ -149,7 +149,7 @@ export default function Compras() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader breadcrumb="Compras" title="Compras" subtitle="Órdenes de compra y proveedores">
         <button onClick={() => { setShowOrdenModal(true); setOrdenErrors({}) }} className="btn-primary">
@@ -165,7 +165,7 @@ export default function Compras() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Gasto por proveedor */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
@@ -317,7 +317,7 @@ export default function Compras() {
 
       {/* ── PROVEEDORES ── */}
       {tab === 'proveedores' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {proveedores.map((p, i) => {
             const { count: provOrdenesCount = 0, total: provTotal = 0 } = ordenStats.provFullMap[p.nombre] || {}
             return (

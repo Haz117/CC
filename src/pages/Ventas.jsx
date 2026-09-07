@@ -159,7 +159,7 @@ export default function Ventas() {
   useEscapeKey(() => { setSelectedVenta(null); setModalOpen(false); setExpandedId(null) })
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader
         breadcrumb="Ventas"
@@ -183,7 +183,7 @@ export default function Ventas() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Tendencia semanal */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">

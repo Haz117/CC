@@ -102,7 +102,7 @@ export default function Sucursales() {
   const totalVentas = useMemo(() => filtered.reduce((a, s) => a + s.ventasMes, 0), [filtered])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
 
       <PageHeader breadcrumb="Sucursales" title="Sucursales"
         subtitle={`${data.length} sucursales · ${sucStats.activas} activas · ${sucStats.inactivas} inactivas`}
@@ -121,7 +121,7 @@ export default function Sucursales() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Ventas por sucursal */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
@@ -196,7 +196,7 @@ export default function Sucursales() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map((s, i) => {
               const rank = getRank(s.id)
               const pct  = Math.round((s.ventasMes / maxVentas) * 100)
