@@ -20,7 +20,9 @@
       "Bash(git commit *)",
       "Bash(git remote *)",
       "Bash(git push *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(gh api *)",
+      "PowerShell(gh api *)"
     ]
   }
 }
