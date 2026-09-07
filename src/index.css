@@ -252,7 +252,7 @@ body {
    SKELETON
 ═══════════════════════════════════════════════════════ */
 .skeleton {
-  background: linear-gradient(90deg,#FFF7ED 25%,#FDBA74 50%,#FFF7ED 75%);
+  background: linear-gradient(90deg,#EEF0F4 25%,#DDE2EA 50%,#EEF0F4 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -267,12 +267,12 @@ body {
 .input-field {
   width: 100%; padding: 10px 14px;
   font-size: .875rem;
-  border: 1.5px solid rgba(185,210,230,.9);
+  border: 1.5px solid #D8DFE8;
   border-radius: 11px;
-  background: #FFFBF7; color: #1A2738;
+  background: #fff; color: #1A2738;
   transition: border-color .2s, box-shadow .2s, background .2s;
   outline: none; font-family: inherit;
-  box-shadow: 0 1px 4px rgba(194,65,12,.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .input-field:focus,
 .input-field:focus-visible {
@@ -292,11 +292,11 @@ body {
 /* Compact filter inputs used in search bars / filter rows */
 .filter-input {
   padding: 8px 12px;
-  font-size: .875rem; border: 1.5px solid rgba(185,210,230,.85);
-  border-radius: 12px; background: #FFFBF7;
+  font-size: .875rem; border: 1.5px solid #D8DFE8;
+  border-radius: 12px; background: #fff;
   color: #1A2738; outline: none; font-family: inherit;
   transition: border-color .15s, box-shadow .15s, background .15s;
-  box-shadow: 0 1px 3px rgba(194,65,12,.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .filter-input:focus,
 .filter-input:focus-visible {
@@ -347,7 +347,7 @@ body {
   color:#627080; background:transparent; border:none;
   border-radius:9px; cursor:pointer; transition:all .15s; font-family:inherit;
 }
-.btn-ghost:hover { background:#FFF7ED; color:#263442 }
+.btn-ghost:hover { background:#F0F2F5; color:#263442 }
 
 .btn-danger {
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
@@ -373,11 +373,11 @@ body {
 .chip {
   display:inline-flex; align-items:center; gap:5px;
   padding:7px 16px; font-size:.75rem; font-weight:600;
-  border-radius:99px; border:1.5px solid rgba(185,210,230,.8);
+  border-radius:99px; border:1.5px solid #D8DFE8;
   background:#fff; color:#4E6880;
   cursor:pointer; transition:all .15s; white-space:nowrap;
   font-family:inherit;
-  box-shadow: 0 1px 4px rgba(194,65,12,.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .chip:hover { border-color:#F97316; color:#C2410C; background:#FFF7ED }
 .chip.active {
@@ -499,7 +499,7 @@ body {
 /* ═══════════════════════════════════════════════════════
    PROGRESS
 ═══════════════════════════════════════════════════════ */
-.progress-track { height:6px; background:#FDE8D0; border-radius:99px; overflow:hidden }
+.progress-track { height:6px; background:#E8EDF2; border-radius:99px; overflow:hidden }
 .progress-fill  { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.4,0,.2,1) }
 .progress-fill-orange { background:#F97316 }
 .progress-fill-green  { background:#059669 }
@@ -621,8 +621,8 @@ body {
   padding: 11px 16px;
   font-size: .6rem; font-weight: 800; text-transform: uppercase;
   letter-spacing: .1em; color: #627080;
-  background: #FFF8F0;
-  border-bottom: 2px solid #FDE8D0;
+  background: #F8F9FB;
+  border-bottom: 1px solid #E8EDF2;
   white-space: nowrap;
   position: sticky; top: 0; z-index: 2;
 }
@@ -636,7 +636,7 @@ body {
 }
 .table-modern tbody tr:last-child td { border-bottom: none }
 .table-modern tbody tr { transition: background .12s }
-.table-modern tbody tr:hover td { background: #FFF7ED }
+.table-modern tbody tr:hover td { background: rgba(249,115,22,.04) }
 .table-modern tbody tr:hover td:first-child { border-left: 3px solid #F97316 }
 .table-modern tbody td:first-child { border-left: 3px solid transparent; transition: border-color .15s }
 
@@ -804,10 +804,10 @@ body {
   border-radius:10px; padding:8px;
   transition:background .15s, color .15s; font-family:inherit;
 }
-.header-icon-btn:hover { background:#FFF7ED; color:#C2410C }
+.header-icon-btn:hover { background:#F0F2F5; color:#C2410C }
 
 .header-profile-btn { background:transparent; transition:background .15s; border-radius:10px }
-.header-profile-btn:hover { background:#FFF7ED }
+.header-profile-btn:hover { background:#F0F2F5 }
 
 .header-search-input {
   width:100%; padding:8px 32px 8px 2.25rem;
@@ -829,7 +829,7 @@ body {
   padding:10px 12px; text-align:left; border:none; cursor:pointer;
   color:#263442; font-family:inherit;
 }
-.search-result-item:hover { background:#FFF7ED }
+.search-result-item:hover { background:#F5F6FA }
 
 .header-menu-btn {
   color:#627080; background:transparent;
@@ -838,7 +838,7 @@ body {
   padding:10px 16px; text-align:left; border:none; cursor:pointer;
   font-size:.875rem; font-weight:500; font-family:inherit;
 }
-.header-menu-btn:hover { background:#FFF7ED; color:#C2410C }
+.header-menu-btn:hover { background:#F5F6FA; color:#C2410C }
 
 .header-menu-btn-danger {
   color:#C97A6D; background:transparent; transition:background .12s;

@@ -242,7 +242,7 @@ export default function Dashboard({ user }) {
             {/* Ilustración */}
             <div className="dashboard-welcome-illus" style={{
               width: 210,
-              background: '#FFF7ED',
+              background: 'linear-gradient(135deg,#FFF7ED 0%,#FFEDD5 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <svg viewBox="0 0 210 148" width="210" height="148">
