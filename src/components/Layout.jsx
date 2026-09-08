@@ -59,8 +59,8 @@ export default function Layout({ children, user, onLogout }) {
           onOpenPalette={() => setPaletteOpen(true)}
           onMenuClick={() => setMenuOpen(o => !o)}
         />
-        <main id="main-content" className="flex-1 overflow-y-auto pb-16 lg:pb-0">
-          <div key={location.key} className="max-w-screen-2xl mx-auto p-5 lg:p-8" style={{ animation: 'pageReveal .38s cubic-bezier(.16,1,.3,1) both' }}>
+        <main id="main-content" className="flex-1 overflow-y-auto pb-20 lg:pb-0" style={{ overscrollBehavior: 'contain' }}>
+          <div key={location.key} className="max-w-screen-2xl mx-auto p-4 sm:p-5 lg:p-8" style={{ animation: 'pageReveal .38s cubic-bezier(.16,1,.3,1) both' }}>
             {children}
           </div>
         </main>

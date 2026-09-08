@@ -143,7 +143,7 @@ export default function Sidebar({ open, onClose, onLogout, user }) {
 
       {/* Panel */}
       <aside
-        className="fixed top-0 left-0 h-full z-40 flex flex-col w-72 lg:translate-x-0"
+        className="fixed top-0 left-0 h-full z-40 flex flex-col w-72 lg:translate-x-0 app-sidebar"
         style={{
           transform: open ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform .28s cubic-bezier(.4,0,.2,1)',

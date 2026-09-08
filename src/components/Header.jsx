@@ -121,7 +121,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
 
   return (
     <header
-      className="h-16 flex items-center px-4 gap-3 flex-shrink-0 sticky top-0 z-10"
+      className="flex items-center px-4 gap-3 flex-shrink-0 sticky top-0 z-10 relative app-header"
       style={{
         background: '#FFFFFF',
         borderBottom: '1px solid #FDE8D0',
@@ -129,9 +129,19 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
       }}
     >
       {/* Hamburger — oculto en desktop donde la sidebar está fija */}
-      <button className="header-icon-btn lg:hidden" onClick={onMenuClick} title="Menú">
+      <button className="header-icon-btn lg:hidden" onClick={onMenuClick} title="Menú" aria-label="Abrir menú">
         <Menu className="w-5 h-5" />
       </button>
+
+      {/* Título de página en móvil — centrado absolutamente */}
+      {pageTitle && (
+        <span
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-bold sm:hidden pointer-events-none"
+          style={{ color: '#263442', maxWidth: '52vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
+          {pageTitle}
+        </span>
+      )}
 
       {/* Page title (desktop) */}
       {pageTitle && (

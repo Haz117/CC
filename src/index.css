@@ -1518,9 +1518,11 @@ nav[aria-label="Navegación principal"] {
   padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
 
-/* ── Main content: avoid content under bottom nav ── */
+/* ── Main content: clearance for BottomNav + safe area ── */
 @media (max-width: 1024px) {
-  main#main-content { padding-bottom: env(safe-area-inset-bottom); }
+  main#main-content {
+    padding-bottom: max(5rem, calc(3.5rem + env(safe-area-inset-bottom)));
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1647,3 +1649,140 @@ nav[aria-label="Navegación principal"] {
   /* Row hover / active feedback as card tap */
   .table-card tbody tr:active { transform: scale(.99); opacity: .9; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   ROUND AP — PWA SAFE AREA + MOBILE-FIRST UX
+═══════════════════════════════════════════════════════ */
+
+/* ── iOS PWA standalone: status bar clearance ── */
+.app-header {
+  padding-top: env(safe-area-inset-top, 0px);
+  min-height: calc(4rem + env(safe-area-inset-top, 0px));
+}
+.app-sidebar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Extra safe area in standalone PWA on notch devices ── */
+@media (display-mode: standalone) {
+  .app-header { min-height: calc(4rem + env(safe-area-inset-top)); }
+  .app-sidebar { padding-top: env(safe-area-inset-top); }
+}
+
+/* ── Touch targets: min 44px for iOS HIG compliance ── */
+@media (hover: none) and (pointer: coarse) {
+  .action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .header-icon-btn {
+    padding: 10px;
+    border-radius: 12px;
+  }
+  .chip {
+    padding: 9px 16px;
+    min-height: 40px;
+  }
+  .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
+    min-height: 44px;
+  }
+  /* Inventory card actions always visible on touch */
+  .inv-card-actions {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ── Bottom nav height: taller on touch ── */
+@media (hover: none) and (pointer: coarse) {
+  nav[aria-label="Navegación principal"] a,
+  nav[aria-label="Navegación principal"] button {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+/* ── Horizontal scroll containers: momentum + scroll hint ── */
+.filter-bar, .filter-group {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+/* ── Modals: prevent rubber-band scroll on iOS ── */
+.modal-body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Page hero: compact title on very small screens ── */
+@media (max-width: 380px) {
+  .page-hero { padding: 12px 12px; }
+  .page-hero-title { font-size: 1rem; }
+}
+
+/* ── Content gap: tighter on mobile ── */
+@media (max-width: 640px) {
+  .space-y-6 > * + * { margin-top: 1rem !important; }
+  .gap-5 { gap: 0.875rem !important; }
+}
+
+/* ── Table scroll container: fade hint at right edge ── */
+.table-scroll-wrapper {
+  position: relative;
+}
+@media (max-width: 640px) {
+  .card.overflow-hidden > .table-scroll-wrapper::after {
+    content: '';
+    position: sticky;
+    right: 0;
+    width: 32px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.9));
+    pointer-events: none;
+  }
+}
+
+/* ── KpiBar: single-column on very narrow phones ── */
+@media (max-width: 320px) {
+  .kpi-bar { grid-template-columns: 1fr !important; }
+}
+
+/* ── Notification dropdown: full-width on small screens ── */
+@media (max-width: 480px) {
+  .notif-dropdown {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    top: auto !important;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* ── Overscroll: contain to prevent pull-to-refresh on main ── */
+main#main-content {
+  overscroll-behavior-y: contain;
+}
+
+/* ── Tap highlight: remove on interactive elements ── */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Safe bottom padding for fixed elements above BottomNav ── */
+.fixed-above-nav {
+  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+/* ── ScrollToTop: higher z on mobile for BottomNav clearance ── */
+@media (max-width: 1024px) {
+  .scroll-top-btn {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    right: 12px;
+  }
+}
+
+/* ── PWA OfflineIndicator: push header content down ── */
+.app-header + * { transition: margin-top .3s ease; }
+
+/* ── ios scroll inertia for all scroll containers ── */
+* { -webkit-overflow-scrolling: touch; }

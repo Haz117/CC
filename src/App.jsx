@@ -5,6 +5,8 @@ import Layout from './components/Layout'
 import ToastContainer from './components/ToastContainer'
 import NotificationBanner from './components/NotificationBanner'
 import SplashScreen from './components/SplashScreen'
+import PwaInstallPrompt from './components/PwaInstallPrompt'
+import OfflineIndicator from './components/OfflineIndicator'
 import Login from './pages/Login'
 
 const Dashboard      = lazy(() => import('./pages/Dashboard'))
@@ -37,6 +39,8 @@ function App() {
 
   return (
     <Router>
+      <OfflineIndicator />
+      <PwaInstallPrompt />
       <ToastContainer />
       <NotificationBanner />
       <Layout user={user} onLogout={() => setUser(null)}>
