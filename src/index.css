@@ -14,8 +14,8 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #F5F6FA;
-  color: #1A2738;
+  background: #F2F3F5;
+  color: #263442;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -151,6 +151,9 @@ body {
 }
 .page-loader-spinner {
   width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid #FDE8D0;
+  border-top-color: #F97316;
+  animation: spin 0.8s linear infinite;
 }
 
 /* ── Sidebar close button focus ── */
@@ -164,7 +167,7 @@ body {
 ═══════════════════════════════════════════════════════ */
 ::-webkit-scrollbar         { width:6px; height:6px }
 ::-webkit-scrollbar-track   { background:transparent }
-::-webkit-scrollbar-thumb   { background:#C4CFDA; border-radius:99px }
+::-webkit-scrollbar-thumb   { background:#D4DDE6; border-radius:99px }
 ::-webkit-scrollbar-thumb:hover { background:#8FA1B2 }
 
 /* ═══════════════════════════════════════════════════════
@@ -266,7 +269,7 @@ body {
   font-size: .875rem;
   border: 1.5px solid #D8DFE8;
   border-radius: 11px;
-  background: #fff; color: #1A2738;
+  background: #fff; color: #263442;
   transition: border-color .2s, box-shadow .2s, background .2s;
   outline: none; font-family: inherit;
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
@@ -291,7 +294,7 @@ body {
   padding: 8px 12px;
   font-size: .875rem; border: 1.5px solid #D8DFE8;
   border-radius: 12px; background: #fff;
-  color: #1A2738; outline: none; font-family: inherit;
+  color: #263442; outline: none; font-family: inherit;
   transition: border-color .15s, box-shadow .15s, background .15s;
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
@@ -344,7 +347,7 @@ body {
   color:#627080; background:transparent; border:none;
   border-radius:9px; cursor:pointer; transition:all .15s; font-family:inherit;
 }
-.btn-ghost:hover { background:#F0F2F5; color:#263442 }
+.btn-ghost:hover { background:#F2F3F5; color:#263442 }
 
 .btn-danger {
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
@@ -445,7 +448,7 @@ body {
 }
 .modal-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:18px 24px; border-bottom:1px solid #F0F2F5;
+  padding:18px 24px; border-bottom:1px solid #FDE8D0;
   background:#fff;
 }
 
@@ -476,7 +479,7 @@ body {
   width:76px; height:76px; border-radius:22px;
   display:flex; align-items:center; justify-content:center;
   background:#FFF7ED;
-  border:1.5px solid rgba(185,210,230,.8);
+  border:1.5px solid rgba(253,232,208,.9);
   margin-bottom:20px;
   box-shadow:0 4px 16px rgba(249,115,22,.08);
 }
@@ -496,7 +499,7 @@ body {
 /* ═══════════════════════════════════════════════════════
    PROGRESS
 ═══════════════════════════════════════════════════════ */
-.progress-track { height:6px; background:#E8EDF2; border-radius:99px; overflow:hidden }
+.progress-track { height:6px; background:#FDE8D0; border-radius:99px; overflow:hidden }
 .progress-fill  { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.4,0,.2,1) }
 .progress-fill-orange { background:#F97316 }
 .progress-fill-green  { background:#059669 }
@@ -619,7 +622,7 @@ body {
   font-size: .6rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .08em; color: #8FA1B2;
   background: #fff;
-  border-bottom: 1px solid #F0F2F5;
+  border-bottom: 1px solid #FDE8D0;
   white-space: nowrap;
   position: sticky; top: 0; z-index: 2;
 }
@@ -628,7 +631,7 @@ body {
 .table-modern tbody td {
   padding: 14px 16px;
   font-size: .8125rem; color: #263442;
-  border-bottom: 1px solid #F5F6FA;
+  border-bottom: 1px solid #F2F3F5;
   vertical-align: middle;
 }
 .table-modern tbody tr:last-child td { border-bottom: none }
@@ -801,15 +804,15 @@ body {
   border-radius:10px; padding:8px;
   transition:background .15s, color .15s; font-family:inherit;
 }
-.header-icon-btn:hover { background:#F0F2F5; color:#C2410C }
+.header-icon-btn:hover { background:#FFF7ED; color:#C2410C }
 
 .header-profile-btn { background:transparent; transition:background .15s; border-radius:10px }
-.header-profile-btn:hover { background:#F0F2F5 }
+.header-profile-btn:hover { background:#FFF7ED }
 
 .header-search-input {
   width:100%; padding:8px 32px 8px 2.25rem;
-  font-size:.875rem; border:1.5px solid #E0E5EC;
-  border-radius:12px; background:#F5F6FA; color:#1A2738;
+  font-size:.875rem; border:1.5px solid #D8DFE8;
+  border-radius:12px; background:#F2F3F5; color:#263442;
   transition:border-color .2s, box-shadow .2s, background .2s;
   outline:none; font-family:inherit;
   box-shadow: 0 1px 3px rgba(194,65,12,.05);
@@ -826,7 +829,7 @@ body {
   padding:10px 12px; text-align:left; border:none; cursor:pointer;
   color:#263442; font-family:inherit;
 }
-.search-result-item:hover { background:#F5F6FA }
+.search-result-item:hover { background:#FFF7ED }
 
 .header-menu-btn {
   color:#627080; background:transparent;
@@ -835,7 +838,7 @@ body {
   padding:10px 16px; text-align:left; border:none; cursor:pointer;
   font-size:.875rem; font-weight:500; font-family:inherit;
 }
-.header-menu-btn:hover { background:#F5F6FA; color:#C2410C }
+.header-menu-btn:hover { background:#FFF7ED; color:#C2410C }
 
 .header-menu-btn-danger {
   color:#C97A6D; background:transparent; transition:background .12s;
@@ -1407,6 +1410,7 @@ input[type="checkbox"], input[type="radio"] {
   .kpi-cell p:first-child { font-size: .6rem }
 }
 
+
 /* ── Modal: flex-column + max-height so content never overflows viewport ── */
 /* overflow:clip keeps border-radius clipping without creating a scroll container
    (overflow:hidden would confine position:sticky to the card instead of modal-body) */
@@ -1607,7 +1611,7 @@ nav[aria-label="Navegación principal"] {
 
   .table-card tbody tr {
     background: #fff;
-    border: 1.5px solid #EDE5DC;
+    border: 1.5px solid #FDE8D0;
     border-radius: 14px;
     margin-bottom: 12px;
     padding: 12px 14px;

@@ -148,9 +148,9 @@ export default function Login({ onLogin }) {
 
         {/* Divisor */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '40px 0 32px' }}>
-          <div style={{ flex: 1, height: 1, background: '#EEE8E2' }} />
-          <span style={{ fontSize: 10, fontWeight: 700, color: '#B8AFA6', letterSpacing: '.12em', textTransform: 'uppercase' }}>demo</span>
-          <div style={{ flex: 1, height: 1, background: '#EEE8E2' }} />
+          <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#8FA1B2', letterSpacing: '.12em', textTransform: 'uppercase' }}>demo</span>
+          <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
         </div>
 
         {/* Demo — sin cajas anidadas */}
@@ -175,7 +175,7 @@ export default function Login({ onLogin }) {
       </div>
 
       {/* Footer */}
-      <p style={{ textAlign: 'center', fontSize: 11, color: '#C0B8B0', padding: '0 0 28px' }}>
+      <p style={{ textAlign: 'center', fontSize: 11, color: '#8FA1B2', padding: '0 0 28px' }}>
         © 2026 Cremerías Admin · Acceso seguro SSL
       </p>
 

@@ -3,7 +3,7 @@ export default function KpiBar({ items = [] }) {
     <div className="grid animate-fade-in kpi-bar" style={{ marginBottom: '1.5rem' }}>
       {items.map((item, i) => {
         const accentColor = item.alert ? '#C97A6D' : item.good ? '#059669' : '#F97316'
-        const valueColor  = item.alert ? '#C97A6D' : item.good ? '#059669' : '#1A2738'
+        const valueColor  = item.alert ? '#C97A6D' : item.good ? '#059669' : '#263442'
         return (
           <div
             key={item.label}
