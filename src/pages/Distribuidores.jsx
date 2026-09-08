@@ -121,9 +121,9 @@ export default function Distribuidores() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Mercancía vs vendido */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Mercancía vs vendido</span>
@@ -152,7 +152,7 @@ export default function Distribuidores() {
         </div>
 
         {/* Métricas clave */}
-        <div className="card p-5 flex flex-col gap-3">
+        <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
           <div className="flex items-center gap-2 mb-1">
             <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Métricas clave</span>

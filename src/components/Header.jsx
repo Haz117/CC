@@ -81,6 +81,7 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
   const [searchVal,   setSearchVal]   = useState('')
   const [searchOpen,  setSearchOpen]  = useState(false)
   const [spinning,    setSpinning]    = useState(false)
+  const [searching,   setSearching]   = useState(false)
   const [notifItems,  setNotifItems]  = useState(notifications)
   const searchRef    = useRef(null)
   const spinTimer    = useRef(null)
@@ -112,6 +113,13 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  useEffect(() => {
+    if (!searchVal.trim()) { setSearching(false); return }
+    setSearching(true)
+    const t = setTimeout(() => setSearching(false), 300)
+    return () => clearTimeout(t)
+  }, [searchVal])
 
   // Ctrl+K is now handled by Layout → CommandPalette; header input still gets focus from / shortcut via SearchInput
 
@@ -178,6 +186,12 @@ export default function Header({ onMenuClick, user, onLogout, onOpenPalette }) {
           onFocus={() => setSearchOpen(true)}
           className="sr-only"
         />
+        {searching && (
+          <div
+            className="page-loader-spinner"
+            style={{ width: 16, height: 16, position: 'absolute', right: searchVal ? 36 : 10, top: '50%', transform: 'translateY(-50%)', borderWidth: 2 }}
+          />
+        )}
         {searchVal && (
           <button
             onClick={() => { setSearchVal(''); setSearchOpen(false) }}

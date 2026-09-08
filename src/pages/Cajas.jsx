@@ -86,9 +86,9 @@ export default function Cajas() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Ventas por caja */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Ventas del día por caja</span>
@@ -99,16 +99,20 @@ export default function Cajas() {
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="total" radius={[5, 5, 0, 0]}>
-                {data.map(c => (
-                  <Cell key={c.id} fill={c.status === 'Abierta' ? '#F97316' : c.status === 'Cerrada' ? '#FED7AA' : '#FDE8D0'} />
-                ))}
+                {data.map((c, i) => {
+                  if (c.status === 'Inactiva') return <Cell key={c.id} fill="#FDE8D0" />
+                  const maxV = Math.max(...data.filter(x => x.status !== 'Inactiva').map(x => x.ventasDia))
+                  const ratio = c.ventasDia / maxV
+                  const fill = ratio >= 0.8 ? '#059669' : ratio >= 0.5 ? '#d97706' : '#C97A6D'
+                  return <Cell key={c.id} fill={fill} />
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Estado de cajas */}
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de cajas</span>

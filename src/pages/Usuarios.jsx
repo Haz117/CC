@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useMemo, useRef } from 'react'
 import { Users, Plus, Search, Shield, Edit, Trash2, Lock, Unlock, KeyRound, Eye, AlertTriangle, UserX, Mail, Building2, Clock, TrendingUp } from 'lucide-react'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonTableRows, SkeletonCardGrid } from '../components/Skeleton'
 import Badge from '../components/Badge'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -150,9 +150,9 @@ export default function Usuarios() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Usuarios por rol */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Distribución por rol</span>
@@ -165,13 +165,19 @@ export default function Usuarios() {
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
               <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={v => `${v} usuario${v !== 1 ? 's' : ''}`} />} />
-              <Bar dataKey="count" radius={[5, 5, 0, 0]} fill="#F97316" />
+              <Bar dataKey="count" radius={[5, 5, 0, 0]}>
+                {roles.map((r, i) => {
+                  const maxC = Math.max(...roles.map(x => roleCounts[x]))
+                  const ratio = roleCounts[r] / maxC
+                  return <Cell key={r} fill={ratio >= 0.8 ? '#059669' : ratio >= 0.4 ? '#F97316' : '#FDBA74'} />
+                })}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Por estado y sucursal */}
-        <div className="card p-5 flex flex-col gap-3">
+        <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
           <div className="flex items-center gap-2 mb-1">
             <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de acceso</span>

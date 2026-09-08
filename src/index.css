@@ -1316,25 +1316,13 @@ input[type="checkbox"], input[type="radio"] {
 
 /* Dashboard two-column layout — stacks vertically on tablet/mobile */
 .dashboard-grid {
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  align-items: start;
 }
-.dashboard-right {
-  width: 300px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-@media (max-width: 1100px) {
-  .dashboard-grid { flex-direction: column; }
-  .dashboard-right { width: 100%; flex-direction: row; flex-wrap: wrap; }
-  .dashboard-right > * { flex: 1; min-width: 280px; }
-}
-@media (max-width: 640px) {
-  .dashboard-right { flex-direction: column; }
-  .dashboard-right > * { min-width: 0; }
+@media (max-width: 1000px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
 }
 
 /* Dashboard inner 2-panel row (Performance + Donuts) — stacks on mobile */

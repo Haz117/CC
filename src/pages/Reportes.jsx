@@ -3,7 +3,7 @@ import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
 } from 'recharts'
-import { Download, FileText, Table, TrendingUp, DollarSign, Package, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Download, FileText, Table, TrendingUp, DollarSign, Package, ArrowUpRight, ArrowDownRight, X } from 'lucide-react'
 import toast from '../utils/toast'
 import PageHeader from '../components/PageHeader'
 import KpiBar from '../components/KpiBar'
@@ -231,6 +231,16 @@ export default function Reportes() {
                 <button key={k} onClick={()=>selectPreset(k)} className={`chip ${activePreset===k?'active':''}`}>{l}</button>
               ))}
             </div>
+            {(activePreset !== 'semana' || filterSuc !== 'Todas') && (
+              <button
+                onClick={() => { selectPreset('semana'); setFilterSuc('Todas') }}
+                style={{ fontSize: '.72rem', fontWeight: 700, color: '#8FA1B2', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, transition: 'color .15s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#C97A6D'}
+                onMouseLeave={e => e.currentTarget.style.color = '#8FA1B2'}
+              >
+                <X size={12} /> Limpiar
+              </button>
+            )}
           </div>
           <div className="data-toolbar-footer flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">

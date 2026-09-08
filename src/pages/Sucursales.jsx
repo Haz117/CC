@@ -121,9 +121,9 @@ export default function Sucursales() {
       ]} />
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Ventas por sucursal */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Ventas del mes por sucursal</span>
@@ -134,14 +134,19 @@ export default function Sucursales() {
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="ventas" radius={[5, 5, 0, 0]}>
-                {data.map((s, i) => <Cell key={s.id} fill={!s.status ? '#FDE8D0' : i === 0 ? '#F97316' : '#FDBA74'} />)}
+                {data.map((s, i) => {
+                  const maxV = Math.max(...data.map(x => x.ventasMes))
+                  const ratio = s.ventasMes / maxV
+                  const fill = !s.status ? '#FDE8D0' : ratio >= 0.8 ? '#059669' : ratio >= 0.5 ? '#d97706' : '#C97A6D'
+                  return <Cell key={s.id} fill={fill} />
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Participación */}
-        <div className="card p-5 flex flex-col gap-2.5">
+        <div className="card p-5 flex flex-col gap-2.5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-1">
             <BarChart2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Participación</span>

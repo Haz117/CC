@@ -85,6 +85,13 @@ export default function Configuracion() {
   const [reqAutorizacion,  setReqAutorizacion]  = useState(true)
   const [ticketOpts,       setTicketOpts]       = useState({ logo: true, rfc: true, copia: false })
 
+  /* ── Ticket preview state ── */
+  const [ticketNombre,   setTicketNombre]   = useState('Cremerías El Rancho')
+  const [ticketMensaje,  setTicketMensaje]  = useState('¡Gracias por su compra!')
+  const [ticketTel,      setTicketTel]      = useState('442-100-2000')
+  const [ticketDir,      setTicketDir]      = useState('Av. Morelos 145, Centro')
+  const [ticketRfc,      setTicketRfc]      = useState('XAXX010101000')
+
   const togglePayment = (m) => setEnabledPayments(p => p.includes(m) ? p.filter(x => x !== m) : [...p, m])
   const togglePerm    = (p) => setEnabledPerms(ps => ps.includes(p) ? ps.filter(x => x !== p) : [...ps, p])
   const handleGuardar = () => toast.success('Configuración guardada', 'Los cambios fueron aplicados correctamente')
@@ -340,16 +347,16 @@ export default function Configuracion() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <FormField label="Encabezado del ticket">
-                    <input type="text" defaultValue="Cremerías El Rancho" className="input-field" />
+                    <input type="text" value={ticketNombre} onChange={e => setTicketNombre(e.target.value)} className="input-field" />
                   </FormField>
                   <FormField label="Mensaje de pie">
-                    <input type="text" defaultValue="¡Gracias por su compra!" className="input-field" />
+                    <input type="text" value={ticketMensaje} onChange={e => setTicketMensaje(e.target.value)} className="input-field" />
                   </FormField>
                   <FormField label="Teléfono en ticket">
-                    <input type="tel" defaultValue="442-100-2000" className="input-field" />
+                    <input type="tel" value={ticketTel} onChange={e => setTicketTel(e.target.value)} className="input-field" />
                   </FormField>
                   <FormField label="Dirección en ticket">
-                    <input type="text" defaultValue="Av. Morelos 145, Centro" className="input-field" />
+                    <input type="text" value={ticketDir} onChange={e => setTicketDir(e.target.value)} className="input-field" />
                   </FormField>
                   <div className="space-y-2.5">
                     {[
@@ -376,10 +383,10 @@ export default function Configuracion() {
                     Vista previa
                   </p>
                   <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #FDE8D0', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
-                    <p className="text-center font-bold text-sm mb-0.5">CREMERÍAS EL RANCHO</p>
-                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Av. Morelos 145, Centro</p>
-                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Tel: 442-100-2000</p>
-                    {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>RFC: XAXX010101000</p>}
+                    <p className="text-center font-bold text-sm mb-0.5">{ticketNombre || 'Nombre de empresa'}</p>
+                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>{ticketDir || 'Dirección'}</p>
+                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Tel: {ticketTel || '—'}</p>
+                    {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>RFC: {ticketRfc || '—'}</p>}
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p>Venta: V-00522</p>
                     <p>Fecha: 29/07/2026 09:45</p>
@@ -392,7 +399,7 @@ export default function Configuracion() {
                     <p className="font-bold" style={{ color: '#C2410C' }}>TOTAL: $128.00</p>
                     <p className="text-[10px]" style={{ color: '#8FA1B2' }}>IVA incluido (16%): $17.66</p>
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
-                    <p className="text-center font-medium" style={{ color: '#F97316' }}>¡Gracias por su compra!</p>
+                    <p className="text-center font-medium" style={{ color: '#F97316' }}>{ticketMensaje || 'Mensaje de pie'}</p>
                   </div>
                 </div>
               </div>

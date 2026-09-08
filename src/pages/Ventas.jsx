@@ -175,17 +175,16 @@ export default function Ventas() {
       </PageHeader>
 
       <KpiBar items={[
-        { label: 'Completadas',   value: completadasCount, sub: fmt(totalHoy) },
-        { label: 'Pendientes',    value: pendientesCount,  sub: 'crédito / cobro' },
-        { label: 'Canceladas',    value: canceladas.length, alert: canceladas.length > 0, sub: 'requieren revisión' },
-        { label: 'Devoluciones',  value: devueltas.length,                                sub: 'procesadas' },
-        { label: 'Total cobrado', value: fmt(totalHoy), good: true,                       sub: 'ventas completadas' },
+        { label: 'Completadas',   value: completadasCount,   sub: 'hoy',                good: true              },
+        { label: 'Pendientes',    value: pendientesCount,    sub: 'crédito / cobro'                             },
+        { label: 'Canceladas',    value: canceladas.length,  sub: 'requieren revisión', alert: canceladas.length > 0 },
+        { label: 'Total cobrado', value: fmt(totalHoy),      sub: 'ventas completadas', good: true              },
       ]} />
 
-      {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* ══ Resumen visual — solo desktop ══════════════════════════ */}
+      <div className="hidden lg:grid lg:grid-cols-5 gap-5">
         {/* Tendencia semanal */}
-        <div className="card p-5 lg:col-span-2">
+        <div className="card p-5 lg:col-span-3">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Tendencia semanal</span>
@@ -204,7 +203,7 @@ export default function Ventas() {
         </div>
 
         {/* Distribución por estado */}
-        <div className="card p-5 flex flex-col">
+        <div className="card p-5 flex flex-col lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Por estado</span>
@@ -317,7 +316,7 @@ export default function Ventas() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto table-card">
           <table className="table-modern animate-rows">
             <thead>
               <tr>
@@ -357,7 +356,7 @@ export default function Ventas() {
                       }}
                       onClick={() => setExpandedId(isExpanded ? null : v.id)}
                     >
-                      <td style={{ paddingLeft: 14, paddingRight: 0 }} onClick={e => { e.stopPropagation(); toggleSelect(v.id) }}>
+                      <td data-label="" style={{ paddingLeft: 14, paddingRight: 0 }} onClick={e => { e.stopPropagation(); toggleSelect(v.id) }}>
                         <input
                           type="checkbox"
                           aria-label={`Seleccionar ${v.id}`}
@@ -366,7 +365,7 @@ export default function Ventas() {
                           style={{ accentColor: '#F97316', width: 15, height: 15, cursor: 'pointer' }}
                         />
                       </td>
-                      <td>
+                      <td data-label="Folio">
                         <div className="flex items-center gap-1.5">
                           <span
                             className="inline-block w-3.5 h-3.5 rounded-sm text-center leading-none transition-transform duration-200 flex-shrink-0"
@@ -380,26 +379,26 @@ export default function Ventas() {
                           <span className="folio">{v.id}</span>
                         </div>
                       </td>
-                      <td className="hidden sm:table-cell">
+                      <td data-label="Fecha" className="hidden sm:table-cell">
                         <div>
                           <p className="text-xs font-medium" style={{ color: '#263442' }}>{v.fecha.split(' ')[1]}</p>
                           <p className="text-xs" style={{ color: '#8FA1B2' }}>{v.fecha.split(' ')[0]}</p>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Sucursal">
                         <p className="text-sm font-medium" style={{ color: '#263442' }}>{v.sucursal}</p>
                         <p className="text-xs" style={{ color: '#8FA1B2' }}>{v.caja}</p>
                       </td>
-                      <td className="hidden lg:table-cell">
+                      <td data-label="Cajero" className="hidden lg:table-cell">
                         <span className="text-sm" style={{ color: '#627080' }}>{v.cajero}</span>
                       </td>
-                      <td className="hidden md:table-cell">
+                      <td data-label="Método" className="hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
                           <MIcon className="w-3.5 h-3.5" style={{ color: '#FED7AA' }} />
                           <span className="text-sm" style={{ color: '#627080' }}>{v.metodo}</span>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Total">
                         <span
                           className="text-sm font-bold"
                           style={{ color: v.status === 'Cancelada' ? '#C97A6D' : v.status === 'Devuelta' ? '#7c3aed' : '#263442' }}
@@ -408,8 +407,8 @@ export default function Ventas() {
                           {fmt(v.total)}
                         </span>
                       </td>
-                      <td><Badge label={v.status} color={statusColor[v.status]} /></td>
-                      <td onClick={e => e.stopPropagation()}>
+                      <td data-label="Estado"><Badge label={v.status} color={statusColor[v.status]} /></td>
+                      <td data-label="Acciones" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-0.5">
                           <button onClick={() => setSelectedVenta(v)} className="action-btn" title="Ver ticket completo">
                             <Eye className="w-4 h-4" />

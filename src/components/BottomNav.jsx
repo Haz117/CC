@@ -4,11 +4,11 @@ import { LayoutDashboard, ShoppingCart, Package, Map, MoreHorizontal } from 'luc
 const tabs = [
   { path: '/dashboard',  icon: LayoutDashboard, label: 'Panel' },
   { path: '/ventas',     icon: ShoppingCart,    label: 'Ventas' },
-  { path: '/inventario', icon: Package,         label: 'Stock' },
+  { path: '/inventario', icon: Package,         label: 'Stock',  badge: 3 },
   { path: '/rutas',      icon: Map,             label: 'Rutas' },
 ]
 
-function BottomTab({ path, icon: Icon, label }) {
+function BottomTab({ path, icon: Icon, label, badge }) {
   const resolved = useResolvedPath(path)
   const isActive = !!useMatch({ path: resolved.pathname, end: true })
 
@@ -19,37 +19,31 @@ function BottomTab({ path, icon: Icon, label }) {
       className="flex flex-col items-center justify-center gap-1 py-2 relative"
       style={{ color: isActive ? '#C2410C' : '#8FA1B2', minHeight: 56, WebkitTapHighlightColor: 'transparent' }}
     >
-      {/* Active indicator dot at top */}
-      {isActive && (
-        <span
-          style={{
-            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-            width: 24, height: 3, borderRadius: '0 0 4px 4px',
-            background: '#F97316',
-          }}
-        />
-      )}
+      {/* Active indicator */}
+      {isActive && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:3, borderRadius:'0 0 4px 4px', background:'#F97316' }} />}
 
-      {/* Icon pill */}
-      <div
-        className="flex items-center justify-center rounded-2xl transition-all duration-200"
-        style={{
-          width: 48, height: 30,
-          background: isActive ? 'rgba(249,115,22,.12)' : 'transparent',
-          transform: isActive ? 'scale(1.06)' : 'scale(1)',
-        }}
-      >
-        <Icon
-          size={isActive ? 20 : 19}
-          style={{ color: isActive ? '#F97316' : '#8FA1B2', transition: 'all .2s' }}
-          strokeWidth={isActive ? 2.3 : 1.8}
-        />
+      {/* Icon pill con badge */}
+      <div style={{ position: 'relative' }}>
+        <div className="flex items-center justify-center rounded-2xl transition-all duration-200"
+          style={{ width:48, height:30, background: isActive ? 'rgba(249,115,22,.12)' : 'transparent', transform: isActive ? 'scale(1.06)' : 'scale(1)' }}>
+          <Icon size={isActive ? 20 : 19} style={{ color: isActive ? '#F97316' : '#8FA1B2', transition: 'all .2s' }} strokeWidth={isActive ? 2.3 : 1.8} />
+        </div>
+        {badge > 0 && (
+          <span className="red-badge-pulse" style={{
+            position: 'absolute', top: -2, right: 2,
+            minWidth: 16, height: 16, borderRadius: 99,
+            background: '#C97A6D', color: '#fff',
+            fontSize: '.6rem', fontWeight: 800,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '0 4px', border: '1.5px solid #fff',
+          }}>
+            {badge}
+          </span>
+        )}
       </div>
 
-      <span
-        className="text-[10px] font-bold transition-all duration-200"
-        style={{ color: isActive ? '#C2410C' : '#8FA1B2', letterSpacing: isActive ? '.01em' : '0' }}
-      >
+      <span className="text-[10px] font-bold transition-all duration-200"
+        style={{ color: isActive ? '#C2410C' : '#8FA1B2', letterSpacing: isActive ? '.01em' : '0' }}>
         {label}
       </span>
     </NavLink>
