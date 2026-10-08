@@ -1,0 +1,413 @@
+/* Datos de ejemplo para el modo demostración.
+   Tienen la misma forma que regresa Supabase (dinero en centavos, fechas ISO en UTC, estados en
+   mayúsculas) y respetan la misma regla de la base: un supervisor o cajero solo ve su sucursal.
+   Nunca se mezclan con datos reales. */
+
+export const PERFIL_DEMO = { tipo: 'USUARIO', id: 'usr-carlos', nombre: 'Carlos Mendoza', rol: 'ADMINISTRADOR', sucursal_id: 'suc-almacen', sucursal: 'Almacén Central', es_almacen: true }
+
+/* ── Catálogos ───────────────────────────────────────────── */
+const SUCURSALES = [
+  { id: 'suc-almacen',  nombre: 'Almacén Central',   es_almacen: true,  activo: true,  direccion: 'Carretera a Celaya km 4' },
+  { id: 'suc-centro',   nombre: 'Sucursal Centro',   es_almacen: false, activo: true,  direccion: 'Av. Morelos 145, Centro',          prefijo: 'CENTRO',  terminales: ['04E2', '9B1C'], peso: 1.3 },
+  { id: 'suc-norte',    nombre: 'Sucursal Norte',    es_almacen: false, activo: true,  direccion: 'Blvd. Norte 820, Col. Las Flores', prefijo: 'NORTE',   terminales: ['A1B7'],         peso: 1.0 },
+  { id: 'suc-sur',      nombre: 'Sucursal Sur',      es_almacen: false, activo: true,  direccion: 'Calle 5 de Mayo 310, Col. Sur',    prefijo: 'SUR',     terminales: ['7F30'],         peso: 0.8 },
+  { id: 'suc-oriente',  nombre: 'Sucursal Oriente',  es_almacen: false, activo: true,  direccion: 'Av. Oriente 56, Col. Jardines',    prefijo: 'ORIENTE', terminales: ['C4D9'],         peso: 0.6 },
+  { id: 'suc-poniente', nombre: 'Sucursal Poniente', es_almacen: false, activo: false, direccion: 'Blvd. Poniente 200, Fracc. Nuevo' },
+]
+
+const USUARIOS = [
+  { id: 'usr-carlos',  nombre_completo: 'Carlos Mendoza', rol: 'ADMINISTRADOR', sucursal_id: 'suc-almacen', auth_user_id: 'auth-carlos',  usuario: 'carlos.mendoza', activo: true  },
+  { id: 'usr-ana',     nombre_completo: 'Ana Ramos',      rol: 'SUPERVISOR',    sucursal_id: 'suc-centro',  auth_user_id: 'auth-ana',     usuario: 'ana.ramos',      activo: true  },
+  { id: 'usr-maria',   nombre_completo: 'María López',    rol: 'CAJERO',        sucursal_id: 'suc-centro',  auth_user_id: 'auth-maria',   usuario: 'maria.lopez',    activo: true  },
+  { id: 'usr-jose',    nombre_completo: 'José Pérez',     rol: 'CAJERO',        sucursal_id: 'suc-centro',  auth_user_id: null,           usuario: 'jose.perez',     activo: true  },
+  { id: 'usr-roberto', nombre_completo: 'Roberto Silva',  rol: 'SUPERVISOR',    sucursal_id: 'suc-norte',   auth_user_id: 'auth-roberto', usuario: 'roberto.silva',  activo: true  },
+  { id: 'usr-sandra',  nombre_completo: 'Sandra Ruiz',    rol: 'CAJERO',        sucursal_id: 'suc-norte',   auth_user_id: null,           usuario: 'sandra.ruiz',    activo: true  },
+  { id: 'usr-lucia',   nombre_completo: 'Lucía Pérez',    rol: 'SUPERVISOR',    sucursal_id: 'suc-sur',     auth_user_id: 'auth-lucia',   usuario: 'lucia.perez',    activo: true  },
+  { id: 'usr-pedro',   nombre_completo: 'Pedro García',   rol: 'CAJERO',        sucursal_id: 'suc-sur',     auth_user_id: null,           usuario: 'pedro.garcia',   activo: true  },
+  { id: 'usr-miguel',  nombre_completo: 'Miguel Torres',  rol: 'SUPERVISOR',    sucursal_id: 'suc-oriente', auth_user_id: null,           usuario: 'miguel.torres',  activo: true  },
+  { id: 'usr-luis',    nombre_completo: 'Luis Mora',      rol: 'CAJERO',        sucursal_id: 'suc-oriente', auth_user_id: null,           usuario: 'luis.mora',      activo: true  },
+  { id: 'usr-elena',   nombre_completo: 'Elena Vargas',   rol: 'CAJERO',        sucursal_id: 'suc-poniente', auth_user_id: null,          usuario: 'elena.vargas',   activo: false },
+]
+
+const CATEGORIAS = {
+  quesos:       { nombre: 'Quesos',       color: '#F97316' },
+  cremas:       { nombre: 'Cremas',       color: '#059669' },
+  mantequillas: { nombre: 'Mantequillas', color: '#d97706' },
+  otros:        { nombre: 'Otros',        color: '#7c3aed' },
+}
+
+// `precio` solo sirve para armar los tickets de ejemplo: en la base el precio vive en lote_precios.
+const PRODUCTOS = [
+  { id: 'prd-oaxaca',   clave: 'QOX',     nombre: 'Queso Oaxaca',        unidad: 'KG',  cat: 'quesos',       precio: 18500, minimo: 15 },
+  { id: 'prd-panela',   clave: 'QPA',     nombre: 'Queso Panela',        unidad: 'KG',  cat: 'quesos',       precio: 12000, minimo: 12 },
+  { id: 'prd-manchego', clave: 'QMA',     nombre: 'Queso Manchego',      unidad: 'KG',  cat: 'quesos',       precio: 14500, minimo: 10 },
+  { id: 'prd-cotija',   clave: 'QCO',     nombre: 'Queso Cotija',        unidad: 'KG',  cat: 'quesos',       precio: 16000, minimo: 8  },
+  { id: 'prd-requeson', clave: 'REQ-250', nombre: 'Requesón 250 g',      unidad: 'PZA', cat: 'quesos',       precio: 2800,  minimo: 20 },
+  { id: 'prd-crema',    clave: 'CRA-1L',  nombre: 'Crema Ácida 1 L',     unidad: 'PZA', cat: 'cremas',       precio: 3800,  minimo: 30 },
+  { id: 'prd-espesa',   clave: 'CRE-500', nombre: 'Crema Espesa 500 ml', unidad: 'PZA', cat: 'cremas',       precio: 3500,  minimo: 24 },
+  { id: 'prd-mantequi', clave: 'MAN-200', nombre: 'Mantequilla 200 g',   unidad: 'PZA', cat: 'mantequillas', precio: 4200,  minimo: 24 },
+  { id: 'prd-jocoque',  clave: 'JOC-1L',  nombre: 'Jocoque 1 L',         unidad: 'PZA', cat: 'otros',        precio: 3000,  minimo: 12 },
+  { id: 'prd-yogurt',   clave: 'YOG-1L',  nombre: 'Yogurt Natural 1 L',  unidad: 'PZA', cat: 'otros',        precio: 3400,  minimo: 18 },
+]
+
+const presentacionesDe = (p) => p.unidad === 'KG'
+  ? [
+      { id: `${p.id}-granel`, nombre: 'Granel',      tipo: 'GRANEL', factor: 1,   codigo_barras: null,                     es_principal: true,  activo: true },
+      { id: `${p.id}-pieza`,  nombre: 'Pieza 500 g', tipo: 'PIEZA',  factor: 0.5, codigo_barras: `20${p.clave}500`,        es_principal: false, activo: true },
+    ]
+  : [
+      { id: `${p.id}-pieza`,  nombre: 'Pieza',       tipo: 'PIEZA',  factor: 1,   codigo_barras: `750100${String(p.precio).padStart(7, '0')}`, es_principal: true,  activo: true },
+      { id: `${p.id}-caja`,   nombre: 'Caja con 12', tipo: 'CAJA',   factor: 12,  codigo_barras: null,                     es_principal: false, activo: true },
+    ]
+
+/* ── Utilidades ──────────────────────────────────────────── */
+// Generador determinista: los mismos datos en cada recarga.
+function azar(semilla) {
+  let a = semilla >>> 0
+  return () => {
+    a = (a + 0x6D2B79F5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const espera = () => new Promise(resolver => setTimeout(resolver, 220))
+const tiendas = () => SUCURSALES.filter(s => !s.es_almacen && s.activo)
+const deSucursal = (sucursalId) => (fila) => !sucursalId || fila.sucursal_id === sucursalId
+const pagina = (lista, n, porPagina) => ({ filas: lista.slice(n * porPagina, (n + 1) * porPagina), total: lista.length })
+
+/* ── Ventas de los últimos 35 días ───────────────────────── */
+let ventasGeneradas = null
+
+function generarVentas() {
+  const r = azar(20261007)
+  const ahora = new Date()
+  const ventas = []
+  const consecutivo = {}
+
+  for (let atras = 34; atras >= 0; atras--) {
+    const dia = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - atras)
+    const finDeSemana = dia.getDay() === 0 || dia.getDay() === 6
+
+    for (const suc of tiendas()) {
+      const cajeros = USUARIOS.filter(u => u.sucursal_id === suc.id && u.activo)
+      const tickets = Math.round((14 + r() * 10) * suc.peso * (finDeSemana ? 1.3 : 1))
+      const minutos = Array.from({ length: tickets }, () => Math.floor(r() * 12 * 60)).sort((a, b) => a - b)
+
+      for (const minuto of minutos) {
+        const fecha = new Date(dia)
+        fecha.setHours(8, minuto, Math.floor(r() * 60), 0)
+
+        const renglones = []
+        const elegidos = [...PRODUCTOS].sort(() => r() - 0.5).slice(0, 1 + Math.floor(r() * 4))
+        elegidos.forEach((p, i) => {
+          const cant = p.unidad === 'KG' ? Math.round((0.25 + r() * 1.25) * 20) / 20 : 1 + Math.floor(r() * 3)
+          renglones.push({
+            renglon: i + 1, descripcion: p.nombre, unidad: p.unidad, cantidad: cant,
+            precio_unitario_centavos: p.precio, importe_centavos: Math.round(cant * p.precio),
+          })
+        })
+        const total = renglones.reduce((s, x) => s + x.importe_centavos, 0)
+
+        const suerte = r()
+        const pagos = suerte < 0.6  ? [{ metodo: 'EFECTIVO', monto_centavos: total }]
+          : suerte < 0.85 ? [{ metodo: 'TARJETA', monto_centavos: total }]
+          : suerte < 0.95 ? [{ metodo: 'TRANSFERENCIA', monto_centavos: total }]
+          : [{ metodo: 'EFECTIVO', monto_centavos: Math.floor(total / 2) }, { metodo: 'TARJETA', monto_centavos: total - Math.floor(total / 2) }]
+
+        const terminal = suc.terminales[Math.floor(r() * suc.terminales.length)]
+        const cajero = cajeros[Math.floor(r() * cajeros.length)]
+        const cancelada = r() < 0.03
+        if (fecha > ahora) continue
+
+        const clave = `${suc.prefijo}-${terminal}`
+        consecutivo[clave] = (consecutivo[clave] || 0) + 1
+        ventas.push({
+          id: `vta-${ventas.length + 1}`,
+          folio: `${clave}-${String(consecutivo[clave]).padStart(6, '0')}`,
+          fecha: fecha.toISOString(),
+          total_centavos: total,
+          estado: cancelada ? 'CANCELADA' : 'COMPLETADA',
+          sucursal_id: suc.id,
+          terminal,
+          cajero: { nombre_completo: cajero.nombre_completo },
+          venta_pagos: pagos,
+          venta_detalle: renglones,
+        })
+      }
+    }
+  }
+  return ventas.sort((a, b) => b.fecha.localeCompare(a.fecha))
+}
+
+const todasLasVentas = () => (ventasGeneradas ??= generarVentas())
+
+// El encabezado como lo regresa la lista: sin renglones.
+const sinDetalle = ({ venta_detalle: _detalle, terminal: _terminal, ...venta }) => venta
+
+export async function listarVentas({ desde, hasta, sucursalId } = {}) {
+  await espera()
+  const lista = todasLasVentas()
+    .filter(deSucursal(sucursalId))
+    .filter(v => (!desde || v.fecha >= desde) && (!hasta || v.fecha < hasta))
+    .map(sinDetalle)
+  return { filas: lista, total: lista.length, truncado: false }
+}
+
+export async function listarUltimasVentas({ desde, limite = 8 } = {}) {
+  const { filas } = await listarVentas({ desde })
+  return filas.slice(0, limite)
+}
+
+export async function obtenerTicket(ventaId) {
+  await espera()
+  const venta = todasLasVentas().find(v => v.id === ventaId)
+  if (!venta) return null
+  const { terminal: _terminal, ...ticket } = venta
+  return ticket
+}
+
+/* ── Turnos de caja ──────────────────────────────────────── */
+let turnosGenerados = null
+
+function generarTurnos() {
+  const r = azar(77)
+  const ahora = new Date()
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())
+  const turnos = []
+  const nombre = (id) => ({ nombre_completo: USUARIOS.find(u => u.id === id)?.nombre_completo })
+
+  for (const suc of tiendas()) {
+    const cajero = USUARIOS.find(u => u.sucursal_id === suc.id && u.rol === 'CAJERO')
+    const supervisor = USUARIOS.find(u => u.sucursal_id === suc.id && u.rol === 'SUPERVISOR')
+
+    suc.terminales.forEach((terminal, n) => {
+      const caja = { nombre: `Caja ${n + 1} · ${terminal}` }
+
+      // Turno abierto de hoy
+      let apertura = new Date(hoy)
+      apertura.setHours(7, 45 + n * 10, 0, 0)
+      if (apertura > ahora) apertura = new Date(ahora.getTime() - 30 * 60_000)
+      const retiro = new Date(Math.min(ahora.getTime(), apertura.getTime() + 4 * 3600_000))
+      turnos.push({
+        id: `trn-${suc.id}-${terminal}-hoy`, sucursal_id: suc.id, estado: 'ABIERTO',
+        abierto_en: apertura.toISOString(), cerrado_en: null,
+        fondo_inicial_centavos: 100000, efectivo_esperado_centavos: null,
+        efectivo_contado_centavos: null, diferencia_centavos: null, notas_cierre: null,
+        cajero: nombre(cajero.id), cerro: null, caja,
+        movimientos_caja: n === 0 ? [{ tipo: 'RETIRO', monto_centavos: 200000, concepto: 'Retiro a caja fuerte', fecha: retiro.toISOString() }] : [],
+      })
+
+      // Cortes de los 12 días anteriores
+      for (let atras = 1; atras <= 12; atras++) {
+        const dia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - atras)
+        const abre = new Date(dia); abre.setHours(8, 0, 0, 0)
+        const cierra = new Date(dia); cierra.setHours(20, 5 + Math.floor(r() * 20), 0, 0)
+        const efectivo = todasLasVentas()
+          .filter(v => v.sucursal_id === suc.id && v.terminal === terminal && v.estado === 'COMPLETADA'
+            && v.fecha >= abre.toISOString() && v.fecha < cierra.toISOString())
+          .flatMap(v => v.venta_pagos)
+          .filter(p => p.metodo === 'EFECTIVO')
+          .reduce((s, p) => s + p.monto_centavos, 0)
+        const movimientos = [
+          { tipo: 'RETIRO', monto_centavos: Math.min(150000, Math.floor(efectivo / 2)), concepto: 'Retiro a caja fuerte', fecha: new Date(abre.getTime() + 6 * 3600_000).toISOString() },
+          ...(r() < 0.3 ? [{ tipo: 'ENTRADA', monto_centavos: 50000, concepto: 'Cambio en monedas', fecha: new Date(abre.getTime() + 2 * 3600_000).toISOString() }] : []),
+        ]
+        const neto = movimientos.reduce((s, m) => s + (m.tipo === 'RETIRO' ? -m.monto_centavos : m.monto_centavos), 0)
+        const esperado = 100000 + efectivo + neto
+        const suerte = r()
+        const diferencia = suerte < 0.7 ? 0 : suerte < 0.85 ? -Math.round(r() * 60) * 50 : suerte < 0.95 ? Math.round(r() * 20) * 50 : -12000
+        turnos.push({
+          id: `trn-${suc.id}-${terminal}-${atras}`, sucursal_id: suc.id, estado: 'CERRADO',
+          abierto_en: abre.toISOString(), cerrado_en: cierra.toISOString(),
+          fondo_inicial_centavos: 100000, efectivo_esperado_centavos: esperado,
+          efectivo_contado_centavos: esperado + diferencia, diferencia_centavos: diferencia,
+          notas_cierre: diferencia <= -10000 ? 'Faltante por revisar con el cajero' : null,
+          cajero: nombre(cajero.id), cerro: nombre((supervisor ?? cajero).id), caja,
+          movimientos_caja: movimientos,
+        })
+      }
+    })
+  }
+  return turnos
+}
+
+const todosLosTurnos = () => (turnosGenerados ??= generarTurnos())
+
+export async function listarTurnosAbiertos({ sucursalId } = {}) {
+  await espera()
+  return todosLosTurnos()
+    .filter(t => t.estado === 'ABIERTO').filter(deSucursal(sucursalId))
+    .sort((a, b) => b.abierto_en.localeCompare(a.abierto_en))
+}
+
+export async function listarCortes({ sucursalId, desde, hasta, pagina: n = 0, porPagina = 50 } = {}) {
+  await espera()
+  const lista = todosLosTurnos()
+    .filter(t => t.estado === 'CERRADO').filter(deSucursal(sucursalId))
+    .filter(t => (!desde || t.cerrado_en >= desde) && (!hasta || t.cerrado_en < hasta))
+    .sort((a, b) => b.cerrado_en.localeCompare(a.cerrado_en))
+  return pagina(lista, n, porPagina)
+}
+
+/* ── Inventario ──────────────────────────────────────────── */
+let existenciasGeneradas = null
+
+function generarExistencias() {
+  const r = azar(4242)
+  const lista = []
+  for (const suc of SUCURSALES.filter(s => s.activo)) {
+    for (const p of PRODUCTOS) {
+      const suerte = r()
+      const factor = suc.es_almacen ? 6 + r() * 6 : suerte < 0.05 ? r() * 0.4 : suerte < 0.13 ? 0.55 + r() * 0.4 : 1.2 + r() * 2.5
+      const existencia = p.unidad === 'KG' ? Math.round(p.minimo * factor * 1000) / 1000 : Math.round(p.minimo * factor)
+      lista.push({ producto_id: p.id, sucursal_id: suc.id, existencia })
+    }
+  }
+  return lista
+}
+
+const todasLasExistencias = () => (existenciasGeneradas ??= generarExistencias())
+
+const todosLosLimites = () => SUCURSALES.filter(s => s.activo).flatMap(suc =>
+  PRODUCTOS.map(p => ({
+    id: `lim-${suc.id}-${p.id}`, sucursal_id: suc.id, producto_id: p.id,
+    minimo: p.minimo * (suc.es_almacen ? 4 : 1), maximo: p.minimo * (suc.es_almacen ? 12 : 4),
+  })),
+)
+
+export async function listarProductos() {
+  await espera()
+  return PRODUCTOS.map(p => ({
+    id: p.id, clave: p.clave, nombre: p.nombre, unidad: p.unidad,
+    categoria_id: p.cat,
+    categorias: CATEGORIAS[p.cat],
+    presentaciones: presentacionesDe(p),
+  }))
+}
+
+export async function listarExistencias({ sucursalId } = {}) {
+  await espera()
+  return todasLasExistencias().filter(deSucursal(sucursalId))
+}
+
+export async function listarLimites({ sucursalId } = {}) {
+  await espera()
+  return todosLosLimites().filter(deSucursal(sucursalId))
+}
+
+function ordenesPendientes() {
+  const limites = new Map(todosLosLimites().map(l => [`${l.producto_id}|${l.sucursal_id}`, l]))
+  return todasLasExistencias()
+    .map(e => ({ e, limite: limites.get(`${e.producto_id}|${e.sucursal_id}`) }))
+    .filter(({ e, limite }) => limite && e.existencia < limite.minimo)
+    .map(({ e, limite }, i) => ({
+      id: `ord-${i + 1}`, sucursal_id: e.sucursal_id, producto_id: e.producto_id,
+      cantidad_sugerida: Math.round((limite.maximo - e.existencia) * 1000) / 1000,
+      estado: 'PENDIENTE',
+      creado_en: new Date(Date.now() - (i + 1) * 3 * 3600_000).toISOString(),
+    }))
+}
+
+export async function listarOrdenesPendientes() {
+  await espera()
+  return ordenesPendientes()
+}
+
+const MERMAS = [
+  ['prd-crema', 'suc-centro', 3, 'Caducidad', 1],        ['prd-oaxaca', 'suc-norte', 1.2, 'Producto dañado', 2],
+  ['prd-yogurt', 'suc-sur', 4, 'Caducidad', 4],          ['prd-panela', 'suc-centro', 0.8, 'Mal estado', 6],
+  ['prd-mantequi', 'suc-oriente', 2, 'Empaque roto', 9], ['prd-espesa', 'suc-norte', 5, 'Caducidad', 12],
+  ['prd-jocoque', 'suc-centro', 2, 'Derrame', 15],       ['prd-manchego', 'suc-sur', 0.65, 'Mal estado', 19],
+  ['prd-requeson', 'suc-oriente', 6, 'Caducidad', 23],   ['prd-cotija', 'suc-norte', 0.4, 'Producto dañado', 27],
+]
+
+export async function listarMermas({ sucursalId, desde, hasta, pagina: n = 0, porPagina = 100 } = {}) {
+  await espera()
+  const lista = MERMAS.map(([productoId, sucursal_id, cant, motivo, atras], i) => {
+    const p = PRODUCTOS.find(x => x.id === productoId)
+    return {
+      folio: `MER-${String(MERMAS.length - i).padStart(5, '0')}`,
+      fecha: new Date(Date.now() - atras * 24 * 3600_000).toISOString(),
+      cantidad: cant, costo_centavos: Math.round(cant * p.precio * 0.62), motivo, sucursal_id,
+      productos: { nombre: p.nombre, unidad: p.unidad },
+    }
+  })
+    .filter(deSucursal(sucursalId))
+    .filter(m => (!desde || m.fecha >= desde) && (!hasta || m.fecha < hasta))
+  return pagina(lista, n, porPagina)
+}
+
+/* ── Organización ────────────────────────────────────────── */
+export async function listarSucursales() {
+  await espera()
+  return SUCURSALES.map(({ prefijo: _prefijo, terminales: _terminales, peso: _peso, ...s }) => s)
+}
+
+export async function listarUsuarios() {
+  await espera()
+  return USUARIOS
+}
+
+export async function vincularUsuario(usuarioId) {
+  await espera()
+  const usuario = USUARIOS.find(u => u.id === usuarioId)
+  if (!usuario) throw new Error('El usuario no existe.')
+  usuario.auth_user_id = `auth-${usuarioId}`
+}
+
+const METAS = { 'suc-centro': 18000000, 'suc-norte': 16000000, 'suc-sur': 11000000, 'suc-oriente': 12000000 }
+const SALDOS = { 'suc-centro': 1250000, 'suc-norte': 845000, 'suc-sur': 0, 'suc-oriente': 2310000 }
+
+export async function listarMetas() {
+  await espera()
+  return Object.entries(METAS).map(([sucursal_id, meta_centavos]) => ({ sucursal_id, meta_centavos }))
+}
+
+export async function listarSaldosCredito() {
+  await espera()
+  return Object.entries(SALDOS).map(([sucursal_id, saldo_centavos]) => ({ sucursal_id, saldo_centavos }))
+}
+
+/* ── Sistema ─────────────────────────────────────────────── */
+export async function listarConfiguracion() {
+  await espera()
+  return [
+    { clave: 'alerta.dias_sin_venta', valor: '30' },
+    { clave: 'empresa.nombre',        valor: 'Cremerías El Rancho' },
+    { clave: 'ticket.mensaje_pie',    valor: '¡Gracias por su compra!' },
+  ]
+}
+
+const BITACORA = [
+  ['VENTA_CANCELADA',  'Canceló una venta de $185.00',               'usr-ana',     'suc-centro',  0.4],
+  ['CORTE_CAJA',       'Cerró el turno de Caja 1 sin diferencia',     'usr-ana',     'suc-centro',  13],
+  ['SURTIDO_RECIBIDO', 'Recibió surtido del almacén a crédito',       'usr-roberto', 'suc-norte',   20],
+  ['MERMA',            'Registró merma: Crema Ácida 1 L × 3',         'usr-maria',   'suc-centro',  26],
+  ['USUARIO_ALTA',     'Dio de alta a Elena Vargas como cajera',      'usr-carlos',  'suc-almacen', 49],
+  ['PRECIO_CAMBIO',    'Cambió el precio de Queso Oaxaca',            'usr-carlos',  'suc-almacen', 52],
+  ['CORTE_CAJA',       'Cerró el turno de Caja 1 con faltante',       'usr-lucia',   'suc-sur',     61],
+  ['RETIRO_EFECTIVO',  'Retiro a caja fuerte por $1,500.00',          'usr-pedro',   'suc-sur',     68],
+]
+
+export async function listarBitacora({ pagina: n = 0, porPagina = 25 } = {}) {
+  await espera()
+  const lista = BITACORA.map(([accion, descripcion, usuario_id, sucursal_id, horas], i) => ({
+    folio: `BIT-${String(4200 - i).padStart(6, '0')}`,
+    fecha: new Date(Date.now() - horas * 3600_000).toISOString(),
+    accion, descripcion, usuario_id, sucursal_id,
+  }))
+  return pagina(lista, n, porPagina)
+}
+
+export async function contarAvisos({ hoy }) {
+  await espera()
+  const turnos = todosLosTurnos()
+  return {
+    ordenesPendientes:   ordenesPendientes().length,
+    canceladasHoy:       todasLasVentas().filter(v => v.estado === 'CANCELADA' && v.fecha >= hoy).length,
+    cortesConDiferencia: turnos.filter(t => t.estado === 'CERRADO' && t.diferencia_centavos !== 0 && t.cerrado_en >= hoy).length,
+    cajasAbiertas:       turnos.filter(t => t.estado === 'ABIERTO').length,
+  }
+}

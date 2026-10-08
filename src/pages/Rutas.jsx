@@ -1,5 +1,8 @@
 ﻿import { useState, useEffect, useMemo, useRef } from 'react'
-import { Map, Plus, Clock, CheckCircle, AlertCircle, Truck, Eye, Navigation, Edit, Trash2, RotateCcw, TrendingUp } from 'lucide-react'
+import { Map, Plus, Clock, CheckCircle, AlertCircle, Truck, Eye, Navigation, Edit, Trash2, RotateCcw, TrendingUp, LocateFixed } from 'lucide-react'
+import { MapContainer, Marker, Polyline, Popup, TileLayer, CircleMarker, useMap } from 'react-leaflet'
+import { divIcon } from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
 import { useSort } from '../hooks/useSort'
@@ -34,6 +37,37 @@ const iconBg = {
 
 const BLANK_RUTA = { nombre: '', distribuidor: '', vehiculo: '', hora: '' }
 
+const mapRoutes = {
+  'R-001': { path: 'M 92 218 C 150 182, 184 160, 238 166 S 340 214, 412 174 S 512 104, 604 116', vehicle: [412, 174], color: '#F97316', eta: 'En recorrido', zone: 'Zona Norte' },
+  'R-002': { path: 'M 124 76 C 184 96, 212 136, 280 126 S 376 78, 452 96 S 548 152, 642 190', vehicle: [642, 190], color: '#059669', eta: 'Finalizada 11:45', zone: 'Zona Sur' },
+  'R-003': { path: 'M 84 150 C 172 138, 208 78, 290 68 S 420 112, 492 76 S 586 48, 688 76', vehicle: [84, 150], color: '#8FA1B2', eta: 'Salida pendiente', zone: 'Zona Centro' },
+  'R-004': { path: 'M 118 250 C 176 224, 230 236, 290 202 S 386 164, 460 202 S 574 244, 674 224', vehicle: [460, 202], color: '#D97706', eta: 'En recorrido', zone: 'Zona Oriente' },
+  'R-005': { path: 'M 74 92 C 150 54, 220 54, 282 92 S 392 144, 468 126 S 582 82, 700 126', vehicle: [74, 92], color: '#C97A6D', eta: 'Ruta cancelada', zone: 'Zona Poniente' },
+}
+
+const routeCoordinates = {
+  'R-001': [[20.624, -100.420], [20.635, -100.405], [20.649, -100.397], [20.660, -100.380]],
+  'R-002': [[20.570, -100.455], [20.582, -100.430], [20.594, -100.410], [20.608, -100.392]],
+  'R-003': [[20.676, -100.446], [20.690, -100.420], [20.700, -100.394], [20.714, -100.370]],
+  'R-004': [[20.590, -100.375], [20.604, -100.360], [20.620, -100.345], [20.638, -100.330]],
+  'R-005': [[20.685, -100.475], [20.670, -100.455], [20.655, -100.438], [20.642, -100.425]],
+}
+
+const stopNames = ['Sucursal Centro', 'Sucursal Progreso', 'Sucursal El Fitzhi', 'Sucursal San Nicolás', 'Sucursal La Palma', 'Sucursal Zaragoza']
+
+function MapViewport({ center }) {
+  const map = useMap()
+  useEffect(() => { map.flyTo(center, 12, { duration: 0.65 }) }, [map, center])
+  return null
+}
+
+const routeIcon = (color, active = false) => divIcon({
+  className: 'route-map-marker',
+  html: `<span style="display:block;width:${active ? 18 : 13}px;height:${active ? 18 : 13}px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(38,52,66,.25)"></span>`,
+  iconSize: [active ? 18 : 13, active ? 18 : 13],
+  iconAnchor: [active ? 9 : 6.5, active ? 9 : 6.5],
+})
+
 export default function Rutas() {
   const PER_PAGE = 5
   const loaded = useLoadDelay()
@@ -54,6 +88,10 @@ export default function Rutas() {
   const [editRuta, setEditRuta]           = useState(null)
   const [editForm, setEditForm]           = useState({})
   const [editErrors, setEditErrors]       = useState({})
+  const [mapRouteId, setMapRouteId]       = useState('R-001')
+  const selectedMapRoute = data.find(r => r.id === mapRouteId) || data.find(r => r.status === 'En proceso') || data[0]
+  const selectedMapMeta = selectedMapRoute ? mapRoutes[selectedMapRoute.id] : null
+  const selectedCoordinates = selectedMapRoute ? routeCoordinates[selectedMapRoute.id] : routeCoordinates['R-001']
 
   const rutaStats = useMemo(() => {
     let enProceso = 0, finalizadas = 0, canceladas = 0, pendientes = 0, totalVentas = 0
@@ -140,8 +178,8 @@ export default function Rutas() {
 
       <PageHeader
         breadcrumb="Rutas"
-        title="Rutas de Distribución"
-        subtitle="Control y seguimiento en tiempo real de todas las rutas de reparto"
+        title="Rutas"
+        subtitle="Planifica, monitorea y administra tus rutas en tiempo real"
       >
         <button onClick={() => setShowModal(true)} className="btn-primary">
           <Plus className="w-4 h-4" /> Nueva ruta
@@ -149,31 +187,208 @@ export default function Rutas() {
       </PageHeader>
 
       <KpiBar items={[
-        { label: 'Total rutas',  value: data.length,                                            sub: 'registradas' },
-        { label: 'En proceso',   value: enProceso,                                              sub: 'activas ahora' },
-        { label: 'Finalizadas',  value: finalizadas, good: finalizadas > 0,                    sub: 'hoy' },
-        { label: 'Pendientes',   value: pendientes,                                             sub: 'por salir' },
-        { label: 'Canceladas',   value: canceladas, alert: canceladas > 0,                     sub: 'requieren revisión' },
+        { label: 'Rutas activas',    value: enProceso,  sub: 'en recorrido' },
+        { label: 'Completadas hoy',  value: finalizadas, good: finalizadas > 0, sub: 'vs. ayer' },
+        { label: 'Con retrasos',     value: pendientes + canceladas, alert: pendientes + canceladas > 0, sub: 'requieren atención' },
+        { label: 'Distancia total',  value: '842 km', good: true, sub: '↑ 8% vs. ayer' },
       ]} />
 
-      {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="card p-3 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2.5" style={{ marginTop: '-.25rem' }}>
+        <div className="filter-input flex items-center gap-2 text-xs" style={{ color: '#627080' }}><span style={{ color: '#627080' }}>Fecha</span><strong>Hoy, 8 sep 2026</strong></div>
+        <button className="filter-input flex items-center justify-between text-xs text-left" style={{ color: '#627080' }}><span><span style={{ color: '#627080' }}>Zona </span><strong>Todas las zonas</strong></span><span style={{ color: '#627080' }}>⌄</span></button>
+        <button className="filter-input flex items-center justify-between text-xs text-left" style={{ color: '#627080' }}><span><span style={{ color: '#627080' }}>Estado </span><strong>Todos</strong></span><span style={{ color: '#627080' }}>⌄</span></button>
+        <button className="filter-input flex items-center justify-between text-xs text-left" style={{ color: '#627080' }}><span><span style={{ color: '#627080' }}>Conductor / vehículo </span><strong>Todos</strong></span><span style={{ color: '#627080' }}>⌄</span></button>
+        <button className="btn-secondary justify-center text-xs col-span-2 md:col-span-1">Limpiar filtros</button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_285px] gap-3 items-stretch" style={{ marginTop: '1.25rem' }}>
+        <div className="card p-3 flex flex-col min-w-0">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs font-black" style={{ color: '#263442' }}>Rutas ({data.length})</p>
+              <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Monitoreo operativo</p>
+            </div>
+            <button onClick={() => setShowModal(true)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#FFF0E5', color: '#F97316' }} title="Nueva ruta"><Plus className="w-3.5 h-3.5" /></button>
+          </div>
+          <SearchInput className="flex-none" value={search} onChange={setSearch} placeholder="Buscar ruta..." resultCount={filtered.length} />
+          <div className="mt-3 space-y-2 overflow-y-auto" style={{ maxHeight: 450 }}>
+            {data.map(route => {
+              const meta = mapRoutes[route.id]
+              const active = route.id === mapRouteId
+              const progress = route.clientesTotal ? Math.round(route.clientesVisitados / route.clientesTotal * 100) : 0
+              return (
+                <button key={route.id} onClick={() => setMapRouteId(route.id)} className="w-full text-left rounded-xl p-2.5 transition-colors" style={active ? { background: '#FFF7ED', border: '1px solid #FDBA74' } : { border: '1px solid transparent' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: meta.color }} />
+                    <span className="text-[11px] font-bold truncate" style={{ color: '#263442' }}>{route.nombre}</span>
+                    <span className="ml-auto text-[10px]" style={{ color: '#627080' }}>›</span>
+                  </div>
+                  <span className="inline-flex mt-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold" style={{ background: `${meta.color}18`, color: meta.color }}>{route.status}</span>
+                  <div className="flex items-center justify-between mt-1.5 text-[10px]" style={{ color: '#627080' }}><span>{route.clientesVisitados}/{route.clientesTotal} clientes</span><span>{progress}%</span></div>
+                  <div className="h-1 rounded-full mt-1" style={{ background: '#FDE8D0' }}><div className="h-1 rounded-full" style={{ width: `${progress}%`, background: progress === 100 ? '#059669' : '#F97316' }} /></div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="card overflow-hidden min-w-0">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #FDE8D0' }}>
+            <div><p className="text-xs font-black" style={{ color: '#263442' }}>Mapa de rutas</p><p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Ubicación y progreso en tiempo real</p></div>
+            <div className="hidden sm:flex items-center gap-3 text-[10px] font-semibold" style={{ color: '#627080' }}><span><i className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#F97316' }} />En curso</span><span><i className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#059669' }} />Finalizada</span><span><i className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#C97A6D' }} />Cancelada</span></div>
+          </div>
+          <MapContainer center={selectedCoordinates[0]} zoom={12} zoomControl={true} scrollWheelZoom={false} style={{ height: 460, width: '100%' }}>
+            <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <MapViewport center={selectedCoordinates[0]} />
+            {data.map(route => {
+              const meta = mapRoutes[route.id]
+              const active = route.id === mapRouteId
+              return <span key={route.id}><Polyline positions={routeCoordinates[route.id]} pathOptions={{ color: meta.color, weight: active ? 5 : 2.5, opacity: active ? 1 : .45, dashArray: active ? undefined : '7 7' }} /><Marker position={routeCoordinates[route.id].at(-1)} icon={routeIcon(meta.color, active)} eventHandlers={{ click: () => setMapRouteId(route.id) }}><Popup><strong>{route.nombre}</strong><br />{route.distribuidor} · {meta.eta}</Popup></Marker></span>
+            })}
+            <CircleMarker center={[20.624, -100.405]} radius={8} pathOptions={{ color: '#fff', weight: 3, fillColor: '#263442', fillOpacity: 1 }}><Popup><strong>Centro de distribución</strong></Popup></CircleMarker>
+          </MapContainer>
+        </div>
+
+        <div className="card p-4 min-w-0 md:col-span-2 xl:col-span-1">
+          <div className="flex items-start justify-between gap-2 mb-2"><div><p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#F97316' }}>Ruta seleccionada</p><p className="text-base font-black mt-1" style={{ color: '#263442' }}>{selectedMapRoute.nombre}</p><p className="text-[10px] mt-1" style={{ color: '#627080' }}>{selectedMapMeta.zone} · {selectedMapRoute.clientesVisitados}/{selectedMapRoute.clientesTotal} paradas</p></div><Badge label={selectedMapRoute.status} color={statusColor[selectedMapRoute.status]} /></div>
+          <div className="flex gap-4 text-[10px] font-bold pb-2 mb-3" style={{ borderBottom: '1px solid #FDE8D0' }}><span style={{ color: '#F97316', borderBottom: '2px solid #F97316', paddingBottom: 8 }}>Resumen</span><span style={{ color: '#627080' }}>Paradas ({selectedMapRoute.clientesTotal})</span><span className="hidden xl:inline" style={{ color: '#627080' }}>Incidencias (0)</span></div>
+          <div className="grid grid-cols-2 gap-2 mb-4"><div className="rounded-xl p-2.5" style={{ background: '#F8FAFC' }}><p className="text-[10px]" style={{ color: '#627080' }}>Salida</p><p className="text-sm font-bold mt-1" style={{ color: '#263442' }}>{selectedMapRoute.salida}</p></div><div className="rounded-xl p-2.5" style={{ background: '#F8FAFC' }}><p className="text-[10px]" style={{ color: '#627080' }}>Progreso</p><p className="text-sm font-bold mt-1" style={{ color: selectedMapMeta.color }}>{selectedMapRoute.clientesVisitados}/{selectedMapRoute.clientesTotal}</p></div></div>
+          <div className="space-y-3 text-xs"><div className="flex justify-between"><span style={{ color: '#627080' }}>Zona</span><strong style={{ color: '#627080' }}>{selectedMapMeta.zone}</strong></div><div className="flex justify-between"><span style={{ color: '#627080' }}>Ventas</span><strong style={{ color: '#059669' }}>{fmt(selectedMapRoute.ventas)}</strong></div><div className="flex justify-between"><span style={{ color: '#627080' }}>Cobros</span><strong style={{ color: '#F97316' }}>{fmt(selectedMapRoute.cobros)}</strong></div></div>
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid #FDE8D0' }}>
+            <div className="flex items-center justify-between mb-2"><p className="text-[11px] font-bold" style={{ color: '#263442' }}>Paradas de la ruta</p><span className="text-[10px] font-semibold" style={{ color: '#F97316' }}>{selectedMapRoute.clientesVisitados}/{selectedMapRoute.clientesTotal} visitadas</span></div>
+            <div className="space-y-2">
+              {stopNames.map((stop, index) => {
+                const completed = index < Math.min(selectedMapRoute.clientesVisitados, 5)
+                const current = !completed && index === Math.min(selectedMapRoute.clientesVisitados, 4)
+                const times = ['08:00', '08:35', '09:20', '10:10', '11:00', '11:45']
+                return <div key={stop} className="flex items-center gap-2 text-[10px]"><span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: completed ? '#DCFCE7' : current ? '#FFF0E5' : '#F2F3F5', color: completed ? '#059669' : current ? '#F97316' : '#627080' }}>{completed ? '✓' : index + 1}</span><span className="truncate flex-1" style={{ color: '#627080' }}>{stop}</span><span className="shrink-0" style={{ color: '#627080' }}>{times[index]}</span><span className="shrink-0 font-semibold" style={{ color: completed ? '#059669' : current ? '#F97316' : '#627080' }}>{completed ? 'Completada' : current ? 'En curso' : 'Pendiente'}</span></div>
+              })}
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2"><button onClick={() => setSelected(selectedMapRoute)} className="btn-primary flex-1 justify-center py-2 text-xs">Ver detalle</button><button onClick={() => openEdit(selectedMapRoute)} className="btn-secondary px-3 py-2 text-xs">Editar</button></div>
+        </div>
+      </div>
+
+      {/* ══ Seguimiento en mapa ═══════════════════════════════════ */}
+      {false && selectedMapRoute && selectedMapMeta && (
+        <div className="card overflow-hidden" style={{ borderColor: '#FDE8D0' }}>
+          <div className="flex flex-col gap-4 p-5 border-b" style={{ borderColor: '#FDE8D0', background: 'linear-gradient(110deg, #FFFFFF 0%, #FFF9F3 100%)' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#FFF0E5', color: '#F97316' }}>
+                  <LocateFixed className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold" style={{ color: '#263442' }}>Centro de seguimiento</p>
+                    <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>EN VIVO</span>
+                  </div>
+                  <p className="text-xs mt-0.5" style={{ color: '#627080' }}>Posición operativa · actualización hace menos de 1 min</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: '#059669' }}>
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#059669' }} />
+                {enProceso} unidad{enProceso !== 1 ? 'es' : ''} activa{enProceso !== 1 ? 's' : ''}
+              </div>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {data.map(route => (
+                <button
+                  key={route.id}
+                  onClick={() => setMapRouteId(route.id)}
+                  className="flex items-center gap-2 shrink-0 rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
+                  style={mapRouteId === route.id
+                    ? { background: '#FFF0E5', color: '#C2410C', border: '1px solid #FDBA74' }
+                    : { background: '#F8FAFC', color: '#627080', border: '1px solid #E8EDF2' }}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ background: mapRoutes[route.id].color }} />
+                  {route.nombre}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="relative">
+            <div className="relative overflow-hidden" style={{ background: '#FFF9F3', minHeight: 360 }}>
+              <MapContainer center={selectedCoordinates[0]} zoom={12} zoomControl={true} scrollWheelZoom={false} style={{ minHeight: 360, width: '100%' }}>
+                <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <MapViewport center={selectedCoordinates[0]} />
+                {data.map(route => {
+                  const meta = mapRoutes[route.id]
+                  const active = route.id === selectedMapRoute.id
+                  return (
+                    <span key={route.id}>
+                      <Polyline positions={routeCoordinates[route.id]} pathOptions={{ color: meta.color, weight: active ? 6 : 3, opacity: active ? 1 : .45, dashArray: active ? undefined : '8 8' }} />
+                      <Marker position={routeCoordinates[route.id][routeCoordinates[route.id].length - 1]} icon={routeIcon(meta.color, active)} eventHandlers={{ click: () => setMapRouteId(route.id) }}>
+                        <Popup><strong>{route.nombre}</strong><br />{route.distribuidor} · {route.vehiculo}<br />{meta.eta}</Popup>
+                      </Marker>
+                    </span>
+                  )
+                })}
+                <CircleMarker center={[20.624, -100.405]} radius={8} pathOptions={{ color: '#fff', weight: 3, fillColor: '#263442', fillOpacity: 1 }}>
+                  <Popup><strong>Centro de distribución</strong><br />Punto de salida de las rutas</Popup>
+                </CircleMarker>
+              </MapContainer>
+              <div className="absolute left-4 bottom-4 flex flex-wrap items-center gap-3 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,.94)', border: '1px solid #FDE8D0', boxShadow: '0 6px 18px rgba(38,52,66,.08)' }}>
+                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>Rutas</span>
+                {[["En proceso", '#F97316'], ['Finalizada', '#059669'], ['Pendiente', '#8FA1B2']].map(([label, color]) => (
+                  <span key={label} className="flex items-center gap-1.5 text-[10px] font-semibold" style={{ color: '#627080' }}><span className="w-2 h-2 rounded-full" style={{ background: color }} />{label}</span>
+                ))}
+              </div>
+            </div>
+            <div className="absolute right-3 top-3 z-20 p-4 flex flex-col justify-between rounded-2xl" style={{ width: 252, maxWidth: 'calc(100% - 24px)', minHeight: 250, background: 'rgba(255,255,255,.96)', border: '1px solid rgba(253,232,208,.95)', boxShadow: '0 12px 28px rgba(38,52,66,.14)', backdropFilter: 'blur(8px)' }}>
+              <div>
+                <div className="flex flex-col items-start gap-2 mb-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#F97316' }}>Ruta seleccionada</p>
+                    <p className="text-base font-bold" style={{ color: '#263442' }}>{selectedMapRoute.nombre}</p>
+                    <p className="text-xs mt-1" style={{ color: '#627080' }}>{selectedMapRoute.distribuidor} · {selectedMapRoute.vehiculo}</p>
+                  </div>
+                  <div className="self-stretch flex justify-end">
+                    <Badge label={selectedMapRoute.status} color={statusColor[selectedMapRoute.status]} />
+                  </div>
+                </div>
+                <div className="space-y-3 rounded-xl p-3 mb-4" style={{ background: '#FFF9F3', border: '1px solid #FDE8D0' }}>
+                  <div className="grid grid-cols-[1fr_auto] gap-3 items-center text-xs"><span style={{ color: '#627080' }}>Zona asignada</span><strong className="text-right" style={{ color: '#627080' }}>{selectedMapMeta.zone}</strong></div>
+                  <div className="grid grid-cols-[1fr_auto] gap-3 items-center text-xs"><span style={{ color: '#627080' }}>Estado</span><strong className="text-right" style={{ color: selectedMapMeta.color }}>{selectedMapMeta.eta}</strong></div>
+                  <div className="grid grid-cols-[1fr_auto] gap-3 items-center text-xs"><span style={{ color: '#627080' }}>Clientes visitados</span><strong className="text-right" style={{ color: '#627080' }}>{selectedMapRoute.clientesVisitados}/{selectedMapRoute.clientesTotal}</strong></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-xl p-3" style={{ background: '#F8FAFC' }}>
+                    <p className="text-[10px]" style={{ color: '#627080' }}>Ventas</p>
+                    <p className="text-sm font-bold mt-1" style={{ color: '#059669' }}>{fmt(selectedMapRoute.ventas)}</p>
+                  </div>
+                  <div className="rounded-xl p-3" style={{ background: '#F8FAFC' }}>
+                    <p className="text-[10px]" style={{ color: '#627080' }}>Cobros</p>
+                    <p className="text-sm font-bold mt-1" style={{ color: '#F97316' }}>{fmt(selectedMapRoute.cobros)}</p>
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setSelected(selectedMapRoute)} className="btn-soft-blue mt-5 w-full py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-1">
+                <Eye className="w-3.5 h-3.5" /> Ver seguimiento detallado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ Resumen visual legado: sustituido por el módulo operativo superior ══ */}
+      {false && <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ marginTop: '1.75rem' }}>
         {/* Clientes visitados por ruta */}
         <div className="card p-5 lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Cobertura de clientes</span>
-            <span className="text-xs ml-auto" style={{ color: '#8FA1B2' }}>visitados / total</span>
+            <span className="text-xs ml-auto" style={{ color: '#627080' }}>visitados / total</span>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(r => ({ name: r.nombre.replace('Ruta ', ''), visitados: r.clientesVisitados, pendientes: r.clientesTotal - r.clientesVisitados }))} barSize={14} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
               <Tooltip
                 cursor={{ fill: '#FFF7ED' }}
                 content={({ active, payload, label }) => active && payload?.length ? (
                   <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
-                    <p style={{ fontSize: 10, color: '#8FA1B2', fontWeight: 700 }}>{label}</p>
+                    <p style={{ fontSize: 10, color: '#627080', fontWeight: 700 }}>{label}</p>
                     {payload.map(p => <p key={p.name} style={{ fontSize: 12, color: p.fill, fontWeight: 700 }}>{p.name === 'visitados' ? 'Visitados' : 'Pendientes'}: {p.value}</p>)}
                   </div>
                 ) : null}
@@ -217,15 +432,15 @@ export default function Rutas() {
             })}
           </div>
           <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
-            <span className="text-xs" style={{ color: '#8FA1B2' }}>Ventas totales</span>
+            <span className="text-xs" style={{ color: '#627080' }}>Ventas totales</span>
             <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(totalVentas)}</span>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* ── TABLE / CARDS ── */}
       {!loaded ? <SkeletonTableRows /> : <>
-      <div className="card overflow-hidden mb-5 hidden lg:block">
+      <div className="card overflow-hidden mb-5 hidden lg:block" style={{ marginTop: '1.75rem' }}>
         <div className="data-toolbar">
           <div className="data-toolbar-row">
             <SearchInput value={search} onChange={setSearch} placeholder="Buscar ruta o distribuidor..." resultCount={filtered.length} />
@@ -243,7 +458,7 @@ export default function Rutas() {
           <div className="flex items-center gap-2">
             <Map className="w-4 h-4 flex-shrink-0" style={{ color: '#d97706' }} />
             <span className="section-head-text"><strong>Rutas de Distribución</strong></span>
-            <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} ruta{filtered.length !== 1 ? 's' : ''}</span>
+            <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} ruta{filtered.length !== 1 ? 's' : ''}</span>
             <span className="badge" style={{ background: 'rgba(217,119,6,.1)', color: '#d97706' }}>{enProceso} en proceso</span>
             <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{finalizadas} finalizadas</span>
             {canceladas > 0 && (
@@ -292,11 +507,11 @@ export default function Rutas() {
                         <span style={{ color: '#627080' }}>{r.distribuidor}</span>
                       </div>
                     </td>
-                    <td><span className="font-mono text-xs" style={{ color: '#8FA1B2' }}>{r.vehiculo}</span></td>
+                    <td><span className="font-mono text-xs" style={{ color: '#627080' }}>{r.vehiculo}</span></td>
                     <td><span style={{ color: '#627080' }}>{r.salida}</span></td>
                     <td>
                       <span className="font-semibold" style={{ color: '#627080' }}>{r.clientesVisitados}</span>
-                      <span style={{ color: '#8FA1B2' }}>/{r.clientesTotal}</span>
+                      <span style={{ color: '#627080' }}>/{r.clientesTotal}</span>
                     </td>
                     <td className="w-28">
                       <div className="progress-track">
@@ -305,10 +520,10 @@ export default function Rutas() {
                           style={{ width: `${progress}%` }}
                         />
                       </div>
-                      <p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>{Math.round(progress)}%</p>
+                      <p className="text-xs mt-0.5" style={{ color: '#627080' }}>{Math.round(progress)}%</p>
                     </td>
                     <td>
-                      <span className="font-bold" style={{ color: r.ventas > 0 ? '#059669' : '#8FA1B2' }}>{fmt(r.ventas)}</span>
+                      <span className="font-bold" style={{ color: r.ventas > 0 ? '#059669' : '#627080' }}>{fmt(r.ventas)}</span>
                     </td>
                     <td><Badge label={r.status} color={statusColor[r.status]} /></td>
                     <td>
@@ -386,7 +601,7 @@ export default function Rutas() {
                     <p className="font-bold" style={{ color: '#263442' }}>{r.nombre}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="folio">{r.id}</span>
-                      <span className="text-xs" style={{ color: '#8FA1B2' }}>{r.vehiculo}</span>
+                      <span className="text-xs" style={{ color: '#627080' }}>{r.vehiculo}</span>
                     </div>
                   </div>
                 </div>
@@ -403,7 +618,7 @@ export default function Rutas() {
 
               {!isCancelled && (
                 <div className="mb-4">
-                  <div className="flex justify-between text-xs mb-1.5" style={{ color: '#8FA1B2' }}>
+                  <div className="flex justify-between text-xs mb-1.5" style={{ color: '#627080' }}>
                     <span>Clientes visitados</span>
                     <span className="font-semibold">{r.clientesVisitados}/{r.clientesTotal}</span>
                   </div>
@@ -426,7 +641,7 @@ export default function Rutas() {
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {[['Salida', r.salida], ['Llegada', r.llegada], ['Cierre', r.cierre]].map(([label, val]) => (
                   <div key={label} className="text-center rounded-xl p-2" style={{ background: '#F2F3F5' }}>
-                    <p className="text-xs mb-0.5" style={{ color: '#8FA1B2' }}>{label}</p>
+                    <p className="text-xs mb-0.5" style={{ color: '#627080' }}>{label}</p>
                     <p className="text-sm font-semibold" style={{ color: '#627080' }}>{val}</p>
                   </div>
                 ))}
@@ -439,7 +654,7 @@ export default function Rutas() {
                   ['Devoluciones',fmt(r.devoluciones),  r.devoluciones > 0 ? '#C97A6D' : '#8FA1B2'],
                 ].map(([label, val, col]) => (
                   <div key={label} className="text-center">
-                    <p className="text-xs mb-0.5" style={{ color: '#8FA1B2' }}>{label}</p>
+                    <p className="text-xs mb-0.5" style={{ color: '#627080' }}>{label}</p>
                     <p className="text-sm font-bold" style={{ color: col }}>{val}</p>
                   </div>
                 ))}
@@ -459,7 +674,7 @@ export default function Rutas() {
 
       {/* ── MODAL: Detalle ruta ── */}
       {selected && (
-        <Modal maxWidth="lg" onClose={() => setSelected(null)} header={<div><h3 className="font-bold" style={{ color: '#263442' }}>{selected.nombre}</h3><div className="flex items-center gap-2 mt-1"><span className="folio">{selected.id}</span><span className="text-xs" style={{ color: '#8FA1B2' }}>{selected.vehiculo}</span></div></div>}>
+        <Modal maxWidth="lg" onClose={() => setSelected(null)} header={<div><h3 className="font-bold" style={{ color: '#263442' }}>{selected.nombre}</h3><div className="flex items-center gap-2 mt-1"><span className="folio">{selected.id}</span><span className="text-xs" style={{ color: '#627080' }}>{selected.vehiculo}</span></div></div>}>
             <div className="p-6 space-y-4">
               {selected.status === 'Cancelada' && (
                 <div className="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style={{ background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.25)' }}>
@@ -482,7 +697,7 @@ export default function Rutas() {
               </div>
               {selected.status !== 'Cancelada' && (
                 <div>
-                  <div className="flex justify-between text-xs mb-1.5" style={{ color: '#8FA1B2' }}>
+                  <div className="flex justify-between text-xs mb-1.5" style={{ color: '#627080' }}>
                     <span>Clientes visitados</span>
                     <span className="font-semibold">{selected.clientesVisitados}/{selected.clientesTotal}</span>
                   </div>

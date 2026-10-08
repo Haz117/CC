@@ -1,174 +1,179 @@
-﻿import { useState, useEffect, useMemo, useRef } from 'react'
-import { Users, Plus, Search, Shield, Edit, Trash2, Lock, Unlock, KeyRound, Eye, AlertTriangle, UserX, Mail, Building2, Clock, TrendingUp } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Users, Search, Eye, Mail, Building2, TrendingUp, Link2, Unlink, UserX, ChevronRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { SkeletonTableRows, SkeletonCardGrid } from '../components/Skeleton'
+import { SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
-import ConfirmDialog from '../components/ConfirmDialog'
-import toast from '../utils/toast'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
+import FilaDesglose from '../components/FilaDesglose'
+import TituloTarjeta from '../components/TituloTarjeta'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
-import { INIT_USUARIOS, roles, sucursalesOpts as sucursales } from '../data/usuarios'
-import { useLoadDelay } from '../hooks/useLoadDelay'
-import { useEscapeKey } from '../hooks/useEscapeKey'
-import { useDebounce } from '../hooks/useDebounce'
-import { usePersistedState } from '../hooks/usePersistedState'
 import Modal from '../components/Modal'
 import ModalFooter from '../components/ModalFooter'
 import EmptyState from '../components/EmptyState'
 import FormField from '../components/FormField'
-import AlertBanner from '../components/AlertBanner'
 import ChartTooltip from '../components/ChartTooltip'
+import AvisoError from '../components/AvisoError'
+import SelectorSucursal from '../components/SelectorSucursal'
+import toast from '../utils/toast'
+import { useEscapeKey } from '../hooks/useEscapeKey'
+import { useDebounce } from '../hooks/useDebounce'
+import { usePersistedState } from '../hooks/usePersistedState'
+import { useConsulta } from '../hooks/useConsulta'
+import { useSucursales } from '../hooks/useSucursales'
+import { ROLES, etiquetaRol } from '../lib/navegacion'
+import { listarUsuarios, vincularUsuario } from '../api/organizacion'
+import { iniciales } from '../utils/fmt'
+import { esCorreo } from '../utils/validar'
 
-const roleColor = {
-  'Superadmin':       'purple',
-  'Administrador':    'blue',
-  'Cajero':           'teal',
-  'Distribuidor':     'amber',
-  'Encargado de ruta':'green',
-}
+const PER_PAGE = 8
 
+const roleColor = { ADMINISTRADOR: 'purple', SUPERVISOR: 'blue', CAJERO: 'teal' }
 const avatarBg = {
-  'Superadmin':        { bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
-  'Administrador':     { bg: '#FFF7ED',              color: '#F97316' },
-  'Cajero':            { bg: 'rgba(5,150,105,.1)',   color: '#059669' },
-  'Distribuidor':      { bg: 'rgba(217,119,6,.1)',   color: '#d97706' },
-  'Encargado de ruta': { bg: '#F2F3F5',              color: '#627080' },
+  ADMINISTRADOR: { bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
+  SUPERVISOR:    { bg: '#FFF7ED',              color: '#F97316' },
+  CAJERO:        { bg: 'rgba(5,150,105,.1)',   color: '#059669' },
+}
+const avatarDe = (u) => (u.activo ? avatarBg[u.rol] ?? avatarBg.CAJERO : { bg: 'rgba(201,122,109,.12)', color: '#C97A6D' })
+
+/* ── Ligar una persona con su cuenta de Auth (solo administrador) ── */
+function VincularCuenta({ usuario, onClose, onListo }) {
+  const [correo,    setCorreo]    = useState('')
+  const [error,     setError]     = useState('')
+  const [guardando, setGuardando] = useState(false)
+
+  const vincular = async () => {
+    const limpio = correo.trim().toLowerCase()
+    if (!esCorreo(limpio)) { setError('Escribe un correo válido.'); return }
+    setGuardando(true)
+    try {
+      await vincularUsuario(usuario.id, limpio)
+      toast.success('Cuenta vinculada', `${usuario.nombre} ya puede entrar con ${limpio}`)
+      onListo()
+    } catch (err) {
+      setError(err.message)
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <Modal title="Dar acceso a la app web" subtitle={usuario.nombre} maxWidth="lg" onClose={onClose}>
+      <div className="p-6 space-y-4">
+        <ol className="space-y-2.5">
+          {[
+            <>La persona ya existe en <strong>usuarios</strong> (se da de alta desde la caja del almacén).</>,
+            <>En el panel de Supabase abre <strong>Authentication → Users → Add user</strong> y crea la cuenta con su correo, una contraseña de mínimo 8 caracteres y <strong>Auto Confirm User</strong>.</>,
+            <>Escribe aquí ese mismo correo para ligar la cuenta con {usuario.nombre.split(' ')[0]}.</>,
+          ].map((paso, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0" style={{ background: '#FFF7ED', color: '#F97316' }}>{i + 1}</span>
+              <p className="text-sm" style={{ color: '#627080' }}>{paso}</p>
+            </li>
+          ))}
+        </ol>
+        <FormField label="Correo de la cuenta" required error={error}>
+          <input
+            type="email"
+            autoFocus
+            placeholder="correo@ejemplo.com"
+            value={correo}
+            onChange={e => { setCorreo(e.target.value); setError('') }}
+            onKeyDown={e => { if (e.key === 'Enter') vincular() }}
+            className={`input-field ${error ? 'input-field-error' : ''}`}
+          />
+        </FormField>
+      </div>
+      <ModalFooter onCancel={onClose} onConfirm={vincular} disabled={guardando} confirmLabel={guardando ? 'Vinculando...' : 'Vincular cuenta'} />
+    </Modal>
+  )
 }
 
 export default function Usuarios() {
-  const BLANK_USER = { nombre: '', email: '', telefono: '', rol: 'Cajero', sucursal: 'Centro', password: '' }
-  const PER_PAGE = 6
+  const { sucursales, nombreCorto, nombreSucursal } = useSucursales()
 
-  const loaded = useLoadDelay()
   const [search, setSearch]             = usePersistedState('usuarios-search', '')
   const debouncedSearch = useDebounce(search)
-  const [filterRol, setFilterRol]       = usePersistedState('usuarios-rol', 'Todos')
+  const [filterRol, setFilterRol]       = useState('Todos')
+  const [sucursalId, setSucursalId]     = useState('')
   const [page, setPage]                 = useState(1)
-  const [showModal, setShowModal]       = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editUser, setEditUser]         = useState(null)
-  const [editForm, setEditForm]         = useState({})
   const [selectedUser, setSelectedUser] = useState(null)
-  const [confirmBlock, setConfirmBlock] = useState(null)
-  const [data, setData]                 = useState(INIT_USUARIOS)
-  const [nuevoForm, setNuevoForm]       = useState(BLANK_USER)
-  const [nuevoErrors, setNuevoErrors]   = useState({})
-  const [shake, setShake]               = useState(false)
-  const shakeTimer = useRef(null)
+  const [porVincular, setPorVincular]   = useState(null)
 
-  const openEdit = (u) => {
-    setEditUser(u)
-    setEditForm({ nombre: u.nombre, email: u.email, rol: u.rol, sucursal: u.sucursal })
-    setShowEditModal(true)
-    setSelectedUser(null)
-  }
+  const { datos, cargando, error, recargar } = useConsulta(listarUsuarios)
 
-  const handleSaveEdit = () => {
-    if (!editForm.nombre.trim() || !editForm.email.trim()) return
-    setData(d => d.map(u => u.id === editUser.id ? { ...u, ...editForm } : u))
-    toast.success('Usuario actualizado', `${editForm.nombre} fue modificado correctamente`)
-    setShowEditModal(false)
-    setEditUser(null)
-  }
+  const data = useMemo(() => (datos ?? []).map(u => ({
+    ...u,
+    nombre: u.nombre_completo ?? '—',
+    sucursal: nombreCorto(u.sucursal_id),
+    activo: u.activo !== false,
+    vinculado: Boolean(u.auth_user_id),
+  })), [datos, nombreCorto])
 
-  const filtered = useMemo(() => data.filter(u =>
-    (u.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) || u.email.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
-    (filterRol === 'Todos' || u.rol === filterRol)
-  ), [data, debouncedSearch, filterRol])
+  const filtered = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase()
+    return data.filter(u =>
+      (filterRol === 'Todos' || u.rol === filterRol) &&
+      (!sucursalId || u.sucursal_id === sucursalId) &&
+      (!q || u.nombre.toLowerCase().includes(q) || String(u.usuario ?? '').toLowerCase().includes(q))
+    )
+  }, [data, debouncedSearch, filterRol, sucursalId])
   const paginated = useMemo(() => filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE), [filtered, page])
 
-  const { bloqueados, activosCount, roleCounts, sucursalCounts } = useMemo(() => {
-    const bloqueados = data.filter(u => u.status === 'Bloqueado')
-    const activosCount = data.length - bloqueados.length
-    const roleCounts = Object.fromEntries(roles.map(r => [r, data.filter(u => u.rol === r).length]))
-    const sucursalCounts = Object.fromEntries(
-      ['Centro', 'Norte', 'Sur', 'Oriente', 'Global'].map(suc => [suc, data.filter(u => u.sucursal === suc).length])
-    )
-    return { bloqueados, activosCount, roleCounts, sucursalCounts }
+  const stats = useMemo(() => {
+    const activos = data.filter(u => u.activo)
+    const vinculados = activos.filter(u => u.vinculado).length
+    const porRol = Object.fromEntries(ROLES.map(r => [r, data.filter(u => u.rol === r).length]))
+    const porSucursal = new Map()
+    for (const u of activos) porSucursal.set(u.sucursal_id, (porSucursal.get(u.sucursal_id) ?? 0) + 1)
+    return {
+      activos: activos.length, inactivos: data.length - activos.length,
+      vinculados, sinVincular: activos.length - vinculados, porRol,
+      porSucursal: [...porSucursal.entries()].sort((a, b) => b[1] - a[1]),
+    }
   }, [data])
 
-  const toggleBlock = (id) => {
-    setData(d => d.map(u => u.id === id ? { ...u, status: u.status === 'Activo' ? 'Bloqueado' : 'Activo' } : u))
-    const u = data.find(u => u.id === id)
-    if (u?.status === 'Activo')
-      toast.error('Usuario bloqueado', `${u.nombre} ya no puede acceder al sistema`)
-    else
-      toast.success('Usuario desbloqueado', `${u?.nombre} puede acceder nuevamente`)
-  }
+  useEffect(() => { setPage(1) }, [debouncedSearch, filterRol, sucursalId])
+  useEscapeKey(() => { setSelectedUser(null); setPorVincular(null) })
 
-  useEffect(() => { setPage(1) }, [debouncedSearch, filterRol])
-  useEscapeKey(() => { setShowModal(false); setSelectedUser(null) })
+  const abrirVincular = (u) => { setSelectedUser(null); setPorVincular(u) }
+  const maxRol = Math.max(1, ...Object.values(stats.porRol))
 
-  const uniqueRoles = [...new Set(data.map(u => u.rol))].length
-
-  const validateNuevo = () => {
-    const errs = {}
-    if (!nuevoForm.nombre.trim())                              errs.nombre   = 'El nombre es requerido'
-    if (!nuevoForm.email.trim())                               errs.email    = 'El email es requerido'
-    else if (!/\S+@\S+\.\S+/.test(nuevoForm.email))           errs.email    = 'Email inválido'
-    if (!nuevoForm.password || nuevoForm.password.length < 8) errs.password = 'Mínimo 8 caracteres'
-    return errs
-  }
-
-  const handleGuardarUsuario = () => {
-    const errs = validateNuevo()
-    if (Object.keys(errs).length > 0) {
-      setNuevoErrors(errs)
-      setShake(true)
-      clearTimeout(shakeTimer.current)
-      shakeTimer.current = setTimeout(() => setShake(false), 400)
-      return
-    }
-    const nextId = Math.max(...data.map(u => u.id)) + 1
-    setData(d => [...d, { id: nextId, nombre: nuevoForm.nombre, email: nuevoForm.email, rol: nuevoForm.rol, sucursal: nuevoForm.sucursal, status: 'Activo', ultimo: 'Ahora' }])
-    toast.success('Usuario creado', `${nuevoForm.nombre} fue registrado y puede iniciar sesión`)
-    setShowModal(false)
-    setNuevoForm(BLANK_USER)
-    setNuevoErrors({})
-  }
+  // Mientras llega la primera respuesta, o si falló, no hay cifras que mostrar: un cero se leería como dato real.
+  const sinDatos = datos === undefined
+  const estadoKpi = cargando ? 'cargando' : sinDatos ? 'error' : null
 
   return (
     <div className="space-y-6">
 
       <PageHeader
         breadcrumb="Usuarios"
-        title="Gestión de Usuarios"
-        subtitle={`${data.length} usuarios registrados · ${activosCount} activos · ${bloqueados.length} bloqueados`}
-      >
-        <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Nuevo usuario
-        </button>
-      </PageHeader>
+        title="Usuarios"
+        subtitle={sinDatos ? 'Personas que operan las cajas y la app web' : `${data.length} personas · ${stats.activos} activas · ${stats.vinculados} con acceso a la app web`}
+      />
 
-      <KpiBar items={[
-        { label: 'Total usuarios', value: data.length,                                                         sub: 'registrados' },
-        { label: 'Activos',        value: activosCount, good: true,                                              sub: 'con acceso' },
-        { label: 'Bloqueados',     value: bloqueados.length, alert: bloqueados.length > 0,                     sub: 'acceso suspendido' },
-        { label: 'Roles activos',  value: uniqueRoles,                                                         sub: 'distintos' },
+      <KpiBar estado={estadoKpi} items={[
+        { label: 'Total usuarios', value: data.length,       sub: 'todas las sucursales' },
+        { label: 'Activos',        value: stats.activos,     good: true,                 sub: 'pueden operar' },
+        { label: 'Con acceso web', value: stats.vinculados,                              sub: 'cuenta vinculada' },
+        { label: 'Sin vincular',   value: stats.sinVincular,                             sub: 'solo entran en la caja' },
+        { label: 'Inactivos',      value: stats.inactivos,   alert: stats.inactivos > 0, sub: 'dados de baja' },
       ]} />
 
+      <AvisoError error={error} onReintentar={recargar} />
+
       {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Usuarios por rol */}
+      {!sinDatos && <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <div className="card p-5 lg:col-span-3">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Distribución por rol</span>
-          </div>
-          <ResponsiveContainer width="100%" height={148}>
-            <BarChart
-              data={roles.map(r => ({ name: r === 'Encargado de ruta' ? 'Enc. ruta' : r, count: roleCounts[r] }))}
-              barSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
-            >
+          <TituloTarjeta icon={TrendingUp} titulo="Distribución por rol" />
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={ROLES.map(r => ({ rol: r, name: etiquetaRol(r), count: stats.porRol[r] }))} maxBarSize={40} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={v => `${v} usuario${v !== 1 ? 's' : ''}`} />} />
               <Bar dataKey="count" radius={[5, 5, 0, 0]}>
-                {roles.map((r, i) => {
-                  const maxC = Math.max(...roles.map(x => roleCounts[x]))
-                  const ratio = roleCounts[r] / maxC
+                {ROLES.map(r => {
+                  const ratio = stats.porRol[r] / maxRol
                   return <Cell key={r} fill={ratio >= 0.8 ? '#059669' : ratio >= 0.4 ? '#F97316' : '#FDBA74'} />
                 })}
               </Bar>
@@ -176,182 +181,125 @@ export default function Usuarios() {
           </ResponsiveContainer>
         </div>
 
-        {/* Por estado y sucursal */}
         <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
-          <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Estado de acceso</span>
-          </div>
+          <TituloTarjeta icon={Link2} titulo="Acceso a la app web" className="mb-1" />
           {[
-            { label: 'Activos',    count: activosCount,                                       color: '#059669', bg: 'rgba(5,150,105,.08)' },
-            { label: 'Bloqueados', count: bloqueados.length,                                  color: '#C97A6D', bg: 'rgba(201,122,109,.08)' },
+            { label: 'Cuenta vinculada', count: stats.vinculados,  color: '#059669' },
+            { label: 'Sin vincular',     count: stats.sinVincular, color: '#627080', fondo: '#F2F3F5' },
           ].map(s => {
-            const pct = Math.round(s.count / data.length * 100)
-            return (
-              <div key={s.label} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.bg }}>
-                  <span className="text-xs font-black" style={{ color: s.color }}>{s.count}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</span>
-                    <span className="text-xs font-bold" style={{ color: s.color }}>{pct}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
-                    <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, background: s.color }} />
-                  </div>
-                </div>
-              </div>
-            )
+            const pct = stats.activos ? Math.round(s.count / stats.activos * 100) : 0
+            return <FilaDesglose key={s.label} cuenta={s.count} etiqueta={s.label} derecha={`${pct}%`} pct={pct} color={s.color} fondo={s.fondo} />
           })}
           <div className="mt-2 rounded-xl p-3" style={{ background: '#FFF7ED' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#8FA1B2' }}>Sucursales con usuarios</p>
-            {['Centro', 'Norte', 'Sur', 'Oriente', 'Global'].map(suc => {
-              const n = sucursalCounts[suc]
-              return n > 0 ? (
-                <div key={suc} className="flex justify-between items-center py-0.5">
-                  <span className="text-xs" style={{ color: '#627080' }}>{suc}</span>
-                  <span className="text-xs font-bold" style={{ color: '#F97316' }}>{n}</span>
-                </div>
-              ) : null
-            })}
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#627080' }}>Usuarios activos por sucursal</p>
+            {stats.porSucursal.map(([id, n]) => (
+              <div key={id ?? 'sin'} className="flex justify-between items-center py-0.5">
+                <span className="text-xs" style={{ color: '#627080' }}>{nombreCorto(id)}</span>
+                <span className="text-xs font-bold" style={{ color: '#F97316' }}>{n}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </div>}
 
-      {/* Alerta de usuarios bloqueados */}
-      {bloqueados.length > 0 && (
-        <AlertBanner
-          icon={UserX}
-          title={`${bloqueados.length} usuario${bloqueados.length > 1 ? 's bloqueados' : ' bloqueado'} — acceso al sistema suspendido`}
-          subtitle={bloqueados.map(u => u.nombre).join(' · ')}
-          className="mb-5"
-        />
-      )}
-
-      {!loaded ? (
-        <>
-          <SkeletonCardGrid count={5} cols={5} />
-          <SkeletonTableRows rows={6} />
-        </>
-      ) : <>
-      {/* Role stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
-        {roles.map((r, i) => {
-          const count = roleCounts[r]
-          const isSelected = filterRol === r
-          return (
-            <div
-              key={r}
-              className="card card-glow p-4 cursor-pointer animate-fade-in-up"
-              style={{ ...(isSelected ? { borderColor: '#FDBA74', background: '#FFF7ED' } : {}), animationDelay: `${Math.min(i * 55, 200)}ms` }}
-              onClick={() => setFilterRol(isSelected ? 'Todos' : r)}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: (avatarBg[r] || avatarBg['Cajero']).bg }}
-                >
-                  <Shield className="w-4 h-4" style={{ color: (avatarBg[r] || avatarBg['Cajero']).color }} />
-                </div>
-                <p className="text-2xl font-black" style={{ color: '#263442' }}>{count}</p>
-              </div>
-              <p className="text-xs font-semibold leading-tight" style={{ color: isSelected ? '#C2410C' : '#8FA1B2' }}>{r}</p>
-            </div>
-          )
-        })}
-      </div>
-
+      {cargando ? <SkeletonTableRows rows={6} /> : <>
       {/* Table */}
       <div className="card overflow-hidden">
         <div className="data-toolbar">
           <div className="data-toolbar-row">
-            <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o email..." resultCount={filtered.length} />
-            <select value={filterRol} onChange={e => setFilterRol(e.target.value)} className="filter-input">
-              <option value="Todos">Todos los roles</option>
-              {roles.map(r => <option key={r}>{r}</option>)}
-            </select>
-            <select className="filter-input">
-              <option>Todas las sucursales</option>
-              {sucursales.map(s => <option key={s}>{s}</option>)}
-            </select>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o usuario..." resultCount={filtered.length} />
+            </div>
+            <div className="filter-bar" role="group" aria-label="Rol">
+              {['Todos', ...ROLES].map(r => (
+                <button key={r} type="button" onClick={() => setFilterRol(r)} aria-pressed={filterRol === r} className={`chip ${filterRol === r ? 'active' : ''}`}>
+                  {r === 'Todos' ? `Todos (${data.length})` : `${etiquetaRol(r)} (${stats.porRol[r]})`}
+                </button>
+              ))}
+            </div>
+            <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} />
           </div>
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#7c3aed' }} />
-            <span className="section-head-text"><strong>Usuarios del Sistema</strong></span>
-            <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} usuario{filtered.length !== 1 ? 's' : ''}</span>
-            <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{activosCount} activos</span>
-            {bloqueados.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{bloqueados.length} bloqueados</span>}
+            <span className="section-head-text"><strong>Usuarios del sistema</strong></span>
+            <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} usuario{filtered.length !== 1 ? 's' : ''}</span>
+            {stats.inactivos > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{stats.inactivos} inactivos</span>}
           </div>
+          <span className="hidden md:inline text-xs" style={{ color: '#627080' }}>Las altas y bajas se hacen desde la caja del almacén</span>
         </div>
-        <div className="overflow-x-auto">
+        {/* Móvil: una tarjeta compacta por persona; al tocarla se abre su perfil */}
+        <ul className="sm:hidden lista-movil">
+          {paginated.map(u => {
+            const av = avatarDe(u)
+            return (
+              <li key={u.id}>
+                <button type="button" onClick={() => setSelectedUser(u)} className="lista-movil-fila" aria-label={`Ver a ${u.nombre}`}
+                  style={u.activo ? {} : { background: 'rgba(201,122,109,.04)', borderLeft: '3px solid rgba(201,122,109,.35)' }}>
+                  <span className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: av.bg, color: av.color }}>
+                      {u.activo ? iniciales(u.nombre) : <UserX className="w-3.5 h-3.5" />}
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#A05A52' }}>{u.nombre}</span>
+                      <span className="block text-xs truncate" style={{ color: '#627080' }}>{u.sucursal} · {u.usuario ?? (u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta web')}</span>
+                    </span>
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} />
+                  </span>
+                  <span className="flex items-center gap-2 flex-wrap mt-2.5">
+                    <Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} />
+                    <Badge label={u.vinculado ? 'Vinculada' : 'Sin vincular'} color={u.vinculado ? 'green' : 'gray'} />
+                    {!u.activo && <Badge label="Inactivo" color="red" />}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+
+        <div className="hidden sm:block overflow-x-auto">
           <table className="table-modern">
             <thead>
               <tr>
                 <th>Usuario</th>
                 <th>Rol</th>
                 <th className="hidden md:table-cell">Sucursal</th>
-                <th className="hidden lg:table-cell">Último acceso</th>
-                <th>Estado</th>
+                <th>Acceso web</th>
+                <th className="hidden lg:table-cell">Estado</th>
                 <th className="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {paginated.map(u => {
-                const isBlocked = u.status === 'Bloqueado'
+                const av = avatarDe(u)
                 return (
-                  <tr
-                    key={u.id}
-                    style={isBlocked ? { background: 'rgba(201,122,109,.04)', borderLeft: '3px solid rgba(201,122,109,.35)' } : {}}
-                  >
+                  <tr key={u.id} style={u.activo ? {} : { background: 'rgba(201,122,109,.04)', borderLeft: '3px solid rgba(201,122,109,.35)' }}>
                     <td>
                       <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          style={{
-                            background: isBlocked ? 'rgba(201,122,109,.12)' : (avatarBg[u.rol] || avatarBg['Cajero']).bg,
-                            color: isBlocked ? '#C97A6D' : (avatarBg[u.rol] || avatarBg['Cajero']).color,
-                            opacity: isBlocked ? 0.8 : 1,
-                          }}
-                        >
-                          {isBlocked
-                            ? <Lock className="w-3.5 h-3.5" />
-                            : u.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)
-                          }
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: av.bg, color: av.color }}>
+                          {u.activo ? iniciales(u.nombre) : <UserX className="w-3.5 h-3.5" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate" style={{ color: isBlocked ? '#A05A52' : '#263442' }}>{u.nombre}</p>
-                          <p className="text-xs truncate" style={{ color: '#8FA1B2' }}>{u.email}</p>
+                          <p className="text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#A05A52' }}>{u.nombre}</p>
+                          <p className="text-xs truncate" style={{ color: '#627080' }}>{u.usuario ?? (u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta web')}</p>
                         </div>
                       </div>
                     </td>
-                    <td><Badge label={u.rol} color={roleColor[u.rol]} /></td>
+                    <td><Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} /></td>
                     <td className="hidden md:table-cell"><span className="text-sm" style={{ color: '#627080' }}>{u.sucursal}</span></td>
-                    <td className="hidden lg:table-cell">
-                      <span className="text-xs" style={{ color: isBlocked ? '#C97A6D' : '#8FA1B2' }}>{u.ultimo}</span>
+                    <td>
+                      <Badge label={u.vinculado ? 'Vinculada' : 'Sin vincular'} color={u.vinculado ? 'green' : 'gray'} />
                     </td>
-                    <td><Badge label={u.status} color={u.status === 'Activo' ? 'green' : 'red'} /></td>
+                    <td className="hidden lg:table-cell"><Badge label={u.activo ? 'Activo' : 'Inactivo'} color={u.activo ? 'green' : 'red'} /></td>
                     <td>
                       <div className="flex items-center justify-end gap-1">
-                        <button className="action-btn" title="Ver" onClick={() => setSelectedUser(u)}><Eye className="w-4 h-4" /></button>
-                        <button className="action-btn" title="Editar" onClick={() => openEdit(u)}><Edit className="w-4 h-4" /></button>
-                        <button
-                          className="action-btn"
-                          title="Restablecer contraseña"
-                          onClick={() => toast.info('Contraseña restablecida', `Se envió el acceso temporal a ${u.email}`)}
-                        >
-                          <KeyRound className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => isBlocked ? toggleBlock(u.id) : setConfirmBlock(u)}
-                          className={`action-btn ${isBlocked ? '' : 'danger'}`}
-                          style={isBlocked ? { color: '#059669' } : {}}
-                          title={isBlocked ? 'Desbloquear' : 'Bloquear'}
-                        >
-                          {isBlocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                        </button>
+                        <button className="action-btn" title="Ver" aria-label={`Ver a ${u.nombre}`} onClick={() => setSelectedUser(u)}><Eye className="w-4 h-4" /></button>
+                        {u.activo && !u.vinculado && (
+                          <button className="action-btn" title="Dar acceso a la app web" aria-label={`Vincular cuenta de ${u.nombre}`} onClick={() => abrirVincular(u)}>
+                            <Link2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -360,9 +308,9 @@ export default function Usuarios() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !sinDatos && (
           <EmptyState icon={Search} title="Sin resultados" subtitle="No hay usuarios con ese criterio de búsqueda.">
-            <button onClick={() => { setSearch(''); setFilterRol('Todos') }} className="btn-soft-blue mt-3 px-4 py-2 text-xs font-semibold rounded-xl">
+            <button onClick={() => { setSearch(''); setFilterRol('Todos'); setSucursalId('') }} className="btn-soft-blue mt-3 px-4 py-2 text-xs font-semibold rounded-xl">
               Limpiar filtros
             </button>
           </EmptyState>
@@ -371,225 +319,62 @@ export default function Usuarios() {
       </div>
       </>}
 
-      {/* Confirm bloqueo */}
-      {confirmBlock && (
-        <ConfirmDialog
-          title="¿Bloquear este usuario?"
-          message={`${confirmBlock.nombre} no podrá iniciar sesión hasta que sea desbloqueado manualmente.`}
-          confirmLabel="Sí, bloquear"
-          onConfirm={() => { toggleBlock(confirmBlock.id); setConfirmBlock(null) }}
-          onCancel={() => setConfirmBlock(null)}
-        />
-      )}
-
       {/* Modal perfil de usuario */}
       {selectedUser && (() => {
         const u = selectedUser
-        const isBlocked = u.status === 'Bloqueado'
-        const initials = u.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)
+        const av = avatarDe(u)
         return (
           <Modal title="Perfil de usuario" onClose={() => setSelectedUser(null)}>
-
-              {/* Avatar + name */}
-              <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0"
-                  style={{
-                    background: isBlocked ? 'rgba(201,122,109,.12)' : (avatarBg[u.rol] || avatarBg['Cajero']).bg,
-                    color: isBlocked ? '#C97A6D' : (avatarBg[u.rol] || avatarBg['Cajero']).color,
-                  }}
-                >
-                  {isBlocked ? <Lock className="w-6 h-6" /> : initials}
+            <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0" style={{ background: av.bg, color: av.color }}>
+                {u.activo ? iniciales(u.nombre) : <UserX className="w-6 h-6" />}
+              </div>
+              <div>
+                <p className="text-lg font-bold leading-tight" style={{ color: '#263442' }}>{u.nombre}</p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} />
+                  <Badge label={u.activo ? 'Activo' : 'Inactivo'} color={u.activo ? 'green' : 'red'} />
                 </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 grid grid-cols-1 gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
+                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />
                 <div>
-                  <p className="text-lg font-bold leading-tight" style={{ color: '#263442' }}>{u.nombre}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <Badge label={u.rol} color={roleColor[u.rol]} />
-                    <Badge label={u.status} color={isBlocked ? 'red' : 'green'} />
-                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>Sucursal</p>
+                  <p className="text-sm font-semibold" style={{ color: '#263442' }}>{nombreSucursal(u.sucursal_id)}</p>
                 </div>
               </div>
-
-              {/* Info grid */}
-              <div className="px-6 py-5 grid grid-cols-1 gap-3">
-                <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-                  <Mail className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Correo</p>
-                    <p className="text-sm font-semibold font-mono" style={{ color: '#627080' }}>{u.email}</p>
-                  </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
+                {u.vinculado ? <Mail className="w-4 h-4 flex-shrink-0" style={{ color: '#059669' }} /> : <Unlink className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />}
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>Acceso a la app web</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>
+                    {u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta vinculada: solo entra en la caja'}
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-                    <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Sucursal</p>
-                      <p className="text-sm font-semibold" style={{ color: '#627080' }}>{u.sucursal}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-                    <Clock className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Último acceso</p>
-                      <p className="text-sm font-semibold" style={{ color: '#627080' }}>{u.ultimo}</p>
-                    </div>
-                  </div>
-                </div>
-                {isBlocked && (
-                  <div className="flex items-center gap-2.5 rounded-xl px-4 py-3" style={{ background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.25)' }}>
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#C97A6D' }} />
-                    <p className="text-xs font-semibold" style={{ color: '#A05A52' }}>Acceso al sistema suspendido</p>
-                  </div>
-                )}
               </div>
+            </div>
 
-              {/* Actions */}
-              <div className="px-6 pb-6 flex flex-col gap-2">
-                <div className="flex gap-2">
-                  <button
-                    className="flex-1 btn-secondary flex items-center justify-center gap-2"
-                    onClick={() => {
-                      toast.info('Contraseña restablecida', `Se envió el acceso temporal a ${u.email}`)
-                    }}
-                  >
-                    <KeyRound className="w-4 h-4" /> Restablecer contraseña
-                  </button>
-                  <button
-                    className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold transition-all"
-                    style={isBlocked
-                      ? { background: 'rgba(5,150,105,.1)', color: '#059669', border: '1px solid rgba(5,150,105,.25)' }
-                      : { background: 'rgba(201,122,109,.1)', color: '#A05A52', border: '1px solid rgba(201,122,109,.25)' }
-                    }
-                    onClick={() => {
-                      toggleBlock(u.id)
-                      setSelectedUser(d => ({ ...d, status: d.status === 'Activo' ? 'Bloqueado' : 'Activo' }))
-                    }}
-                  >
-                    {isBlocked ? <><Unlock className="w-4 h-4" /> Desbloquear</> : <><Lock className="w-4 h-4" /> Bloquear</>}
-                  </button>
-                </div>
-                <button
-                  className="btn-primary w-full flex items-center justify-center gap-2"
-                  onClick={() => openEdit(u)}
-                >
-                  <Edit className="w-4 h-4" /> Editar usuario
+            <div className="px-6 pb-6 flex gap-2">
+              <button className="btn-secondary flex-1" onClick={() => setSelectedUser(null)}>Cerrar</button>
+              {u.activo && !u.vinculado && (
+                <button className="btn-primary flex-1 flex items-center justify-center gap-2" onClick={() => abrirVincular(u)}>
+                  <Link2 className="w-4 h-4" /> Dar acceso web
                 </button>
-              </div>
+              )}
+            </div>
           </Modal>
         )
       })()}
 
-      {/* Modal editar usuario */}
-      {showEditModal && editUser && (
-        <Modal title="Editar usuario" subtitle={editUser.email} maxWidth="lg" onClose={() => setShowEditModal(false)}>
-            <div className="p-6 grid grid-cols-2 gap-4">
-              <FormField label="Nombre completo" required className="col-span-2">
-                <input
-                  type="text"
-                  value={editForm.nombre}
-                  onChange={e => setEditForm(f => ({ ...f, nombre: e.target.value }))}
-                  className="input-field"
-                  autoFocus
-                />
-              </FormField>
-              <FormField label="Email" required className="col-span-2">
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
-                  className="input-field"
-                />
-              </FormField>
-              <FormField label="Rol">
-                <select value={editForm.rol} onChange={e => setEditForm(f => ({ ...f, rol: e.target.value }))} className="input-field">
-                  {roles.map(r => <option key={r}>{r}</option>)}
-                </select>
-              </FormField>
-              <FormField label="Sucursal">
-                <select value={editForm.sucursal} onChange={e => setEditForm(f => ({ ...f, sucursal: e.target.value }))} className="input-field">
-                  {sucursales.map(s => <option key={s}>{s}</option>)}
-                </select>
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => setShowEditModal(false)} onConfirm={handleSaveEdit} confirmLabel="Guardar cambios" />
-        </Modal>
-      )}
-
-      {/* Modal nuevo usuario */}
-      {showModal && (
-        <Modal title="Nuevo usuario" maxWidth="lg" shake={shake} onClose={() => { setShowModal(false); setNuevoForm(BLANK_USER); setNuevoErrors({}) }}>
-            <div className="p-6 grid grid-cols-2 gap-4">
-              <FormField label="Nombre completo" required error={nuevoErrors.nombre} className="col-span-2">
-                <input
-                  type="text"
-                  placeholder="Nombre completo"
-                  value={nuevoForm.nombre}
-                  onChange={e => { setNuevoForm(f => ({ ...f, nombre: e.target.value })); setNuevoErrors(er => ({ ...er, nombre: '' })) }}
-                  className={`input-field ${nuevoErrors.nombre ? 'input-field-error' : ''}`}
-                  autoFocus
-                />
-              </FormField>
-              <FormField label="Email" required error={nuevoErrors.email}>
-                <input
-                  type="email"
-                  placeholder="correo@cremeria.mx"
-                  value={nuevoForm.email}
-                  onChange={e => { setNuevoForm(f => ({ ...f, email: e.target.value })); setNuevoErrors(er => ({ ...er, email: '' })) }}
-                  className={`input-field ${nuevoErrors.email ? 'input-field-error' : ''}`}
-                />
-              </FormField>
-              <FormField label="Teléfono">
-                <input
-                  type="tel"
-                  placeholder="442-000-0000"
-                  value={nuevoForm.telefono}
-                  onChange={e => setNuevoForm(f => ({ ...f, telefono: e.target.value }))}
-                  className="input-field"
-                />
-              </FormField>
-              <FormField label="Rol">
-                <select
-                  value={nuevoForm.rol}
-                  onChange={e => setNuevoForm(f => ({ ...f, rol: e.target.value }))}
-                  className="input-field"
-                >
-                  {roles.map(r => <option key={r}>{r}</option>)}
-                </select>
-              </FormField>
-              <FormField label="Sucursal">
-                <select
-                  value={nuevoForm.sucursal}
-                  onChange={e => setNuevoForm(f => ({ ...f, sucursal: e.target.value }))}
-                  className="input-field"
-                >
-                  {sucursales.map(s => <option key={s}>{s}</option>)}
-                </select>
-              </FormField>
-              <FormField label="Contraseña temporal" required error={nuevoErrors.password} className="col-span-2">
-                <input
-                  type="password"
-                  placeholder="Mínimo 8 caracteres"
-                  value={nuevoForm.password}
-                  onChange={e => { setNuevoForm(f => ({ ...f, password: e.target.value })); setNuevoErrors(er => ({ ...er, password: '' })) }}
-                  className={`input-field ${nuevoErrors.password ? 'input-field-error' : ''}`}
-                />
-                {nuevoForm.password && !nuevoErrors.password && (
-                  <div className="flex gap-1 mt-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="h-1 flex-1 rounded-full transition-all" style={{
-                        background: i < Math.min(4, Math.floor(nuevoForm.password.length / 2))
-                          ? nuevoForm.password.length < 6 ? '#C97A6D'
-                          : nuevoForm.password.length < 10 ? '#d97706'
-                          : '#059669'
-                          : '#FDE8D0'
-                      }} />
-                    ))}
-                  </div>
-                )}
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => { setShowModal(false); setNuevoForm(BLANK_USER); setNuevoErrors({}) }} onConfirm={handleGuardarUsuario} confirmLabel="Crear usuario" />
-        </Modal>
+      {porVincular && (
+        <VincularCuenta
+          usuario={porVincular}
+          onClose={() => setPorVincular(null)}
+          onListo={() => { setPorVincular(null); recargar() }}
+        />
       )}
     </div>
   )

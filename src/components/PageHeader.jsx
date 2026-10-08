@@ -3,7 +3,7 @@ export default function PageHeader({ breadcrumb, title, subtitle, children }) {
     <div className="flex items-start justify-between gap-4 flex-wrap mb-6 animate-fade-in">
       <div>
         {breadcrumb && (
-          <p className="text-[10px] font-bold uppercase tracking-[.15em] mb-1.5" style={{ color: '#8FA1B2' }}>
+          <p className="text-[10px] font-bold uppercase tracking-[.15em] mb-1.5" style={{ color: '#627080' }}>
             Panel &rsaquo; {breadcrumb}
           </p>
         )}

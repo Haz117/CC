@@ -1,25 +1,36 @@
-﻿import { useState, useEffect, useMemo } from 'react'
-import { Building2, Plus, MapPin, Users, Monitor, TrendingUp, Edit, Trash2, ToggleLeft, ToggleRight, LayoutGrid, LayoutList, Search, BarChart2 } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Building2, MapPin, Users, Monitor, TrendingUp, LayoutGrid, LayoutList, Search, Target, Warehouse, HandCoins } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
 import Badge from '../components/Badge'
-import ConfirmDialog from '../components/ConfirmDialog'
-import toast from '../utils/toast'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
+import TituloTarjeta from '../components/TituloTarjeta'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
-import { sucursales } from '../data/sucursales'
-import { fmt } from '../utils/fmt'
-import { useLoadDelay } from '../hooks/useLoadDelay'
-import { useEscapeKey } from '../hooks/useEscapeKey'
+import EmptyState from '../components/EmptyState'
+import AvisoError from '../components/AvisoError'
 import { useDebounce } from '../hooks/useDebounce'
 import { usePersistedState } from '../hooks/usePersistedState'
-import Modal from '../components/Modal'
-import ModalFooter from '../components/ModalFooter'
-import EmptyState from '../components/EmptyState'
-import FormField from '../components/FormField'
-import ChartTooltip from '../components/ChartTooltip'
+import { useConsulta } from '../hooks/useConsulta'
+import { useSucursales } from '../hooks/useSucursales'
+import { listarVentasResumen } from '../api/ventas'
+import { listarTurnosAbiertos } from '../api/cajas'
+import { listarMetas, listarSaldosCredito, listarUsuarios } from '../api/organizacion'
+import { ventasPorSucursal } from '../lib/calculos'
+import { pesos, pesosCorto, inicioDelMes, mesLargo } from '../utils/fmt'
+
+const PER_PAGE = 8
+
+// Avance de la meta contra lo que ya debería llevar el mes a la fecha.
+function ritmoDe(avance) {
+  if (avance == null) return { color: '#627080', clase: 'progress-fill-orange' }
+  const hoy = new Date()
+  const esperado = hoy.getDate() / new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate() * 100
+  if (avance >= esperado)       return { color: '#059669', clase: 'progress-fill-green' }
+  if (avance >= esperado * 0.8) return { color: '#d97706', clase: 'progress-fill-amber' }
+  return { color: '#C97A6D', clase: 'progress-fill-red' }
+}
 
 function ViewToggle({ viewMode, setViewMode }) {
   return (
@@ -39,261 +50,283 @@ function ViewToggle({ viewMode, setViewMode }) {
 }
 
 export default function Sucursales() {
-  const PER_PAGE = 5
-  const loaded = useLoadDelay()
-  const [search, setSearch]           = usePersistedState('sucursales-search', '')
+  const { sucursales, nombreCorto, cargando: cargandoSucursales, error: errorSucursales } = useSucursales()
+
+  const [search, setSearch]             = usePersistedState('sucursales-search', '')
   const debouncedSearch = useDebounce(search)
-  const [page, setPage]               = useState(1)
-  const [showModal, setShowModal]     = useState(false)
-  const [viewMode, setViewMode]       = usePersistedState('sucursales-view', 'table')
+  const [page, setPage]                 = useState(1)
+  const [viewMode, setViewMode]         = usePersistedState('sucursales-view', 'cards')
   const [filterStatus, setFilterStatus] = usePersistedState('sucursales-status', 'Todas')
-  const [data, setData]               = useState(sucursales)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editSuc, setEditSuc]         = useState(null)
-  const [editForm, setEditForm]       = useState({})
-  const [confirmDel, setConfirmDel]   = useState(null)
 
-  const filtered = useMemo(() => data.filter(s =>
-    (s.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) || s.admin.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
-    (filterStatus === 'Todas' || (filterStatus === 'Activas' ? s.status : !s.status))
-  ), [data, debouncedSearch, filterStatus])
-  const { sortedByVentas, maxVentas } = useMemo(() => {
-    const sorted = [...data].sort((a, b) => b.ventasMes - a.ventasMes)
-    return { sortedByVentas: sorted, maxVentas: sorted[0]?.ventasMes || 1 }
-  }, [data])
-  const getRank = (id) => sortedByVentas.findIndex(s => s.id === id) + 1
+  // Lo que llega ya viene limitado por la base: el administrador ve todas las sucursales y el supervisor la suya.
+  const desdeMes = inicioDelMes().toISOString()
+  const { datos, cargando, error, recargar } = useConsulta(async () => {
+    const [ventas, metas, saldos, usuarios, abiertas] = await Promise.all([
+      listarVentasResumen({ desde: desdeMes }),
+      listarMetas(), listarSaldosCredito(), listarUsuarios(), listarTurnosAbiertos(),
+    ])
+    return { ventas, metas, saldos, usuarios, abiertas }
+  }, [desdeMes])
 
-  const sucStats = useMemo(() => {
-    let activas = 0, inactivas = 0, cajasTotales = 0, ventasMes = 0
-    for (const s of data) {
-      if (s.status) activas++; else inactivas++
-      cajasTotales += s.cajas
-      ventasMes    += s.ventasMes
+  const data = useMemo(() => {
+    const ventas = ventasPorSucursal(datos?.ventas.filas ?? [])
+    const metas  = new Map((datos?.metas ?? []).map(m => [m.sucursal_id, m.meta_centavos]))
+    const saldos = new Map((datos?.saldos ?? []).map(s => [s.sucursal_id, s.saldo_centavos]))
+    const contar = (lista) => {
+      const mapa = new Map()
+      for (const x of lista ?? []) mapa.set(x.sucursal_id, (mapa.get(x.sucursal_id) ?? 0) + 1)
+      return mapa
     }
-    return { activas, inactivas, cajasTotales, ventasMes }
+    const usuarios = contar(datos?.usuarios?.filter(u => u.activo !== false))
+    const cajas    = contar(datos?.abiertas)
+
+    return sucursales.map(s => {
+      const vendido = ventas.get(s.id)?.centavos ?? 0
+      const meta = metas.get(s.id) ?? null
+      return {
+        ...s,
+        activa: s.activo !== false,
+        vendido,
+        tickets: ventas.get(s.id)?.tickets ?? 0,
+        meta,
+        avance: meta ? Math.round(vendido / meta * 100) : null,
+        saldo: saldos.get(s.id) ?? null,
+        usuarios: usuarios.get(s.id) ?? 0,
+        cajas: cajas.get(s.id) ?? 0,
+      }
+    })
+  }, [sucursales, datos])
+
+  const filtered = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase()
+    return data.filter(s =>
+      (!q || String(s.nombre ?? '').toLowerCase().includes(q) || String(s.direccion ?? '').toLowerCase().includes(q)) &&
+      (filterStatus === 'Todas' || (filterStatus === 'Activas' ? s.activa : !s.activa))
+    )
+  }, [data, debouncedSearch, filterStatus])
+
+  const stats = useMemo(() => {
+    let activas = 0, vendido = 0, meta = 0, saldo = 0, cajas = 0
+    for (const s of data) {
+      if (s.activa) activas++
+      vendido += s.vendido
+      meta    += s.meta ?? 0
+      saldo   += Math.max(0, s.saldo ?? 0)
+      cajas   += s.cajas
+    }
+    return { activas, inactivas: data.length - activas, vendido, meta, saldo, cajas, avance: meta ? Math.round(vendido / meta * 100) : null }
   }, [data])
 
-  const toggleStatus  = (id) => setData(d => d.map(s => s.id === id ? { ...s, status: !s.status } : s))
-  const openEdit      = (s)  => { setEditSuc(s); setEditForm({ nombre: s.nombre, direccion: s.direccion, admin: s.admin }); setShowEditModal(true) }
-  const handleSaveEdit = ()  => {
-    if (!editForm.nombre.trim()) return
-    setData(d => d.map(s => s.id === editSuc.id ? { ...s, ...editForm } : s))
-    toast.success('Sucursal actualizada', `${editForm.nombre} fue modificada correctamente`)
-    setShowEditModal(false); setEditSuc(null)
-  }
-  const handleDelete = (s) => {
-    const snapshot = [...data]
-    setData(d => d.filter(x => x.id !== s.id))
-    toast.error('Sucursal eliminada', s.nombre, { label: 'Deshacer', fn: () => setData(snapshot) })
-    setConfirmDel(null)
-  }
+  // Solo las tiendas entran al comparativo de ventas (el almacén no vende al público).
+  const tiendas = useMemo(
+    () => data.filter(s => !s.es_almacen).sort((a, b) => b.vendido - a.vendido),
+    [data],
+  )
+  const rango = (id) => tiendas.findIndex(s => s.id === id) + 1
 
   useEffect(() => { setPage(1) }, [debouncedSearch, filterStatus])
-  useEscapeKey(() => { setShowModal(false); setShowEditModal(false) })
 
-  const FilterChips = () => (
-    <div className="filter-bar">
-      {['Todas', 'Activas', 'Inactivas'].map(f => (
-        <button key={f} onClick={() => setFilterStatus(f)} className={`chip ${filterStatus === f ? 'active' : ''}`}>{f}</button>
-      ))}
+  const mes = mesLargo()
+  const paginadas = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+
+  // Mientras llega la primera respuesta, o si falló, no hay cifras que mostrar: un cero se leería como dato real.
+  const estadoKpi = cargando || cargandoSucursales ? 'cargando' : datos === undefined ? 'error' : null
+
+  const toolbar = (
+    <div className="data-toolbar">
+      <div className="data-toolbar-row">
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o dirección..." resultCount={filtered.length} />
+        </div>
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="filter-bar">
+            {['Todas', 'Activas', 'Inactivas'].map(f => (
+              <button key={f} onClick={() => setFilterStatus(f)} className={`chip ${filterStatus === f ? 'active' : ''}`}>{f}</button>
+            ))}
+          </div>
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+        </div>
+      </div>
+      <div className="data-toolbar-footer">
+        <div className="toolbar-summary">
+          <span><b>{filtered.length}</b> sucursal{filtered.length !== 1 ? 'es' : ''}</span>
+          <span className="sep">·</span>
+          <span><b>{stats.activas}</b> activas</span>
+        </div>
+        <span className="toolbar-summary">Ventas de {mes}: <b>{pesos(stats.vendido)}</b></span>
+      </div>
     </div>
   )
-
-  const totalVentas = useMemo(() => filtered.reduce((a, s) => a + s.ventasMes, 0), [filtered])
 
   return (
     <div className="space-y-6">
 
       <PageHeader breadcrumb="Sucursales" title="Sucursales"
-        subtitle={`${data.length} sucursales · ${sucStats.activas} activas · ${sucStats.inactivas} inactivas`}
-      >
-        <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Nueva sucursal
-        </button>
-      </PageHeader>
+        subtitle={estadoKpi ? 'Operación, metas y crédito de cada sucursal' : `${data.length} sucursales · ${stats.activas} activas`}
+      />
 
-      <KpiBar items={[
-        { label: 'Total',          value: data.length,             sub: 'sucursales' },
-        { label: 'Activas',        value: sucStats.activas,        good: true,                              sub: 'en operación' },
-        { label: 'Inactivas',      value: sucStats.inactivas,      alert: sucStats.inactivas > 0,           sub: 'sin operación' },
-        { label: 'Cajas totales',  value: sucStats.cajasTotales,   sub: 'registradas' },
-        { label: 'Ventas del mes', value: fmt(sucStats.ventasMes), good: true,                              sub: 'todas las sucursales' },
+      <KpiBar estado={estadoKpi} items={[
+        { label: 'Sucursales',       value: data.length,             sub: `${stats.activas} activas` },
+        { label: 'Cajas abiertas',   value: stats.cajas,             good: stats.cajas > 0, sub: 'en este momento' },
+        { label: 'Ventas del mes',   value: pesosCorto(stats.vendido), good: true, sub: mes },
+        { label: 'Avance de meta',   value: stats.avance == null ? '—' : `${stats.avance}%`, sub: stats.meta ? `meta ${pesosCorto(stats.meta)}` : 'sin meta este mes' },
+        { label: 'Crédito almacén',  value: pesosCorto(stats.saldo), alert: stats.saldo > 0, sub: 'saldo por pagar' },
       ]} />
 
-      {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Ventas por sucursal */}
-        <div className="card p-5 lg:col-span-3">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Ventas del mes por sucursal</span>
-          </div>
-          <ResponsiveContainer width="100%" height={148}>
-            <BarChart data={data.map(s => ({ name: s.nombre.replace('Sucursal ', ''), ventas: s.ventasMes, activa: s.status }))} barSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
-              <Bar dataKey="ventas" radius={[5, 5, 0, 0]}>
-                {data.map((s, i) => {
-                  const maxV = Math.max(...data.map(x => x.ventasMes))
-                  const ratio = s.ventasMes / maxV
-                  const fill = !s.status ? '#FDE8D0' : ratio >= 0.8 ? '#059669' : ratio >= 0.5 ? '#d97706' : '#C97A6D'
-                  return <Cell key={s.id} fill={fill} />
-                })}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <AvisoError error={error || errorSucursales} onReintentar={recargar} />
 
-        {/* Participación */}
-        <div className="card p-5 flex flex-col gap-2.5 lg:col-span-2">
-          <div className="flex items-center gap-2 mb-1">
-            <BarChart2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Participación</span>
+      {datos?.ventas.truncado && (
+        <p className="text-xs font-semibold rounded-2xl px-4 py-3" style={{ color: '#C2410C', background: '#FFF7ED', border: '1px solid #FDBA74' }}>
+          El mes tiene {datos.ventas.total.toLocaleString('es-MX')} ventas y solo se sumaron las más recientes: las ventas del mes son parciales.
+        </p>
+      )}
+
+      {/* ══ Resumen visual ════════════════════════════════════════ */}
+      {tiendas.length > 1 && (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="card p-5 lg:col-span-3">
+            <TituloTarjeta icon={TrendingUp} titulo="Ventas del mes por sucursal" />
+            <ResponsiveContainer width="100%" height={148}>
+              <BarChart data={tiendas.map(s => ({ id: s.id, name: nombreCorto(s.id), ventas: s.vendido / 100, meta: s.meta, avance: s.avance, activa: s.activa }))} maxBarSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="#FDE8D0" />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: '#FFF7ED' }}
+                  content={({ active, payload, label }) => active && payload?.length ? (
+                    <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
+                      <p style={{ fontSize: 10, color: '#627080', fontWeight: 700 }}>{label}</p>
+                      <p style={{ fontSize: 13, color: '#F97316', fontWeight: 800 }}>{pesos(payload[0].value * 100)}</p>
+                      {payload[0].payload.meta && <p style={{ fontSize: 11, color: '#627080' }}>Meta: {pesos(payload[0].payload.meta)} · {payload[0].payload.avance}%</p>}
+                    </div>
+                  ) : null}
+                />
+                <Bar dataKey="ventas" radius={[5, 5, 0, 0]}>
+                  {tiendas.map(s => <Cell key={s.id} fill={!s.activa ? '#FDE8D0' : s.meta ? ritmoDe(s.avance).color : '#F97316'} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          {(() => {
-            const total = sucStats.ventasMes
-            return data.map((s, i) => {
-              const pct = total ? Math.round(s.ventasMes / total * 100) : 0
-              const colors = ['#F97316', '#C2410C', '#059669', '#d97706', '#D4DDE6']
+
+          <div className="card p-5 flex flex-col gap-2.5 lg:col-span-2">
+            <TituloTarjeta icon={Target} titulo="Avance de la meta mensual" className="mb-1" />
+            {tiendas.filter(s => s.meta).map(s => {
+              const r = ritmoDe(s.avance)
               return (
                 <div key={s.id} className="flex items-center gap-2">
-                  <span className="text-[10px] font-semibold w-14 truncate flex-shrink-0" style={{ color: '#627080' }}>{s.nombre.replace('Sucursal ', '')}</span>
+                  <span className="text-[10px] font-semibold w-16 truncate flex-shrink-0" style={{ color: '#627080' }}>{nombreCorto(s.id)}</span>
                   <div className="flex-1 h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
-                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: s.status ? colors[i] : '#D4DDE6' }} />
+                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.min(100, s.avance)}%`, background: r.color }} />
                   </div>
-                  <span className="text-[10px] font-bold w-7 text-right flex-shrink-0" style={{ color: s.status ? colors[i] : '#D4DDE6' }}>{pct}%</span>
+                  <span className="text-[10px] font-bold w-9 text-right flex-shrink-0" style={{ color: r.color }}>{s.avance}%</span>
                 </div>
               )
-            })
-          })()}
-          <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
-            <span className="text-xs" style={{ color: '#8FA1B2' }}>Total mes</span>
-            <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(sucStats.ventasMes)}</span>
+            })}
+            {tiendas.every(s => !s.meta) && (
+              <p className="text-xs" style={{ color: '#627080' }}>No hay metas capturadas para {mes}.</p>
+            )}
+            <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
+              <span className="text-xs" style={{ color: '#627080' }}>Total del mes</span>
+              <span className="text-sm font-black" style={{ color: '#F97316' }}>{pesos(stats.vendido)}</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── Data section ─────────────────────────────────────── */}
-      {!loaded ? <SkeletonCardGrid count={5} /> : <>
+      {cargando || cargandoSucursales ? <SkeletonCardGrid count={5} /> : <>
 
         {/* ── CARDS VIEW ── */}
         {viewMode === 'cards' && <>
-          <div className="card overflow-hidden">
-            <div className="data-toolbar">
-              <div className="data-toolbar-row">
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <SearchInput value={search} onChange={setSearch}
-                    placeholder="Buscar por nombre o administrador..."
-                    resultCount={filtered.length} />
-                </div>
-                <FilterChips />
-                <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-              </div>
-              <div className="data-toolbar-footer">
-                <div className="toolbar-summary">
-                  <span><b>{filtered.length}</b> sucursales</span>
-                  <span className="sep">·</span>
-                  <span><b>{sucStats.activas}</b> activas</span>
-                </div>
-                <span className="toolbar-summary">Ventas mes: <b>{fmt(totalVentas)}</b></span>
-              </div>
-            </div>
-          </div>
+          <div className="card overflow-hidden">{toolbar}</div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {filtered.map((s, i) => {
-              const rank = getRank(s.id)
-              const pct  = Math.round((s.ventasMes / maxVentas) * 100)
-              const rankStyle = rank === 1
-                ? { background: 'rgba(217,119,6,.12)', color: '#d97706' }
-                : rank === 2
-                  ? { background: '#F2F3F5', color: '#627080' }
-                  : rank === 3
-                    ? { background: 'rgba(166,195,218,.2)', color: '#627080' }
-                    : { background: '#F2F3F5', color: '#8FA1B2' }
-              const adminInitials = s.admin !== 'Sin asignar'
-                ? s.admin.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                : '—'
+            {paginadas.map((s, i) => {
+              const r = ritmoDe(s.avance)
+              const puesto = rango(s.id)
               return (
                 <div key={s.id}
                   className="card card-glow p-5 flex flex-col gap-3.5 animate-fade-in-up"
-                  style={{ animationDelay: `${Math.min(i * 60, 200)}ms`, borderColor: !s.status ? 'rgba(201,122,109,.25)' : undefined }}
+                  style={{ animationDelay: `${Math.min(i * 60, 200)}ms`, borderColor: !s.activa ? 'rgba(201,122,109,.25)' : undefined }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: s.status ? '#FFF7ED' : 'rgba(201,122,109,.08)' }}>
-                        <Building2 className="w-5 h-5" style={{ color: s.status ? '#F97316' : '#C97A6D' }} />
+                        style={{ background: s.activa ? '#FFF7ED' : 'rgba(201,122,109,.08)' }}>
+                        {s.es_almacen
+                          ? <Warehouse className="w-5 h-5" style={{ color: '#F97316' }} />
+                          : <Building2 className="w-5 h-5" style={{ color: s.activa ? '#F97316' : '#C97A6D' }} />}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
-                        <p className="text-xs flex items-center gap-1 truncate mt-0.5" style={{ color: '#8FA1B2' }}>
-                          <MapPin className="w-3 h-3 flex-shrink-0" />{s.direccion}
-                        </p>
+                        <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: '#263442' }}>{s.nombre}</p>
+                        {s.direccion && (
+                          <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: '#627080' }} title={s.direccion}>
+                            <MapPin className="w-3 h-3 flex-shrink-0" /><span className="truncate">{s.direccion}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <Badge label={s.status ? 'Activa' : 'Inactiva'} color={s.status ? 'green' : 'red'} />
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black" style={rankStyle}>
-                        #{rank}
+                      <Badge label={s.activa ? 'Activa' : 'Inactiva'} color={s.activa ? 'green' : 'red'} />
+                      {!s.es_almacen && puesto > 0 && tiendas.length > 1 && (
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black"
+                          style={puesto === 1 ? { background: 'rgba(217,119,6,.12)', color: '#d97706' } : { background: '#F2F3F5', color: '#627080' }}>
+                          #{puesto}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="rounded-xl p-2.5 text-center" style={{ background: '#FFF7ED' }}>
+                        <Monitor className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#F97316' }} />
+                        <p className="text-xs font-bold leading-none" style={{ color: '#C2410C' }}>{s.cajas}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Cajas abiertas</p>
+                      </div>
+                      <div className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(124,58,237,.08)' }}>
+                        <Users className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#7c3aed' }} />
+                        <p className="text-xs font-bold leading-none" style={{ color: '#7c3aed' }}>{s.usuarios}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Usuarios</p>
+                      </div>
+                      <div className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(5,150,105,.08)' }}>
+                        <TrendingUp className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#059669' }} />
+                        <p className="text-[10px] font-bold leading-none" style={{ color: '#059669' }}>{pesosCorto(s.vendido)}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Ventas mes</p>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-xl p-2.5 text-center" style={{ background: '#FFF7ED' }}>
-                      <Monitor className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#F97316' }} />
-                      <p className="text-xs font-bold leading-none" style={{ color: '#C2410C' }}>{s.cajas}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Cajas</p>
-                    </div>
-                    <div className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(124,58,237,.08)' }}>
-                      <Users className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#7c3aed' }} />
-                      <p className="text-xs font-bold leading-none" style={{ color: '#7c3aed' }}>{s.usuarios}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Usuarios</p>
-                    </div>
-                    <div className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(5,150,105,.08)' }}>
-                      <TrendingUp className="w-3.5 h-3.5 mx-auto mb-1" style={{ color: '#059669' }} />
-                      <p className="text-[10px] font-bold leading-none" style={{ color: '#059669' }}>{fmt(s.ventasMes)}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: '#627080' }}>Ventas mes</p>
-                    </div>
-                  </div>
+                    {s.meta ? (
+                      <div>
+                        <div className="flex justify-between text-[10px] mb-1.5">
+                          <span className="font-medium" style={{ color: '#627080' }}>Meta del mes · {pesosCorto(s.meta)}</span>
+                          <span className="font-bold" style={{ color: r.color }}>{s.avance}%</span>
+                        </div>
+                        <div className="progress-track">
+                          <div className={`progress-fill ${r.clase}`} style={{ width: `${Math.min(100, s.avance)}%` }} />
+                        </div>
+                      </div>
+                    ) : !s.es_almacen && (
+                      <p className="text-[10px]" style={{ color: '#627080' }}>Sin meta capturada para {mes}.</p>
+                    )}
 
-                  <div>
-                    <div className="flex justify-between text-[10px] mb-1.5">
-                      <span className="font-medium" style={{ color: '#8FA1B2' }}>Participación en ventas</span>
-                      <span className="font-bold" style={{ color: '#F97316' }}>{pct}%</span>
-                    </div>
-                    <div className="progress-track">
-                      <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
+                    {s.es_almacen && (
+                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#FFF8F0' }}>
+                        <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
+                        <span className="text-xs" style={{ color: '#627080' }}>Almacén central: surte a las sucursales</span>
+                      </div>
+                    )}
 
-                  <div className="flex items-center gap-2.5 border-t pt-3" style={{ borderColor: '#FFF8F0' }}>
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                      style={{
-                        background: s.admin !== 'Sin asignar' ? '#FFF7ED' : '#FFF8F0',
-                        color: s.admin !== 'Sin asignar' ? '#F97316' : '#8FA1B2',
-                      }}>
-                      {adminInitials}
-                    </div>
-                    <span className="text-xs truncate" style={{ color: '#627080' }}>
-                      {s.admin === 'Sin asignar' ? <em style={{ color: '#8FA1B2' }}>Sin administrador</em> : s.admin}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button onClick={() => openEdit(s)} className="btn-soft-blue flex-1 py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-1">
-                      <Edit className="w-3.5 h-3.5" /> Editar
-                    </button>
-                    <button onClick={() => toggleStatus(s.id)} className="action-btn px-3 rounded-xl"
-                      style={s.status ? { color: '#059669' } : { color: '#C97A6D' }} title={s.status ? 'Desactivar' : 'Activar'}>
-                      {s.status ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                    </button>
-                    <button onClick={() => setConfirmDel(s)} className="action-btn danger px-3 rounded-xl" title="Eliminar">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                    {s.saldo != null && (
+                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#FFF8F0' }}>
+                        <HandCoins className="w-4 h-4 flex-shrink-0" style={{ color: s.saldo > 0 ? '#d97706' : '#059669' }} />
+                        <span className="text-xs" style={{ color: '#627080' }}>
+                          {s.saldo > 0
+                            ? <>Debe al almacén <strong style={{ color: '#d97706' }}>{pesos(s.saldo)}</strong></>
+                            : 'Sin adeudo con el almacén'}
+                        </span>
+                      </div>
+                    )}
+                  </>
                 </div>
               )
             })}
@@ -301,39 +334,25 @@ export default function Sucursales() {
               <EmptyState icon={Search} title="Sin resultados" subtitle="Intenta con otro término o limpia los filtros." className="col-span-full" />
             )}
           </div>
+          {filtered.length > PER_PAGE && (
+            <div className="card overflow-hidden">
+              <Pagination total={filtered.length} page={page} perPage={PER_PAGE} onChange={setPage} />
+            </div>
+          )}
         </>}
 
         {/* ── TABLE VIEW ── */}
         {viewMode === 'table' && (
           <div className="card overflow-hidden">
-            <div className="data-toolbar">
-              <div className="data-toolbar-row">
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <SearchInput value={search} onChange={setSearch}
-                    placeholder="Buscar por nombre o administrador..."
-                    resultCount={filtered.length} />
-                </div>
-                <FilterChips />
-                <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-              </div>
-              <div className="data-toolbar-footer">
-                <div className="toolbar-summary">
-                  <span><b>{filtered.length}</b> sucursales</span>
-                  <span className="sep">·</span>
-                  <span><b>{sucStats.activas}</b> activas</span>
-                </div>
-                <span className="toolbar-summary">Ventas mes: <b>{fmt(totalVentas)}</b></span>
-              </div>
-            </div>
+            {toolbar}
 
             <div className="section-head">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="section-head-text"><strong>Sucursales</strong></span>
-                <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} encontrada{filtered.length !== 1 ? 's' : ''}</span>
-                <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{sucStats.activas} activas</span>
-                {sucStats.inactivas > 0 && (
-                  <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{sucStats.inactivas} inactivas</span>
+                <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} encontrada{filtered.length !== 1 ? 's' : ''}</span>
+                {stats.inactivas > 0 && (
+                  <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{stats.inactivas} inactivas</span>
                 )}
               </div>
             </div>
@@ -343,60 +362,51 @@ export default function Sucursales() {
                 <thead>
                   <tr>
                     <th>Sucursal</th>
-                    <th className="hidden md:table-cell">Administrador</th>
-                    <th className="hidden lg:table-cell">Cajas</th>
+                    <th className="hidden lg:table-cell">Cajas abiertas</th>
                     <th className="hidden lg:table-cell">Usuarios</th>
-                    <th className="hidden xl:table-cell">Ventas mes</th>
+                    <th>Ventas del mes</th>
+                    <th className="hidden md:table-cell">Meta</th>
+                    <th className="hidden xl:table-cell">Crédito almacén</th>
                     <th>Estado</th>
-                    <th className="text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE).map(s => (
-                    <tr key={s.id}>
-                      <td>
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: s.status ? '#FFF7ED' : 'rgba(201,122,109,.1)' }}>
-                            <Building2 className="w-4 h-4" style={{ color: s.status ? '#F97316' : '#C97A6D' }} />
+                  {paginadas.map(s => {
+                    const r = ritmoDe(s.avance)
+                    const sinDatos = <span className="text-xs" style={{ color: '#D4DDE6' }}>—</span>
+                    return (
+                      <tr key={s.id}>
+                        <td>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                              style={{ background: s.activa ? '#FFF7ED' : 'rgba(201,122,109,.1)' }}>
+                              {s.es_almacen
+                                ? <Warehouse className="w-4 h-4" style={{ color: '#F97316' }} />
+                                : <Building2 className="w-4 h-4" style={{ color: s.activa ? '#F97316' : '#C97A6D' }} />}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
+                              <p className="text-xs truncate" style={{ color: '#627080' }}>{s.es_almacen ? 'Almacén central' : s.direccion}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
-                            <p className="text-xs flex items-center gap-1 min-w-0" style={{ color: '#8FA1B2' }}>
-                              <MapPin className="w-3 h-3 flex-shrink-0" /><span className="truncate">{s.direccion}</span>
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="hidden md:table-cell">
-                        <p className="text-sm" style={{ color: '#627080' }}>{s.admin}</p>
-                      </td>
-                      <td className="hidden lg:table-cell">
-                        <span className="text-sm font-medium" style={{ color: '#627080' }}>{s.cajas}</span>
-                      </td>
-                      <td className="hidden lg:table-cell">
-                        <span className="text-sm font-medium" style={{ color: '#627080' }}>{s.usuarios}</span>
-                      </td>
-                      <td className="hidden xl:table-cell">
-                        <span className="text-sm font-semibold" style={{ color: '#059669' }}>{fmt(s.ventasMes)}</span>
-                      </td>
-                      <td>
-                        <Badge label={s.status ? 'Activa' : 'Inactiva'} color={s.status ? 'green' : 'gray'} />
-                      </td>
-                      <td>
-                        <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => openEdit(s)} className="action-btn" title="Editar"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => toggleStatus(s.id)} className="action-btn"
-                            style={s.status ? { color: '#059669' } : {}} title={s.status ? 'Desactivar' : 'Activar'}>
-                            {s.status ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                          </button>
-                          <button onClick={() => setConfirmDel(s)} className="action-btn danger" title="Eliminar">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="hidden lg:table-cell"><span className="text-sm font-medium" style={{ color: '#627080' }}>{s.cajas}</span></td>
+                        <td className="hidden lg:table-cell"><span className="text-sm font-medium" style={{ color: '#627080' }}>{s.usuarios}</span></td>
+                        <td><span className="text-sm font-semibold" style={{ color: '#059669' }}>{pesos(s.vendido)}</span></td>
+                        <td className="hidden md:table-cell">
+                          {s.meta
+                            ? <span className="text-xs font-bold" style={{ color: r.color }}>{s.avance}% <span className="font-normal" style={{ color: '#627080' }}>de {pesosCorto(s.meta)}</span></span>
+                            : sinDatos}
+                        </td>
+                        <td className="hidden xl:table-cell">
+                          {s.saldo != null
+                            ? <span className="text-sm font-semibold" style={{ color: s.saldo > 0 ? '#d97706' : '#627080' }}>{pesos(s.saldo)}</span>
+                            : sinDatos}
+                        </td>
+                        <td><Badge label={s.activa ? 'Activa' : 'Inactiva'} color={s.activa ? 'green' : 'gray'} /></td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -407,73 +417,13 @@ export default function Sucursales() {
 
             <Pagination total={filtered.length} page={page} perPage={PER_PAGE} onChange={setPage} />
             <div className="table-foot-row">
-              <p className="total-label">Ventas del mes · todas las sucursales</p>
-              <p className="total-value">{fmt(sucStats.ventasMes)}</p>
+              <p className="total-label">Ventas de {mes} · todas las sucursales</p>
+              <p className="total-value">{pesos(stats.vendido)}</p>
             </div>
           </div>
         )}
 
       </>}
-
-      {/* ── Edit modal ─────────────────────────────────────── */}
-      {showEditModal && editSuc && (
-        <Modal title="Editar sucursal" subtitle={`ID #${editSuc.id}`} maxWidth="lg" onClose={() => setShowEditModal(false)}>
-            <div className="p-6 space-y-4">
-              <FormField label="Nombre" required>
-                <input type="text" value={editForm.nombre} onChange={e => setEditForm(f => ({ ...f, nombre: e.target.value }))} className="input-field" autoFocus />
-              </FormField>
-              <FormField label="Dirección">
-                <input type="text" value={editForm.direccion} onChange={e => setEditForm(f => ({ ...f, direccion: e.target.value }))} className="input-field" />
-              </FormField>
-              <FormField label="Administrador">
-                <select value={editForm.admin} onChange={e => setEditForm(f => ({ ...f, admin: e.target.value }))} className="input-field">
-                  <option value="Sin asignar">Sin asignar</option>
-                  {['Ana Ramos', 'Roberto Silva', 'Lucía Pérez', 'Miguel Torres'].map(a => <option key={a}>{a}</option>)}
-                </select>
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => setShowEditModal(false)} onConfirm={handleSaveEdit} confirmLabel="Guardar cambios" />
-        </Modal>
-      )}
-
-      {/* ── Confirm delete ─────────────────────────────────── */}
-      {confirmDel && (
-        <ConfirmDialog
-          title="¿Eliminar esta sucursal?"
-          message={`"${confirmDel.nombre}" será eliminada del sistema. Podrás deshacer esta acción desde la notificación.`}
-          confirmLabel="Sí, eliminar"
-          onConfirm={() => handleDelete(confirmDel)}
-          onCancel={() => setConfirmDel(null)}
-        />
-      )}
-
-      {/* ── Nueva sucursal modal ───────────────────────────── */}
-      {showModal && (
-        <Modal title="Nueva sucursal" maxWidth="lg" onClose={() => setShowModal(false)}>
-            <div className="p-6 space-y-4">
-              <FormField label="Nombre de la sucursal">
-                <input type="text" placeholder="Ej: Sucursal Centro" className="input-field" autoFocus />
-              </FormField>
-              <FormField label="Dirección">
-                <input type="text" placeholder="Calle, número, colonia" className="input-field" />
-              </FormField>
-              <FormField label="Teléfono">
-                <input type="tel" placeholder="Ej: 442-123-4567" className="input-field" />
-              </FormField>
-              <FormField label="Correo electrónico">
-                <input type="email" placeholder="sucursal@cremeria.mx" className="input-field" />
-              </FormField>
-              <FormField label="Administrador">
-                <select className="input-field">
-                  <option>Seleccionar usuario</option>
-                  <option>Ana Ramos</option>
-                  <option>Roberto Silva</option>
-                </select>
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => setShowModal(false)} onConfirm={() => { toast.success('Sucursal guardada', 'La nueva sucursal fue registrada exitosamente'); setShowModal(false) }} confirmLabel="Guardar sucursal" />
-        </Modal>
-      )}
     </div>
   )
 }

@@ -1,14 +1,11 @@
 import { NavLink, useMatch, useResolvedPath } from 'react-router-dom'
-import { LayoutDashboard, ShoppingCart, Package, Map, MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
+import { PAGINAS } from '../lib/navegacion'
 
-const tabs = [
-  { path: '/dashboard',  icon: LayoutDashboard, label: 'Panel' },
-  { path: '/ventas',     icon: ShoppingCart,    label: 'Ventas' },
-  { path: '/inventario', icon: Package,         label: 'Stock',  badge: 3 },
-  { path: '/rutas',      icon: Map,             label: 'Rutas' },
-]
+// Las cuatro pestañas del móvil, en orden de preferencia; el resto del menú queda en "Más".
+const PREFERIDAS = ['/dashboard', '/ventas', '/inventario', '/cajas', '/configuracion']
 
-function BottomTab({ path, icon: Icon, label, badge }) {
+function BottomTab({ path, icon: Icon, label, badge = 0 }) {
   const resolved = useResolvedPath(path)
   const isActive = !!useMatch({ path: resolved.pathname, end: true })
 
@@ -43,14 +40,16 @@ function BottomTab({ path, icon: Icon, label, badge }) {
       </div>
 
       <span className="text-[10px] font-bold transition-all duration-200"
-        style={{ color: isActive ? '#C2410C' : '#8FA1B2', letterSpacing: isActive ? '.01em' : '0' }}>
+        style={{ color: isActive ? '#C2410C' : '#627080', letterSpacing: isActive ? '.01em' : '0' }}>
         {label}
       </span>
     </NavLink>
   )
 }
 
-export default function BottomNav({ onMoreClick }) {
+export default function BottomNav({ onMoreClick, globos = {} }) {
+  const tabs = PREFERIDAS.map(path => PAGINAS.find(p => p.path === path)).filter(Boolean).slice(0, 4)
+
   return (
     <nav
       aria-label="Navegación principal"
@@ -63,14 +62,14 @@ export default function BottomNav({ onMoreClick }) {
       }}
     >
       {tabs.map(tab => (
-        <BottomTab key={tab.path} {...tab} />
+        <BottomTab key={tab.path} path={tab.path} icon={tab.icon} label={tab.corto ?? tab.label} badge={globos[tab.path]?.rojo ? globos[tab.path].n : 0} />
       ))}
       <button
         onClick={onMoreClick}
         aria-label="Más opciones de navegación"
         className="flex flex-col items-center justify-center gap-1 py-2"
         style={{
-          color: '#8FA1B2', border: 'none', background: 'transparent',
+          color: '#627080', border: 'none', background: 'transparent',
           cursor: 'pointer', fontFamily: 'inherit', minHeight: 56,
           WebkitTapHighlightColor: 'transparent',
         }}

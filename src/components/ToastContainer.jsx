@@ -106,7 +106,7 @@ function ToastItem({ toast, onRemove }) {
           {toast.title}
         </p>
         {toast.message && (
-          <p style={{ fontSize: '.75rem', color: '#8FA1B2', marginTop: '3px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '.75rem', color: '#627080', marginTop: '3px', lineHeight: 1.5 }}>
             {toast.message}
           </p>
         )}

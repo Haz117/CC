@@ -6,7 +6,7 @@ export default function ChartCard({ title, subtitle, onExport, exportLabel = 'Ex
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="font-bold tracking-tight" style={{ color: '#263442' }}>{title}</h2>
-          {subtitle && <p className="text-xs" style={{ color: '#8FA1B2' }}>{subtitle}</p>}
+          {subtitle && <p className="text-xs" style={{ color: '#627080' }}>{subtitle}</p>}
         </div>
         {onExport && (
           <button

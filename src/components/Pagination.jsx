@@ -29,7 +29,7 @@ export default function Pagination({ total, page, perPage, onChange }) {
       className="flex items-center justify-between px-5 py-3"
       style={{ borderTop: '1px solid #FDE8D0', background: '#FFFBF7' }}
     >
-      <p className="text-xs font-medium" style={{ color: '#8FA1B2' }}>
+      <p className="text-xs font-medium" style={{ color: '#627080' }}>
         {start}–{end}{' '}
         <span style={{ color: '#D4DDE6' }}>de</span>{' '}
         <strong style={{ color: '#627080' }}>{total}</strong>

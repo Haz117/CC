@@ -12,7 +12,10 @@ export function downloadCSV(rows, filename = 'export') {
   // Escape a single cell value: wrap in quotes if it contains a comma,
   // double-quote, or newline; double any existing double-quotes.
   const escape = (val) => {
-    const str = val == null ? '' : String(val)
+    let str = val == null ? '' : String(val)
+    // Text typed at the registers (motivos, notas, conceptos) ends up here: a cell that starts
+    // with = + - @ would run as a formula in Excel, so it is neutralised. Numbers are left alone.
+    if (/^[=+\-@]/.test(str) && Number.isNaN(Number(str))) str = `'${str}`
     if (str.includes(',') || str.includes('"') || str.includes('\n')) {
       return `"${str.replace(/"/g, '""')}"`
     }
@@ -24,7 +27,8 @@ export function downloadCSV(rows, filename = 'export') {
     ...rows.map(row => headers.map(h => escape(row[h])).join(',')),
   ]
 
-  const csvContent = lines.join('\r\n')
+  // The BOM makes Excel read the file as UTF-8, so accents (Crédito, Requesón) come out right.
+  const csvContent = '﻿' + lines.join('\r\n')
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, X, BellOff } from 'lucide-react'
+import { Bell, X } from 'lucide-react'
 import notify from '../utils/notifications'
 
 export default function NotificationBanner() {
@@ -33,7 +33,7 @@ export default function NotificationBanner() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold" style={{ color: '#263442' }}>Activar notificaciones</p>
-          <p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>Recibe alertas de stock, rutas y ventas</p>
+          <p className="text-xs mt-0.5" style={{ color: '#627080' }}>Recibe alertas de stock, rutas y ventas</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button

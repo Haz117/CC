@@ -128,19 +128,19 @@ export default function Distribuidores() {
             <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="text-sm font-bold" style={{ color: '#263442' }}>Mercancía vs vendido</span>
             <div className="ml-auto flex items-center gap-3">
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#F97316' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Vendido</span></div>
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#FDBA74' }} /><span className="text-xs" style={{ color: '#8FA1B2' }}>Mercancía</span></div>
+              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#F97316' }} /><span className="text-xs" style={{ color: '#627080' }}>Vendido</span></div>
+              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#FDBA74' }} /><span className="text-xs" style={{ color: '#627080' }}>Mercancía</span></div>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={148}>
             <BarChart data={data.map(d => ({ name: d.nombre.split(' ')[0], vendido: d.vendido, mercancia: d.mercancia - d.vendido }))} barSize={14} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
               <Tooltip
                 cursor={{ fill: '#FFF7ED' }}
                 content={({ active, payload, label }) => active && payload?.length ? (
                   <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
-                    <p style={{ fontSize: 10, color: '#8FA1B2', fontWeight: 700 }}>{label}</p>
+                    <p style={{ fontSize: 10, color: '#627080', fontWeight: 700 }}>{label}</p>
                     {payload.map(p => <p key={p.name} style={{ fontSize: 12, color: p.fill, fontWeight: 700 }}>{p.name === 'vendido' ? 'Vendido' : 'Restante'}: {fmt(p.value)}</p>)}
                   </div>
                 ) : null}
@@ -168,14 +168,14 @@ export default function Distribuidores() {
             </div>
           ))}
           <div className="rounded-xl p-3 mt-auto" style={{ background: '#FFF7ED' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#8FA1B2' }}>Eficiencia promedio</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#627080' }}>Eficiencia promedio</p>
             <div className="flex items-end gap-1.5">
               <span className="text-2xl font-black" style={{ color: '#F97316' }}>
                 {distCounts.withSales.length
                   ? Math.round(distCounts.withSales.reduce((a, d) => a + (d.vendido / d.mercancia * 100), 0) / distCounts.withSales.length)
                   : 0}%
               </span>
-              <span className="text-xs mb-1" style={{ color: '#8FA1B2' }}>de mercancía vendida</span>
+              <span className="text-xs mb-1" style={{ color: '#627080' }}>de mercancía vendida</span>
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function Distribuidores() {
           <div className="flex items-center gap-2">
             <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
             <span className="section-head-text"><strong>Distribuidores</strong></span>
-            <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+            <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
             <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{distCounts.activos} activos</span>
             {distCounts.saldo > 0 && (
               <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{distCounts.saldo} saldo</span>
@@ -229,7 +229,7 @@ export default function Distribuidores() {
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-xs truncate" style={{ color: '#263442' }}>{d.nombre}</p>
-                          <p className="text-xs truncate" style={{ color: '#8FA1B2' }}>{d.telefono}</p>
+                          <p className="text-xs truncate" style={{ color: '#627080' }}>{d.telefono}</p>
                         </div>
                       </div>
                     </td>
@@ -247,14 +247,14 @@ export default function Distribuidores() {
                         <div className="progress-track mt-1">
                           <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
                         </div>
-                        <p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>{pct}%</p>
+                        <p className="text-xs mt-0.5" style={{ color: '#627080' }}>{pct}%</p>
                       </div>
                     </td>
                     <td className="hidden xl:table-cell"><span style={{ color: '#627080' }}>{fmt(d.devoluciones)}</span></td>
                     <td>
                       {d.saldo > 0
                         ? <span className="font-bold" style={{ color: '#C97A6D' }}>{fmt(d.saldo)}</span>
-                        : <span className="text-xs" style={{ color: '#8FA1B2' }}>—</span>}
+                        : <span className="text-xs" style={{ color: '#627080' }}>—</span>}
                     </td>
                     <td><Badge label={d.status} color={statusColor[d.status]} /></td>
                     <td>
@@ -308,7 +308,7 @@ export default function Distribuidores() {
                   <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                     <span className="folio text-xs flex-shrink-0">{d.codigo}</span>
                     <span style={{ color: '#D4DDE6' }}>·</span>
-                    <span className="text-xs truncate" style={{ color: '#8FA1B2' }}>{d.telefono}</span>
+                    <span className="text-xs truncate" style={{ color: '#627080' }}>{d.telefono}</span>
                   </div>
                   <p className="text-xs font-medium mt-0.5 truncate" style={{ color: '#F97316' }}>{d.ruta}</p>
                 </div>
@@ -325,7 +325,7 @@ export default function Distribuidores() {
                 { label: 'Devoluciones', value: fmt(d.devoluciones), color: d.devoluciones > 0 ? '#C97A6D' : '#8FA1B2' },
               ].map(item => (
                 <div key={item.label} className="rounded-xl p-2.5" style={{ background: '#F2F3F5' }}>
-                  <p className="text-[10px] mb-0.5" style={{ color: '#8FA1B2' }}>{item.label}</p>
+                  <p className="text-[10px] mb-0.5" style={{ color: '#627080' }}>{item.label}</p>
                   <p className="text-sm font-bold" style={{ color: item.color }}>{item.value}</p>
                 </div>
               ))}
@@ -341,7 +341,7 @@ export default function Distribuidores() {
 
             {/* Mercancía utilization */}
             <div className="mb-3">
-              <div className="flex justify-between text-[10px] mb-1" style={{ color: '#8FA1B2' }}>
+              <div className="flex justify-between text-[10px] mb-1" style={{ color: '#627080' }}>
                 <span>Utilización de mercancía</span>
                 <span className="font-bold" style={{ color: '#F97316' }}>
                   {d.mercancia > 0 ? Math.round((d.vendido / d.mercancia) * 100) : 0}%
@@ -378,7 +378,7 @@ export default function Distribuidores() {
                   <Truck className="w-7 h-7" style={{ color: '#F97316' }} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#8FA1B2' }}>Utilización de mercancía</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#627080' }}>Utilización de mercancía</p>
                   {(() => {
                     const pct = selected.mercancia > 0 ? Math.min(100, Math.round((selected.vendido / selected.mercancia) * 100)) : 0
                     return (
@@ -386,7 +386,7 @@ export default function Distribuidores() {
                         <div className="progress-track" style={{ marginBottom: 4 }}>
                           <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
                         </div>
-                        <p className="text-xs font-black" style={{ color: '#F97316' }}>{pct}% <span className="font-normal" style={{ color: '#8FA1B2' }}>de mercancía vendida</span></p>
+                        <p className="text-xs font-black" style={{ color: '#F97316' }}>{pct}% <span className="font-normal" style={{ color: '#627080' }}>de mercancía vendida</span></p>
                       </>
                     )
                   })()}
@@ -405,7 +405,7 @@ export default function Distribuidores() {
                 ))}
                 {/* Estado — full width */}
                 <div className="col-span-2 rounded-xl p-3 flex items-center justify-between" style={{ background: '#F2F3F5' }}>
-                  <p className="text-xs" style={{ color: '#8FA1B2' }}>Estado</p>
+                  <p className="text-xs" style={{ color: '#627080' }}>Estado</p>
                   <Badge label={selected.status} color={statusColor[selected.status]} />
                 </div>
                 {/* Saldo — full width, destacado si > 0 */}
@@ -415,8 +415,8 @@ export default function Distribuidores() {
                     ? { background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.2)' }
                     : { background: '#F2F3F5' }}
                 >
-                  <p className="text-xs font-semibold" style={{ color: selected.saldo > 0 ? '#A05A52' : '#8FA1B2' }}>Saldo pendiente</p>
-                  <p className="text-sm font-black" style={{ color: selected.saldo > 0 ? '#C97A6D' : '#8FA1B2' }}>
+                  <p className="text-xs font-semibold" style={{ color: selected.saldo > 0 ? '#A05A52' : '#627080' }}>Saldo pendiente</p>
+                  <p className="text-sm font-black" style={{ color: selected.saldo > 0 ? '#C97A6D' : '#627080' }}>
                     {selected.saldo > 0 ? fmt(selected.saldo) : '—'}
                   </p>
                 </div>
