@@ -1,39 +1,20 @@
 ﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Search, LayoutDashboard, Building2, Monitor, ShoppingCart, Package,
-  Truck, MapPin, ShoppingBag, BarChart3, Users, Settings, Plus,
-  Scissors, X, ArrowRight,
-} from 'lucide-react'
+import { Search, ShoppingCart, Scissors, PackageSearch, BarChart3, UserRound, X, ArrowRight } from 'lucide-react'
+import { PAGINAS } from '../lib/navegacion'
 
-const NAV = [
-  { label: 'Dashboard',        path: '/dashboard',      Icon: LayoutDashboard, group: 'Navegar' },
-  { label: 'Ventas',           path: '/ventas',          Icon: ShoppingCart,    group: 'Navegar' },
-  { label: 'Inventario',       path: '/inventario',      Icon: Package,         group: 'Navegar' },
-  { label: 'Cajas',            path: '/cajas',           Icon: Monitor,         group: 'Navegar' },
-  { label: 'Sucursales',       path: '/sucursales',      Icon: Building2,       group: 'Navegar' },
-  { label: 'Distribuidores',   path: '/distribuidores',  Icon: Truck,           group: 'Navegar' },
-  { label: 'Rutas',            path: '/rutas',           Icon: MapPin,          group: 'Navegar' },
-  { label: 'Compras',          path: '/compras',         Icon: ShoppingBag,     group: 'Navegar' },
-  { label: 'Reportes',         path: '/reportes',        Icon: BarChart3,       group: 'Navegar' },
-  { label: 'Usuarios',         path: '/usuarios',        Icon: Users,           group: 'Navegar' },
-  { label: 'Configuración',    path: '/configuracion',   Icon: Settings,        group: 'Navegar' },
+// La web es de consulta: los accesos rápidos abren vistas, no registran nada.
+const ACCESOS = [
+  { label: 'Ventas de hoy',          path: '/ventas',        Icon: ShoppingCart },
+  { label: 'Cortes de caja',         path: '/cajas',         Icon: Scissors },
+  { label: 'Productos bajo mínimo',  path: '/inventario',    Icon: PackageSearch },
+  { label: 'Reporte de ventas',      path: '/reportes',      Icon: BarChart3 },
+  { label: 'Mi cuenta y contraseña', path: '/configuracion', Icon: UserRound },
 ]
-
-const ACTIONS = [
-  { label: 'Nueva venta',           path: '/ventas',         Icon: Plus,     group: 'Acciones rápidas' },
-  { label: 'Nuevo producto',        path: '/inventario',     Icon: Plus,     group: 'Acciones rápidas' },
-  { label: 'Nueva orden de compra', path: '/compras',        Icon: Plus,     group: 'Acciones rápidas' },
-  { label: 'Registrar corte',       path: '/cajas',          Icon: Scissors, group: 'Acciones rápidas' },
-  { label: 'Nuevo distribuidor',    path: '/distribuidores', Icon: Plus,     group: 'Acciones rápidas' },
-  { label: 'Ver reportes',          path: '/reportes',       Icon: BarChart3,group: 'Acciones rápidas' },
-]
-
-const ALL = [...NAV, ...ACTIONS]
 
 const GROUP_COLORS = {
   'Navegar':          { bg: '#FFF7ED', icon: '#F97316', activeBg: '#F97316' },
-  'Acciones rápidas': { bg: 'rgba(5,150,105,.08)', icon: '#059669', activeBg: '#059669' },
+  'Accesos rápidos':  { bg: 'rgba(5,150,105,.08)', icon: '#059669', activeBg: '#059669' },
 }
 
 export default function CommandPalette({ open, onClose }) {
@@ -43,14 +24,19 @@ export default function CommandPalette({ open, onClose }) {
   const listRef   = useRef(null)
   const navigate  = useNavigate()
 
+  const todos = useMemo(() => [
+    ...PAGINAS.map(p => ({ label: p.label, path: p.path, Icon: p.icon, group: 'Navegar' })),
+    ...ACCESOS.map(a => ({ ...a, group: 'Accesos rápidos' })),
+  ], [])
+
   const results = useMemo(() =>
     query.trim().length === 0
-      ? ALL
-      : ALL.filter(item =>
+      ? todos
+      : todos.filter(item =>
           item.label.toLowerCase().includes(query.toLowerCase()) ||
           item.group.toLowerCase().includes(query.toLowerCase())
         )
-  , [query])
+  , [query, todos])
 
   const grouped = useMemo(() => results.reduce((acc, item) => {
     if (!acc[item.group]) acc[item.group] = []
@@ -140,11 +126,11 @@ export default function CommandPalette({ open, onClose }) {
             aria-autocomplete="list"
             aria-controls="command-palette-list"
             aria-activedescendant={`cp-item-${activeIdx}`}
-            placeholder="Buscar páginas y acciones..."
+            placeholder="Buscar páginas y accesos..."
             value={query}
             onChange={e => setQuery(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-base font-medium"
-            style={{ color: '#263442' }}
+            className="flex-1 bg-transparent text-base font-medium"
+            style={{ color: '#263442', outline: 'none' }}
           />
           <button
             onClick={onClose}
@@ -223,7 +209,7 @@ export default function CommandPalette({ open, onClose }) {
           {results.length === 0 && (
             <div className="py-14 text-center">
               <Search className="w-8 h-8 mx-auto mb-3" style={{ color: '#D4DDE6' }} />
-              <p className="text-sm font-medium" style={{ color: '#8FA1B2' }}>
+              <p className="text-sm font-medium" style={{ color: '#627080' }}>
                 Sin resultados para "<span style={{ color: '#263442' }}>{query}</span>"
               </p>
             </div>
@@ -232,11 +218,11 @@ export default function CommandPalette({ open, onClose }) {
 
         {/* Footer */}
         <div
-          className="flex items-center gap-4 px-4 py-2.5"
+          className="flex items-center gap-4 px-4 py-2.5 max-sm:hidden!"
           style={{ borderTop: '1px solid #F2F3F5', background: '#F2F3F5' }}
         >
           {[['↑↓', 'navegar'], ['↵', 'abrir'], ['esc', 'cerrar']].map(([key, label]) => (
-            <span key={key} className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: '#FED7AA' }}>
+            <span key={key} className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: '#627080' }}>
               <kbd
                 className="px-1.5 py-0.5 rounded-md text-[9px] font-bold"
                 style={{ background: '#FDE8D0', color: '#627080', border: '1px solid #D4DDE6' }}
@@ -246,7 +232,7 @@ export default function CommandPalette({ open, onClose }) {
               {label}
             </span>
           ))}
-          <span className="ml-auto text-[10px] font-medium" style={{ color: '#D4DDE6' }}>
+          <span className="ml-auto text-[10px] font-medium" style={{ color: '#627080' }}>
             Ctrl+K
           </span>
         </div>

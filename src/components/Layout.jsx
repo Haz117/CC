@@ -1,29 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { FlaskConical } from 'lucide-react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import BottomNav from './BottomNav'
 import ScrollToTop from './ScrollToTop'
 import CommandPalette from './CommandPalette'
+import { useAuth } from '../auth/contexto'
+import { useAvisos } from '../hooks/useAvisos'
+import { tituloDe } from '../lib/navegacion'
 
-export default function Layout({ children, user, onLogout }) {
+export default function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const location = useLocation()
-
-  const pageTitles = {
-    '/dashboard': 'Panel Principal', '/sucursales': 'Sucursales', '/cajas': 'Cajas',
-    '/ventas': 'Ventas', '/inventario': 'Inventario', '/distribuidores': 'Distribuidores',
-    '/rutas': 'Rutas', '/compras': 'Compras', '/reportes': 'Reportes',
-    '/usuarios': 'Usuarios', '/configuracion': 'Configuración',
-  }
+  const { modoDemo } = useAuth()
+  const avisos = useAvisos()
 
   useEffect(() => {
-    document.title = `${pageTitles[location.pathname] || 'Inicio'} · Cremerías Admin`
+    document.title = `${tituloDe(location.pathname) || 'Inicio'} · Cremerías Admin`
   }, [location.pathname])
 
   // Close menu on route change
-  useEffect(() => { setMenuOpen(false) }, [location.pathname])
+  useEffect(() => { setMenuOpen(false) }, [location.pathname, location.key])
 
   useEffect(() => {
     const handler = (e) => {
@@ -47,26 +46,34 @@ export default function Layout({ children, user, onLogout }) {
       <Sidebar
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        onLogout={onLogout}
-        user={user}
+        globos={avisos.globos}
       />
 
       {/* Main content — offset por sidebar en desktop */}
-      <div className="flex-1 flex flex-col overflow-hidden lg:pl-72">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden xl:pl-72">
         <Header
-          user={user}
-          onLogout={onLogout}
+          avisos={avisos.lista}
           onOpenPalette={() => setPaletteOpen(true)}
           onMenuClick={() => setMenuOpen(o => !o)}
         />
-        <main id="main-content" className="flex-1 overflow-y-auto pb-20 lg:pb-0" style={{ overscrollBehavior: 'contain' }}>
-          <div key={location.key} className="max-w-screen-2xl mx-auto p-4 sm:p-5 lg:p-8" style={{ animation: 'pageReveal .38s cubic-bezier(.16,1,.3,1) both' }}>
+        {modoDemo && (
+          <div
+            role="status"
+            className="flex items-center justify-center gap-2 px-4 py-1.5 text-[11px] font-bold flex-shrink-0"
+            style={{ background: 'rgba(124,58,237,.08)', color: '#7c3aed', borderBottom: '1px solid rgba(124,58,237,.18)' }}
+          >
+            <FlaskConical className="w-3.5 h-3.5 flex-shrink-0" />
+            Modo demostración · datos de ejemplo, sin conexión a la base
+          </div>
+        )}
+        <main id="main-content" className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-20 lg:pb-0" style={{ overscrollBehavior: 'contain' }}>
+          <div key={location.key} className="max-w-screen-2xl min-w-0 mx-auto p-4 sm:p-5 lg:p-8" style={{ animation: 'pageReveal .38s cubic-bezier(.16,1,.3,1) both' }}>
             {children}
           </div>
         </main>
       </div>
 
-      <BottomNav onMoreClick={() => setMenuOpen(o => !o)} />
+      <BottomNav onMoreClick={() => setMenuOpen(o => !o)} globos={avisos.globos} />
       <ScrollToTop />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>

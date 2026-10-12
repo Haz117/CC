@@ -1,84 +1,41 @@
-﻿import { useState, useRef } from 'react'
-import {
-  Building, Percent, CreditCard, FileText, Shield, Printer,
-  ClipboardList, ChevronRight, Save, Upload, CheckCircle2, X
-} from 'lucide-react'
+import { useState, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Building, Percent, CreditCard, Printer, ClipboardList, ChevronRight, Save, Upload, X, UserRound, SlidersHorizontal, FlaskConical } from 'lucide-react'
 import toast from '../utils/toast'
 import PageHeader from '../components/PageHeader'
 import FormField from '../components/FormField'
+import { Toggle, SettingRow } from './configuracion/piezas'
+import MiCuenta from './configuracion/MiCuenta'
+import Sistema from './configuracion/Sistema'
+import Bitacora from './configuracion/Bitacora'
 
+// `local: true` marca las secciones que la base todavía no respalda: lo que se cambia ahí no se guarda.
 const sections = [
-  { id: 'empresa',   label: 'Datos de la empresa',      icon: Building    },
-  { id: 'impuestos', label: 'Impuestos y precios',       icon: Percent     },
-  { id: 'pagos',     label: 'Métodos de pago',           icon: CreditCard  },
-  { id: 'tickets',   label: 'Tickets e impresión',       icon: Printer     },
-  { id: 'permisos',  label: 'Permisos por rol',          icon: Shield      },
-  { id: 'bitacora',  label: 'Bitácora de acciones',      icon: ClipboardList },
+  { id: 'cuenta',    label: 'Mi cuenta',            icon: UserRound},
+  { id: 'sistema',   label: 'Sistema y parámetros', icon: SlidersHorizontal},
+  { id: 'bitacora',  label: 'Bitácora de acciones', icon: ClipboardList},
+  { id: 'empresa',   label: 'Datos de la empresa',  icon: Building, local: true },
+  { id: 'impuestos', label: 'Impuestos y precios',  icon: Percent, local: true },
+  { id: 'pagos',     label: 'Métodos de pago',      icon: CreditCard, local: true },
+  { id: 'tickets',   label: 'Tickets e impresión',  icon: Printer, local: true },
 ]
 
-const payMethods  = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia bancaria', 'Crédito interno']
-const roles       = ['Superadministrador', 'Administrador', 'Cajero', 'Distribuidor', 'Encargado de ruta']
-const permissions = [
-  'Ver ventas', 'Crear ventas', 'Cancelar ventas', 'Autorizar descuentos',
-  'Ver inventario', 'Modificar inventario', 'Ver reportes', 'Exportar reportes',
-  'Ver usuarios', 'Gestionar usuarios', 'Ver distribuidores',
-  'Ver configuración', 'Modificar configuración',
-]
-
-const bitacora = [
-  { user: 'Carlos Mendoza', action: 'Inició sesión',                       ip: '192.168.1.10', time: '2026-07-29 09:00', type: 'info' },
-  { user: 'Ana Ramos',      action: 'Editó sucursal "Centro"',              ip: '192.168.1.22', time: '2026-07-29 09:14', type: 'edit' },
-  { user: 'Carlos Mendoza', action: 'Creó usuario "Sandra Ruiz"',           ip: '192.168.1.10', time: '2026-07-29 09:32', type: 'create' },
-  { user: 'Roberto Silva',  action: 'Generó reporte de ventas',             ip: '192.168.1.35', time: '2026-07-29 10:05', type: 'report' },
-  { user: 'Carlos Mendoza', action: 'Modificó precio de "Queso Oaxaca"',    ip: '192.168.1.10', time: '2026-07-29 10:22', type: 'edit' },
-  { user: 'Ana Ramos',      action: 'Registró entrada de inventario',       ip: '192.168.1.22', time: '2026-07-29 11:00', type: 'create' },
-  { user: 'Carlos Mendoza', action: 'Bloqueó usuario "Pedro García"',       ip: '192.168.1.10', time: '2026-07-29 11:45', type: 'warn' },
-]
-
-const logDot = { info: '#F97316', edit: '#d97706', create: '#059669', report: '#7c3aed', warn: '#C97A6D' }
-
-/* ── Toggle switch ──────────────────────────────────────────── */
-function Toggle({ on, onChange }) {
-  return (
-    <button
-      type="button"
-      onClick={onChange}
-      className="w-11 h-6 rounded-full relative transition-all duration-200 flex-shrink-0"
-      style={{ background: on ? '#F97316' : '#D4DDE6', boxShadow: on ? '0 0 0 3px rgba(249,115,22,.15)' : 'none' }}
-    >
-      <div
-        className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"
-        style={{ left: on ? 'calc(100% - 20px)' : '4px', boxShadow: '0 1px 3px rgba(38,52,66,.12)' }}
-      />
-    </button>
-  )
-}
-
-/* ── Setting row (label + toggle) ───────────────────────────── */
-function SettingRow({ label, sub, on, onChange }) {
-  return (
-    <div
-      className="flex items-center justify-between p-4 rounded-xl cursor-pointer select-none transition-colors"
-      style={{ background: on ? '#FFF7ED' : '#F2F3F5', border: `1px solid ${on ? '#FDBA74' : '#FDE8D0'}` }}
-      onClick={onChange}
-    >
-      <div className="min-w-0 mr-4">
-        <p className="text-sm font-semibold" style={{ color: '#263442' }}>{label}</p>
-        {sub && <p className="text-xs mt-0.5" style={{ color: '#8FA1B2' }}>{sub}</p>}
-      </div>
-      <Toggle on={on} onChange={onChange} />
-    </div>
-  )
-}
+const payMethods = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia bancaria', 'Crédito interno']
 
 /* ═══════════════════════════════════════════════════════════ */
 export default function Configuracion() {
-  const [activeSection,    setActiveSection]    = useState('empresa')
+  const [params] = useSearchParams()
+  const visibles = sections
+  // El menú de perfil abre una sección concreta con ?seccion=
+  const [activeSection, setActiveSection] = useState(() => {
+    const pedida = params.get('seccion')
+    return visibles.some(s => s.id === pedida) ? pedida : 'cuenta'
+  })
+  const esLocal = sections.find(s => s.id === activeSection)?.local
+
   const [logoSrc,          setLogoSrc]          = useState(null)
   const logoInputRef = useRef(null)
   const [enabledPayments,  setEnabledPayments]  = useState(['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Transferencia bancaria'])
-  const [selectedRole,     setSelectedRole]     = useState('Cajero')
-  const [enabledPerms,     setEnabledPerms]     = useState(['Ver ventas', 'Crear ventas', 'Ver inventario', 'Ver reportes'])
   const [iva,              setIva]              = useState('16')
   const [descMax,          setDescMax]          = useState('15')
   const [preciosConIva,    setPreciosConIva]    = useState(true)
@@ -90,24 +47,21 @@ export default function Configuracion() {
   const [ticketMensaje,  setTicketMensaje]  = useState('¡Gracias por su compra!')
   const [ticketTel,      setTicketTel]      = useState('442-100-2000')
   const [ticketDir,      setTicketDir]      = useState('Av. Morelos 145, Centro')
-  const [ticketRfc,      setTicketRfc]      = useState('XAXX010101000')
+  const ticketRfc = 'XAXX010101000'
 
   const togglePayment = (m) => setEnabledPayments(p => p.includes(m) ? p.filter(x => x !== m) : [...p, m])
-  const togglePerm    = (p) => setEnabledPerms(ps => ps.includes(p) ? ps.filter(x => x !== p) : [...ps, p])
-  const handleGuardar = () => toast.success('Configuración guardada', 'Los cambios fueron aplicados correctamente')
-
-  const isSuperAdmin = selectedRole === 'Superadministrador'
+  const handleGuardar = () => toast.info('Aún no se guarda en la base', 'Esta sección todavía no tiene tabla: el cambio solo vive en esta pantalla')
 
   return (
     <div>
 
-      <PageHeader breadcrumb="Configuración" title="Configuración" subtitle="Personaliza tu sistema Cremerías Admin" />
+      <PageHeader breadcrumb="Configuración" title="Configuración" subtitle="Tu cuenta, la bitácora y los parámetros del sistema" />
 
       {/* ── Mobile horizontal tab nav ── */}
       <div className="lg:hidden mb-2">
         <div className="card overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <div className="flex gap-1 p-2" style={{ minWidth: 'max-content' }}>
-            {sections.map(s => {
+            {visibles.map(s => {
               const active = activeSection === s.id
               return (
                 <button
@@ -133,30 +87,36 @@ export default function Configuracion() {
         {/* ── Desktop vertical section nav ── */}
         <div className="hidden lg:block lg:w-60 flex-shrink-0">
           <div className="card overflow-hidden">
-            {sections.map((s, i) => {
+            {visibles.map((s, i) => {
               const active = activeSection === s.id
               return (
-                <button
-                  key={s.id}
-                  onClick={() => setActiveSection(s.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all"
-                  style={{
-                    color:      active ? '#C2410C' : '#627080',
-                    background: active ? '#FFF7ED' : 'transparent',
-                    borderLeft: `3px solid ${active ? '#F97316' : 'transparent'}`,
-                    borderBottom: i < sections.length - 1 ? '1px solid #F2F3F5' : 'none',
-                  }}
-                >
-                  <s.icon
-                    className="w-4 h-4 flex-shrink-0"
-                    style={{ color: active ? '#F97316' : '#FED7AA' }}
-                  />
-                  <span className="flex-1 text-left">{s.label}</span>
-                  <ChevronRight
-                    className="w-3.5 h-3.5"
-                    style={{ color: active ? '#F97316' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
-                  />
-                </button>
+                <div key={s.id}>
+                  {s.local && !visibles[i - 1]?.local && (
+                    <p className="px-4 pt-3 pb-1.5 text-[9px] font-extrabold uppercase tracking-[.14em]" style={{ color: '#7c3aed', background: 'rgba(124,58,237,.05)' }}>
+                      Sin conexión a la base
+                    </p>
+                  )}
+                  <button
+                    onClick={() => setActiveSection(s.id)}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all"
+                    style={{
+                      color:      active ? '#C2410C' : '#627080',
+                      background: active ? '#FFF7ED' : 'transparent',
+                      borderLeft: `3px solid ${active ? '#F97316' : 'transparent'}`,
+                      borderBottom: i < visibles.length - 1 ? '1px solid #F2F3F5' : 'none',
+                    }}
+                  >
+                    <s.icon
+                      className="w-4 h-4 flex-shrink-0"
+                      style={{ color: active ? '#F97316' : '#FED7AA' }}
+                    />
+                    <span className="flex-1 text-left">{s.label}</span>
+                    <ChevronRight
+                      className="w-3.5 h-3.5"
+                      style={{ color: active ? '#F97316' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
+                    />
+                  </button>
+                </div>
               )
             })}
           </div>
@@ -164,6 +124,22 @@ export default function Configuracion() {
 
         {/* ── Content ── */}
         <div className="flex-1 min-w-0">
+
+          {activeSection === 'cuenta'   && <MiCuenta />}
+          {activeSection === 'sistema'  && <Sistema />}
+          {activeSection === 'bitacora' && <Bitacora />}
+
+          {esLocal && (
+            <div role="note" className="flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-4" style={{ background: 'rgba(124,58,237,.06)', border: '1px solid rgba(124,58,237,.22)' }}>
+              <FlaskConical className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#7c3aed' }} />
+              <div>
+                <p className="text-sm font-bold" style={{ color: '#7c3aed' }}>Vista previa: esta sección todavía no se guarda</p>
+                <p className="text-xs mt-0.5" style={{ color: '#627080' }}>
+                  La base no tiene tablas para estos ajustes, así que lo que cambies aquí no llega a las cajas.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* EMPRESA */}
           {activeSection === 'empresa' && (
@@ -269,7 +245,7 @@ export default function Configuracion() {
                     onChange={e => setDescMax(e.target.value)}
                     min="0" max="100" className="input-field"
                   />
-                  <p className="text-xs mt-1.5 font-medium" style={{ color: '#8FA1B2' }}>
+                  <p className="text-xs mt-1.5 font-medium" style={{ color: '#627080' }}>
                     Los cajeros no podrán superar este porcentaje sin autorización
                   </p>
                 </FormField>
@@ -324,7 +300,7 @@ export default function Configuracion() {
                         </div>
                         <span className="text-sm font-semibold" style={{ color: on ? '#263442' : '#627080' }}>{m}</span>
                       </div>
-                      <Toggle on={on} onChange={() => togglePayment(m)} />
+                      <Toggle on={on} onChange={() => togglePayment(m)} etiqueta={m} />
                     </div>
                   )
                 })}
@@ -379,14 +355,14 @@ export default function Configuracion() {
                   className="rounded-2xl p-4"
                   style={{ background: '#F2F3F5', border: '1.5px dashed #D4DDE6' }}
                 >
-                  <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: '#8FA1B2' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: '#627080' }}>
                     Vista previa
                   </p>
                   <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #FDE8D0', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
                     <p className="text-center font-bold text-sm mb-0.5">{ticketNombre || 'Nombre de empresa'}</p>
-                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>{ticketDir || 'Dirección'}</p>
-                    <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>Tel: {ticketTel || '—'}</p>
-                    {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#8FA1B2' }}>RFC: {ticketRfc || '—'}</p>}
+                    <p className="text-center text-[10px]" style={{ color: '#627080' }}>{ticketDir || 'Dirección'}</p>
+                    <p className="text-center text-[10px]" style={{ color: '#627080' }}>Tel: {ticketTel || '—'}</p>
+                    {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#627080' }}>RFC: {ticketRfc || '—'}</p>}
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p>Venta: V-00522</p>
                     <p>Fecha: 29/07/2026 09:45</p>
@@ -397,7 +373,7 @@ export default function Configuracion() {
                     <p>Crema Ácida 1L x1 &nbsp;&nbsp;&nbsp;&nbsp;$38.00</p>
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p className="font-bold" style={{ color: '#C2410C' }}>TOTAL: $128.00</p>
-                    <p className="text-[10px]" style={{ color: '#8FA1B2' }}>IVA incluido (16%): $17.66</p>
+                    <p className="text-[10px]" style={{ color: '#627080' }}>IVA incluido (16%): $17.66</p>
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
                     <p className="text-center font-medium" style={{ color: '#F97316' }}>{ticketMensaje || 'Mensaje de pie'}</p>
                   </div>
@@ -409,126 +385,6 @@ export default function Configuracion() {
             </div>
           )}
 
-          {/* PERMISOS */}
-          {activeSection === 'permisos' && (
-            <div className="card p-6 animate-fade-in-up">
-              <div className="card-header">
-                <div>
-                  <p className="section-title">Permisos por rol</p>
-                  <p className="section-sub">Define qué puede hacer cada tipo de usuario</p>
-                </div>
-              </div>
-              <div className="filter-bar flex-wrap mb-5">
-                {roles.map(r => (
-                  <button key={r} onClick={() => setSelectedRole(r)} className={`chip ${selectedRole === r ? 'active' : ''}`}>
-                    {r}
-                  </button>
-                ))}
-              </div>
-              <div
-                className="flex items-center gap-3 rounded-xl p-4 mb-5"
-                style={{ background: isSuperAdmin ? 'rgba(249,115,22,.07)' : '#F2F3F5', border: `1px solid ${isSuperAdmin ? '#FDBA74' : '#FDE8D0'}` }}
-              >
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: isSuperAdmin ? 'rgba(249,115,22,.15)' : '#F2F3F5' }}
-                >
-                  <Shield className="w-4 h-4" style={{ color: isSuperAdmin ? '#F97316' : '#8FA1B2' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold" style={{ color: '#263442' }}>Rol: {selectedRole}</p>
-                  <p className="text-xs" style={{ color: '#8FA1B2' }}>
-                    {isSuperAdmin ? 'Acceso total — todos los permisos activos' : `${enabledPerms.length} de ${permissions.length} permisos activos`}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {permissions.map(p => {
-                  const on = isSuperAdmin || enabledPerms.includes(p)
-                  return (
-                    <div
-                      key={p}
-                      onClick={() => !isSuperAdmin && togglePerm(p)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all"
-                      style={{
-                        background:  on ? 'rgba(5,150,105,.08)' : '#F2F3F5',
-                        borderColor: on ? 'rgba(5,150,105,.22)' : '#FDE8D0',
-                        cursor:      isSuperAdmin ? 'default' : 'pointer',
-                        opacity:     isSuperAdmin ? 0.85 : 1,
-                      }}
-                    >
-                      <div
-                        className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                        style={{ background: on ? '#059669' : '#FDE8D0', border: `1.5px solid ${on ? '#059669' : '#D4DDE6'}` }}
-                      >
-                        {on && <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />}
-                      </div>
-                      <span className="text-sm font-medium" style={{ color: on ? '#059669' : '#627080' }}>{p}</span>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar permisos</button>
-              </div>
-            </div>
-          )}
-
-          {/* BITÁCORA */}
-          {activeSection === 'bitacora' && (
-            <div className="card p-6 animate-fade-in-up">
-              <div className="card-header">
-                <div>
-                  <p className="section-title">Bitácora de acciones</p>
-                  <p className="section-sub">{bitacora.length} registros recientes</p>
-                </div>
-                <button className="btn-soft-blue flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl">
-                  <FileText className="w-3.5 h-3.5" /> Exportar
-                </button>
-              </div>
-
-              {/* Timeline */}
-              <div className="relative">
-                <div className="absolute left-[19px] top-0 bottom-0 w-px" style={{ background: '#FDE8D0' }} />
-                <div className="space-y-1">
-                  {bitacora.map((b, i) => {
-                    const color = logDot[b.type] || '#8FA1B2'
-                    const initials = b.user.split(' ').map(n => n[0]).join('').slice(0, 2)
-                    return (
-                      <div
-                        key={b.user + b.time}
-                        className="flex items-start gap-3 p-3 rounded-xl transition-colors cursor-pointer animate-fade-in-up"
-                        style={{ animationDelay: `${Math.min(i * 40, 200)}ms` }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#FFF7ED'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 z-10"
-                          style={{ background: `${color}22`, color }}
-                        >
-                          {initials}
-                        </div>
-                        <div className="flex-1 min-w-0 py-0.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-xs font-bold" style={{ color: '#263442' }}>{b.user}</p>
-                            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-                            <p className="text-xs font-medium" style={{ color: '#627080' }}>{b.action}</p>
-                          </div>
-                          <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#FED7AA' }}>
-                            {b.ip} · {b.time}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <button className="mt-4 pt-3 w-full text-xs font-semibold flex items-center justify-center gap-1 py-1.5 transition-colors border-t" style={{ color: '#F97316', borderColor: '#F2F3F5' }}>
-                Cargar más registros →
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

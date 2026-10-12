@@ -178,7 +178,7 @@ export default function Compras() {
               barSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
             >
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8FA1B2' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#627080' }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmt} />} />
               <Bar dataKey="total" radius={[5, 5, 0, 0]} fill="#F97316" />
             </BarChart>
@@ -195,13 +195,13 @@ export default function Compras() {
             <div key={s.label} className="rounded-xl p-3 flex items-center justify-between" style={{ background: s.bg }}>
               <div>
                 <p className="text-xs font-semibold" style={{ color: '#627080' }}>{s.label}</p>
-                <p className="text-[11px]" style={{ color: '#8FA1B2' }}>{s.count} orden{s.count !== 1 ? 'es' : ''}</p>
+                <p className="text-[11px]" style={{ color: '#627080' }}>{s.count} orden{s.count !== 1 ? 'es' : ''}</p>
               </div>
               <span className="text-sm font-black" style={{ color: s.color }}>{fmt(s.total)}</span>
             </div>
           ))}
           <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
-            <span className="text-xs" style={{ color: '#8FA1B2' }}>Total gastado</span>
+            <span className="text-xs" style={{ color: '#627080' }}>Total gastado</span>
             <span className="text-sm font-black" style={{ color: '#F97316' }}>{fmt(ordenStats.totalGastado)}</span>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function Compras() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={tab === key
               ? { background: '#fff', color: '#F97316', boxShadow: '0 1px 4px rgba(194,65,12,.1)', border: '1px solid #FDE8D0' }
-              : { background: 'transparent', color: '#8FA1B2', border: '1px solid transparent' }
+              : { background: 'transparent', color: '#627080', border: '1px solid transparent' }
             }
           >
             <Icon className="w-4 h-4" />{label}
@@ -238,7 +238,7 @@ export default function Compras() {
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
                 <span className="section-head-text"><strong>Órdenes de Compra</strong></span>
-                <span style={{ fontSize: '.7rem', color: '#8FA1B2' }}>{filtered.length} orden{filtered.length !== 1 ? 'es' : ''}</span>
+                <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} orden{filtered.length !== 1 ? 'es' : ''}</span>
                 <span className="badge" style={{ background: 'rgba(217,119,6,.1)', color: '#d97706' }}>{ordenStats.enTransito} en tránsito</span>
                 <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{ordenStats.recibidas} recibidas</span>
               </div>
@@ -266,7 +266,7 @@ export default function Compras() {
                           <span className="font-medium truncate" style={{ color: '#263442' }}>{o.proveedor}</span>
                         </div>
                       </td>
-                      <td className="hidden sm:table-cell"><span style={{ color: '#8FA1B2' }}>{o.fecha}</span></td>
+                      <td className="hidden sm:table-cell"><span style={{ color: '#627080' }}>{o.fecha}</span></td>
                       <td className="hidden lg:table-cell">
                         <span className="flex items-center gap-1">
                           <Package className="w-3.5 h-3.5" style={{ color: '#8FA1B2' }} />
@@ -331,7 +331,7 @@ export default function Compras() {
                 </span>
               </div>
               <p className="font-bold mb-0.5" style={{ color: '#263442' }}>{p.nombre}</p>
-              <p className="text-xs mb-1 font-mono" style={{ color: '#8FA1B2' }}>{p.rfc}</p>
+              <p className="text-xs mb-1 font-mono" style={{ color: '#627080' }}>{p.rfc}</p>
               <p className="text-xs mb-3" style={{ color: '#627080' }}>{p.contacto}</p>
               <div className="space-y-1.5 mb-4">
                 <div className="flex items-center gap-2">
@@ -347,11 +347,11 @@ export default function Compras() {
               <div className="grid grid-cols-2 gap-2 mb-4 rounded-xl p-3" style={{ background: '#F2F3F5' }}>
                 <div className="text-center">
                   <p className="text-base font-black" style={{ color: '#263442' }}>{provOrdenesCount}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Órdenes</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#627080' }}>Órdenes</p>
                 </div>
                 <div className="text-center" style={{ borderLeft: '1px solid #FDE8D0' }}>
                   <p className="text-base font-black" style={{ color: '#F97316' }}>{fmt(provTotal)}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#8FA1B2' }}>Total</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#627080' }}>Total</p>
                 </div>
               </div>
               <div className="flex gap-2">

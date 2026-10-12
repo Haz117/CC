@@ -49,7 +49,7 @@ export default function OfflineIndicator() {
     >
       {online
         ? <><Wifi size={13} /> Conexión restablecida</>
-        : <><WifiOff size={13} /> Sin conexión · mostrando datos guardados</>
+        : <><WifiOff size={13} /> Sin conexión · lo que ves puede no estar al día</>
       }
     </div>
   )

@@ -57,7 +57,7 @@ export default function PwaInstallPrompt() {
           <p style={{ fontSize: 13, fontWeight: 700, color: '#263442', lineHeight: 1.3 }}>
             Instalar Cremerías Admin
           </p>
-          <p style={{ fontSize: 11, color: '#8FA1B2', marginTop: 2, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11, color: '#627080', marginTop: 2, lineHeight: 1.5 }}>
             Agrega la app a tu pantalla de inicio para acceso rápido
           </p>
         </div>

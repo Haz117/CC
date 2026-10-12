@@ -10,7 +10,7 @@ export default function NotFound() {
       </div>
       <p className="text-6xl font-black mb-2" style={{ color: '#263442' }}>404</p>
       <p className="text-base font-semibold mb-1" style={{ color: '#263442' }}>Página no encontrada</p>
-      <p className="text-sm mb-8" style={{ color: '#8FA1B2' }}>La ruta que buscas no existe en este sistema.</p>
+      <p className="text-sm mb-8" style={{ color: '#627080' }}>La ruta que buscas no existe en este sistema.</p>
       <button
         onClick={() => navigate('/dashboard')}
         className="btn-primary flex items-center gap-2"
