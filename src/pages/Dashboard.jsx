@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { DollarSign, AlertTriangle, LayoutGrid, Receipt, ChevronRight, Monitor, Target, XCircle } from 'lucide-react'
 import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
@@ -61,6 +61,8 @@ export default function Dashboard() {
     const hoyR = resumenVentas(filas.filter(v => v.fecha >= hoyISO))
 
     const delMes = ventasPorSucursal(filas.filter(v => v.fecha >= mesISO))
+    const mesVendido = [...delMes.values()].reduce((s, x) => s + x.centavos, 0)
+    const mesMeta = (datos?.metas ?? []).reduce((s, m) => s + (m.meta_centavos ?? 0), 0)
     const metas = (datos?.metas ?? [])
       .map(m => {
         const vendido = delMes.get(m.sucursal_id)?.centavos ?? 0
@@ -72,7 +74,7 @@ export default function Dashboard() {
       hoy: hoyR,
       delta: ayer.vendido ? Math.round((hoyR.vendido - ayer.vendido) / ayer.vendido * 100) : null,
       semana: ventasPorDia(filas, sumarDias(inicioHoy, -6), inicioHoy),
-      metas,
+      mesVendido, mesMeta, metas,
     }
   }, [datos, hoyISO, mesISO])
 
@@ -98,27 +100,32 @@ export default function Dashboard() {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ══ HERO ══════════════════════════════════════════════ */}
-      <div className="page-hero" style={{ marginBottom: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, position: 'relative', zIndex: 1 }}>
-          <div>
-            <p className="page-hero-sub" style={{ marginBottom: 4 }}>Panel principal · {mesLargo(hoy)}</p>
-            <h1 className="page-hero-title">{saludo}, {nombre}</h1>
-            <p className="page-hero-sub" style={{ marginTop: 4 }}>
-              Resumen de hoy — todas las sucursales
-            </p>
-          </div>
-          <div className="page-hero-actions">
-            <div className="hero-badge-live"><span className="live-dot" />En vivo</div>
-            {r.hoy.canceladas > 0 && (
-              <button
-                onClick={ir('/ventas')}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 10, background: 'rgba(255,255,255,.18)', border: '1px solid rgba(255,255,255,.3)', color: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                <XCircle size={13} /> {r.hoy.canceladas} cancelada{r.hoy.canceladas > 1 ? 's' : ''} hoy
+      {/* ══ HERO DEL PANEL (claro) ════════════════════════════ */}
+      <div className="panel-hero">
+        <div className="min-w-0">
+          <p className="panel-hero-crumb">Panel principal · {mesLargo(hoy)}</p>
+          <h1 className="panel-hero-title">{saludo}, {nombre}</h1>
+          <p className="panel-hero-sub">Resumen de hoy — todas las sucursales</p>
+          <div className="panel-hero-tags">
+            <span className="live-badge-light"><span className="live-dot" /> En vivo</span>
+            {r.hoy.canceladas > 0 && !sinDatos && (
+              <button onClick={ir('/ventas')} className="cancel-chip-light">
+                <XCircle size={12} /> {r.hoy.canceladas} cancelada{r.hoy.canceladas > 1 ? 's' : ''} hoy
               </button>
             )}
           </div>
+        </div>
+        {/* Cifra del mes: no se repite en los indicadores (esos son de hoy) */}
+        <div className="panel-hero-metric">
+          <p className="panel-hero-metric-label">Ventas del mes · todas</p>
+          <p className="panel-hero-metric-value">{sinDatos ? '—' : pesosCorto(r.mesVendido)}</p>
+          <p className="panel-hero-metric-sub">
+            {sinDatos
+              ? ' '
+              : r.mesMeta
+                ? `meta ${pesosCorto(r.mesMeta)} · ${Math.round(r.mesVendido / r.mesMeta * 100)}%`
+                : 'sin meta este mes'}
+          </p>
         </div>
       </div>
 
@@ -174,6 +181,8 @@ export default function Dashboard() {
                 <BarChart data={r.semana} barCategoryGap="32%" margin={{ top: 8, left: 0, right: 4, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 0" stroke="#FDE8D0" vertical={false} />
                   <XAxis dataKey="etiqueta" tick={{ fontSize: 10, fill: '#627080', fontWeight: 600 }} axisLine={false} tickLine={false} />
+                  {/* Eje con montos para leer la gráfica sin pasar el mouse */}
+                  <YAxis tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} width={46} tickFormatter={v => (v >= 1000 ? `$${Math.round(v / 100) / 10}k` : `$${v}`)} />
                   <Tooltip content={props => <ChartTooltip {...props} format={fmtDec} />} cursor={{ fill: 'rgba(249,115,22,.06)' }} />
                   <Bar dataKey="total" radius={[7, 7, 2, 2]}>
                     {r.semana.map(d => <Cell key={d.dia} fill={d.dia === diaLocal(hoy) ? '#F97316' : '#FDBA74'} />)}

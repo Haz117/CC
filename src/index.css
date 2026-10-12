@@ -436,7 +436,7 @@ body {
   line-height: 1.1; color: #fff; position: relative; z-index: 1;
 }
 .page-hero-sub {
-  font-size: .8rem; font-weight: 500; color: rgba(255,255,255,.6);
+  font-size: .8rem; font-weight: 500; color: rgba(255,255,255,.75);
   margin-top: 4px; position: relative; z-index: 1;
 }
 .page-hero-actions {
@@ -567,6 +567,77 @@ body {
 .card.overflow-hidden { overflow: hidden }
 
 /* ── Container max-width standardization ── */
+
+/* ═══════════════════════════════════════════════════════
+   PANTALLAS DE ACCESO (login / recuperar / nueva contraseña)
+═══════════════════════════════════════════════════════ */
+.acceso {
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; background: #fff;
+}
+
+/* ── Panel de marca (izquierda, solo escritorio) ── */
+.acceso-marca {
+  flex: 1 1 46%;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 48px;
+  color: #fff;
+  background:
+    radial-gradient(130% 120% at 100% 0%, rgba(251,146,60,.5), transparent 55%),
+    linear-gradient(155deg, #7C2D12 0%, #C2410C 52%, #EA580C 100%);
+}
+/* marca de agua suave en la esquina */
+.acceso-marca::after {
+  content: ''; position: absolute; right: -90px; bottom: -90px;
+  width: 380px; height: 380px; border-radius: 50%;
+  background: rgba(255,255,255,.05);
+}
+.acceso-marca > * { position: relative; z-index: 1; }
+
+.acceso-marca-top { display: flex; align-items: center; gap: 13px; }
+.acceso-logo-chip {
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.acceso-logo-chip-claro { background: #FFF7ED; border-color: #FDE8D0; }
+.acceso-marca-nombre { font-weight: 800; font-size: 15px; letter-spacing: -.01em; line-height: 1.2; }
+.acceso-marca-rol { font-size: 12px; color: rgba(255,255,255,.72); margin-top: 2px; }
+
+.acceso-marca-centro { max-width: 460px; }
+.acceso-marca-centro h2 {
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem); font-weight: 900;
+  letter-spacing: -.035em; line-height: 1.1;
+}
+.acceso-marca-centro > p {
+  font-size: 15px; line-height: 1.6; color: rgba(255,255,255,.84); margin-top: 16px;
+}
+.acceso-features { list-style: none; margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+.acceso-features li { display: flex; align-items: center; gap: 13px; font-size: 14px; font-weight: 500; }
+.acceso-features li > span {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.acceso-marca-pie { font-size: 12px; color: rgba(255,255,255,.58); }
+
+/* ── Columna del formulario (derecha) ── */
+.acceso-form { flex: 1 1 54%; display: flex; flex-direction: column; min-width: 0; }
+.acceso-form-inner {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  width: 100%; max-width: 400px; margin: 0 auto; padding: 48px 32px 40px;
+}
+.acceso-barra-movil { display: none; height: 4px; flex-shrink: 0; background: linear-gradient(to right,#C2410C,#F97316,#FB923C); }
+.acceso-logo-movil { display: none; align-items: center; gap: 14px; margin-bottom: 44px; }
+.acceso-pie-movil { text-align: center; font-size: 11px; color: #627080; padding: 0 0 28px; }
+
+/* En móvil y tablet angosta: se oculta el panel de marca, queda solo el formulario */
+@media (max-width: 900px) {
+  .acceso-marca { display: none; }
+  .acceso-barra-movil { display: block; }
+  .acceso-logo-movil { display: flex; }
+}
 
 /* ═══════════════════════════════════════════════════════
    SPLASH SCREEN
@@ -807,6 +878,42 @@ kbd {
   border: 1px solid rgba(5,150,105,.35);
 }
 
+/* ── Hero del panel (claro, a juego con los encabezados) ── */
+.panel-hero {
+  background: #fff; border-radius: 18px; padding: 22px 26px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  animation: fadeIn .4s ease-out both;
+}
+.panel-hero-crumb { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; color: #8FA1B2; margin-bottom: 5px; }
+.panel-hero-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: -.04em; line-height: 1; color: #263442; }
+.panel-hero-sub { font-size: 14px; color: #627080; margin-top: 8px; }
+.panel-hero-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.live-badge-light {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 11px; border-radius: 99px; font-size: .7rem; font-weight: 700;
+  background: rgba(5,150,105,.1); color: #059669; border: 1px solid rgba(5,150,105,.24);
+}
+.cancel-chip-light {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 99px; font-size: .7rem; font-weight: 700;
+  background: rgba(201,122,109,.1); color: #A05A52; border: 1px solid rgba(201,122,109,.26);
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.cancel-chip-light:hover { background: rgba(201,122,109,.18); }
+.panel-hero-metric {
+  text-align: right; flex-shrink: 0;
+  background: #FFF7ED; border: 1px solid #FDE8D0;
+  border-radius: 16px; padding: 14px 22px; min-width: 190px;
+}
+.panel-hero-metric-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #8FA1B2; }
+.panel-hero-metric-value { font-size: 1.95rem; font-weight: 900; letter-spacing: -.03em; line-height: 1; color: #C2410C; margin-top: 9px; }
+.panel-hero-metric-sub { font-size: 12px; color: #627080; margin-top: 8px; }
+@media (max-width: 640px) {
+  .panel-hero { padding: 20px; }
+  .panel-hero-metric { width: 100%; text-align: left; }
+}
+
 /* ── Smooth checkbox/radio transition ── */
 input[type="checkbox"], input[type="radio"] {
   transition: all .15s;
@@ -1032,13 +1139,42 @@ input[type="checkbox"], input[type="radio"] {
   flex-shrink: 0;
 }
 
+/* ── Encabezado de página: ícono de la pantalla en recuadro claro ── */
+.page-header-icon {
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #FFF7ED; border: 1px solid #FDE8D0;
+}
+@media (max-width: 480px) {
+  .page-header-icon { width: 40px; height: 40px; border-radius: 11px; }
+}
+
 /* ── KpiBar: responsive grid — wraps to 2 rows on narrow screens ── */
 .kpi-bar {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
-.kpi-cell { cursor: default }
+.kpi-cell {
+  cursor: default;
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 7px;
+}
 .kpi-cell:hover { transform: none !important; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06) !important }
+.kpi-cell-icon {
+  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 3px;
+}
+.kpi-cell-value {
+  font-size: clamp(1.15rem, 2.5vw, 1.6rem); font-weight: 900;
+  letter-spacing: -.04em; line-height: 1;
+}
+.kpi-cell-label {
+  font-size: .64rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .09em; color: #8FA1B2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kpi-cell-sub { font-size: .66rem; font-weight: 500; color: #627080; white-space: nowrap; }
 /* Tableta: rejilla de 12 para que ningún indicador quede solo. 3 o 6 van de tres en tres;
    4 van 2 + 2 (o los cuatro en un renglón desde 641 px) y 5 van 3 + 2. */
 @media (min-width: 481px) and (max-width: 899px) {
@@ -1055,7 +1191,8 @@ input[type="checkbox"], input[type="radio"] {
 /* On very small phones, 2-column minimum */
 @media (max-width: 480px) {
   .kpi-bar { grid-template-columns: repeat(2, 1fr); }
-  .kpi-cell p:first-child { font-size: .6rem }
+  .kpi-cell-label { font-size: .58rem }
+  .kpi-cell-icon { width: 32px; height: 32px; border-radius: 9px }
   .kpi-cell:last-child:nth-child(odd) { grid-column: 1 / -1 }
 }
 

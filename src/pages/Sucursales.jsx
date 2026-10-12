@@ -166,11 +166,11 @@ export default function Sucursales() {
       />
 
       <KpiBar estado={estadoKpi} items={[
-        { label: 'Sucursales',       value: data.length,             sub: `${stats.activas} activas` },
-        { label: 'Cajas abiertas',   value: stats.cajas,             good: stats.cajas > 0, sub: 'en este momento' },
-        { label: 'Ventas del mes',   value: pesosCorto(stats.vendido), good: true, sub: mes },
-        { label: 'Avance de meta',   value: stats.avance == null ? '—' : `${stats.avance}%`, sub: stats.meta ? `meta ${pesosCorto(stats.meta)}` : 'sin meta este mes' },
-        { label: 'Crédito almacén',  value: pesosCorto(stats.saldo), alert: stats.saldo > 0, sub: 'saldo por pagar' },
+        { icon: Building2, label: 'Sucursales', value: data.length,             sub: `${stats.activas} activas` },
+        { icon: Monitor, label: 'Cajas abiertas', value: stats.cajas,             good: stats.cajas > 0, sub: 'en este momento' },
+        { icon: TrendingUp, label: 'Ventas del mes', value: pesosCorto(stats.vendido), good: true, sub: mes },
+        { icon: Target, label: 'Avance de meta', value: stats.avance == null ? '—' : `${stats.avance}%`, sub: stats.meta ? `meta ${pesosCorto(stats.meta)}` : 'sin meta este mes' },
+        { icon: HandCoins, label: 'Crédito almacén', value: pesosCorto(stats.saldo), alert: stats.saldo > 0, sub: 'saldo por pagar' },
       ]} />
 
       <AvisoError error={error || errorSucursales} onReintentar={recargar} />

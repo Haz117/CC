@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Package, Search, AlertTriangle, LayoutGrid, List, TrendingUp, Download, Eye, Truck, Barcode } from 'lucide-react'
+import { Package, Search, AlertTriangle, AlertCircle, LayoutGrid, List, TrendingUp, Download, Eye, Truck, Barcode } from 'lucide-react'
 import { downloadCSV } from '../utils/csv'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
@@ -257,10 +257,10 @@ export default function Inventario() {
       </PageHeader>
 
       <KpiBar estado={estadoKpi} items={[
-        { label: 'Productos',        value: productos.length,                          sub: 'activos en catálogo' },
-        { label: 'Bajo mínimo',      value: bajos.length, alert: bajos.length > 0,     sub: 'por reabastecer' },
-        { label: 'Críticos',         value: criticos, alert: criticos > 0,             sub: 'a la mitad del mínimo o menos' },
-        { label: 'Reabastecimiento', value: ordenes.length, alert: ordenes.length > 0, sub: 'pedidos pendientes' },
+        { icon: Package, label: 'Productos', value: productos.length,                          sub: 'activos en catálogo' },
+        { icon: AlertTriangle, label: 'Bajo mínimo', value: bajos.length, alert: bajos.length > 0,     sub: 'por reabastecer' },
+        { icon: AlertCircle, label: 'Críticos', value: criticos, alert: criticos > 0,             sub: 'a la mitad del mínimo o menos' },
+        { icon: Truck, label: 'Reabastecimiento', value: ordenes.length, alert: ordenes.length > 0, sub: 'pedidos pendientes' },
       ]} />
 
       <AvisoError error={error} onReintentar={recargar} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Users, Search, Eye, Mail, Building2, TrendingUp, Link2, Unlink, UserX, ChevronRight } from 'lucide-react'
+import { Users, UserCheck, Search, Eye, Mail, Building2, TrendingUp, Link2, Unlink, UserX, ChevronRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
@@ -153,11 +153,11 @@ export default function Usuarios() {
       />
 
       <KpiBar estado={estadoKpi} items={[
-        { label: 'Total usuarios', value: data.length,       sub: 'todas las sucursales' },
-        { label: 'Activos',        value: stats.activos,     good: true,                 sub: 'pueden operar' },
-        { label: 'Con acceso web', value: stats.vinculados,                              sub: 'cuenta vinculada' },
-        { label: 'Sin vincular',   value: stats.sinVincular,                             sub: 'solo entran en la caja' },
-        { label: 'Inactivos',      value: stats.inactivos,   alert: stats.inactivos > 0, sub: 'dados de baja' },
+        { icon: Users, label: 'Total usuarios', value: data.length,       sub: 'todas las sucursales' },
+        { icon: UserCheck, label: 'Activos', value: stats.activos,     good: true,                 sub: 'pueden operar' },
+        { icon: Link2, label: 'Con acceso web', value: stats.vinculados,                              sub: 'cuenta vinculada' },
+        { icon: Unlink, label: 'Sin vincular', value: stats.sinVincular,                             sub: 'solo entran en la caja' },
+        { icon: UserX, label: 'Inactivos', value: stats.inactivos,   alert: stats.inactivos > 0, sub: 'dados de baja' },
       ]} />
 
       <AvisoError error={error} onReintentar={recargar} />

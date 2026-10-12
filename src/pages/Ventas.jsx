@@ -226,10 +226,10 @@ export default function Ventas() {
       </PageHeader>
 
       <KpiBar estado={estadoKpi} items={[
-        { label: 'Total vendido',   value: pesos(resumen.vendido),        sub: 'ventas completadas',  good: true },
-        { label: 'Tickets',         value: resumen.completadas,           sub: 'completados' },
-        { label: 'Ticket promedio', value: pesos(resumen.ticketPromedio), sub: 'por venta' },
-        { label: 'Canceladas',      value: resumen.canceladas,            sub: resumen.canceladas ? pesos(resumen.cancelado) : 'sin cancelaciones', alert: resumen.canceladas > 0 },
+        { icon: TrendingUp, label: 'Total vendido',   value: pesos(resumen.vendido),        sub: 'ventas completadas',  good: true },
+        { icon: ShoppingCart, label: 'Tickets', value: resumen.completadas,           sub: 'completados' },
+        { icon: Wallet, label: 'Ticket promedio', value: pesos(resumen.ticketPromedio), sub: 'por venta' },
+        { icon: XCircle, label: 'Canceladas', value: resumen.canceladas,            sub: resumen.canceladas ? pesos(resumen.cancelado) : 'sin cancelaciones', alert: resumen.canceladas > 0 },
       ]} />
 
       <AvisoError error={error} onReintentar={recargar} />

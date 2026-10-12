@@ -22,7 +22,30 @@
       "Bash(git push *)",
       "Bash(python3 *)",
       "Bash(gh api *)",
-      "PowerShell(gh api *)"
+      "PowerShell(gh api *)",
+      "Bash(git checkout *)",
+      "mcp__ide__getDiagnostics",
+      "Bash(awk 'NR>=88 && NR<=95' Cajas.jsx)",
+      "Bash(awk 'NR>=123 && NR<=130' Sucursales.jsx)",
+      "Bash(awk 'NR>=123 && NR<=130' Distribuidores.jsx)",
+      "Bash(awk 'NR>=152 && NR<=159' Usuarios.jsx)",
+      "Bash(awk 'NR>=184 && NR<=192' Ventas.jsx)",
+      "Bash(awk 'NR>=108 && NR<=112' Cajas.jsx)",
+      "Bash(awk 'NR>=142 && NR<=146' Sucursales.jsx)",
+      "Bash(awk 'NR>=134 && NR<=139' Distribuidores.jsx)",
+      "Bash(awk 'NR>=165 && NR<=170' Usuarios.jsx)",
+      "Bash(awk 'NR>=193 && NR<=198' Ventas.jsx)",
+      "Bash(awk 'NR>=148 && NR<=155' Distribuidores.jsx)",
+      "Bash(awk 'NR>=168 && NR<=175' Usuarios.jsx)",
+      "Bash(awk 'NR>=203 && NR<=210' Ventas.jsx)",
+      "Bash(grep -v \"//\")",
+      "Bash(awk 'NR>=1 && NR<=30' components/BottomNav.jsx)",
+      "Bash(awk 'NR>=1 && NR<=20' components/SortTh.jsx)",
+      "Bash(cat components/SortIcon.jsx)",
+      "Bash(awk 'NR>=85 && NR<=175' pages/Usuarios.jsx)",
+      "Bash(P=\"/c/Users/TI/AppData/Local/Temp/claude/c--Users-TI-Documents-Nueva-carpeta--16--cremeria-admin/dfab1878-8ea8-4590-a9c5-b47f7689e6f3/scratchpad\"; ls -la \"$P/driver\" \"$P/capturas\" \"$P/out\" \"$P/real\" \"$P/reset\" 2>/dev/null | head -80; ls \"/c/Users/TI/AppData/Roaming/npm/node_modules/@playwright\")",
+      "Read(//c/Users/TI/AppData/Local/Temp/claude/c--Users-TI-Documents-Nueva-carpeta--16--cremeria-admin/dfab1878-8ea8-4590-a9c5-b47f7689e6f3/scratchpad/driver/**)",
+      "Read(//c/Users/TI/AppData/Roaming/npm/node_modules/@playwright/**)"
     ]
   }
 }

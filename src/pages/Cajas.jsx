@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Monitor, DollarSign, ArrowUpCircle, ArrowDownCircle, Eye, Scissors, TrendingUp, User, Clock, Search, Info, StickyNote } from 'lucide-react'
+import { Monitor, DollarSign, ArrowUpCircle, ArrowDownCircle, Eye, Scissors, TrendingUp, User, Clock, Search, Info, StickyNote, AlertTriangle } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
 import { SkeletonCardGrid, SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
@@ -230,10 +230,10 @@ export default function Cajas() {
       </PageHeader>
 
       <KpiBar estado={estadoKpi} items={[
-        { label: 'Abiertas ahora',   value: modelo.abiertas.length, good: modelo.abiertas.length > 0, sub: 'turnos en operación' },
-        { label: 'Cortes',           value: modelo.cortes.length,                                     sub: 'turnos cerrados' },
-        { label: 'Con diferencia',   value: conDiferencia, alert: conDiferencia > 0,                  sub: `${stats.faltantes} faltante${stats.faltantes !== 1 ? 's' : ''} · ${stats.sobrantes} sobrante${stats.sobrantes !== 1 ? 's' : ''}` },
-        { label: 'Diferencia neta',  value: `${stats.neta < 0 ? '-' : ''}${pesos(Math.abs(stats.neta))}`, alert: stats.neta < 0, good: stats.neta === 0 && modelo.cortes.length > 0, sub: 'contado − esperado' },
+        { icon: Monitor, label: 'Abiertas ahora', value: modelo.abiertas.length, good: modelo.abiertas.length > 0, sub: 'turnos en operación' },
+        { icon: Scissors, label: 'Cortes', value: modelo.cortes.length,                                     sub: 'turnos cerrados' },
+        { icon: AlertTriangle, label: 'Con diferencia', value: conDiferencia, alert: conDiferencia > 0,                  sub: `${stats.faltantes} faltante${stats.faltantes !== 1 ? 's' : ''} · ${stats.sobrantes} sobrante${stats.sobrantes !== 1 ? 's' : ''}` },
+        { icon: TrendingUp, label: 'Diferencia neta', value: `${stats.neta < 0 ? '-' : ''}${pesos(Math.abs(stats.neta))}`, alert: stats.neta < 0, good: stats.neta === 0 && modelo.cortes.length > 0, sub: 'contado − esperado' },
       ]} />
 
       <AvisoError error={abiertas.error || cortes.error} onReintentar={() => { abiertas.recargar(); cortes.recargar() }} />
