@@ -1,9 +1,10 @@
 import { NavLink, useMatch, useResolvedPath } from 'react-router-dom'
-import { X, Milk, LogOut } from 'lucide-react'
+import { X, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/contexto'
 import { PAGINAS, etiquetaRol } from '../lib/navegacion'
 import { iniciales } from '../utils/fmt'
 import { useSincronizacion } from '../lib/sincronizacion'
+import Logo from './Logo'
 
 // Menú lateral oscuro (marrón cálido), a juego con el login y el splash.
 const C = {
@@ -122,13 +123,7 @@ export default function Sidebar({ open, onClose, globos = {} }) {
           borderBottom: `1px solid ${C.border}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-              background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Milk size={18} style={{ color: C.orange }} />
-            </div>
+            <Logo size={36} style={{ flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 14, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>Cremerías Admin</p>
               <p style={{ fontSize: 11, color: C.sub, marginTop: 1 }}>{perfil?.sucursal || rol}</p>

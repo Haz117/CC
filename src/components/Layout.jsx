@@ -59,7 +59,7 @@ export default function Layout({ children }) {
         {modoDemo && (
           <div
             role="status"
-            className="flex items-center justify-center gap-2 px-4 py-1.5 text-xs font-medium flex-shrink-0"
+            className="no-imprimir flex items-center justify-center gap-2 px-4 py-1.5 text-xs font-medium flex-shrink-0"
             style={{ background: '#FFF7ED', color: '#9A3412', borderBottom: '1px solid #FDE8D0' }}
           >
             <FlaskConical className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />

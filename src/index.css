@@ -349,23 +349,16 @@ body {
 ═══════════════════════════════════════════════════════ */
 .empty-state {
   display:flex; flex-direction:column; align-items:center;
-  justify-content:center; padding:4rem 2rem; text-align:center;
-  animation: fadeInUp .4s ease-out both;
+  justify-content:center; padding:3.5rem 2rem; text-align:center;
+  animation: fadeIn .2s ease-out both;
 }
-.empty-state-icon {
-  width:76px; height:76px; border-radius:22px;
-  display:flex; align-items:center; justify-content:center;
-  background:#FFF7ED;
-  border:1.5px solid rgba(253,232,208,.9);
-  margin-bottom:20px;
-  box-shadow:0 4px 16px rgba(249,115,22,.08);
-}
+.empty-state-icono { width:44px; height:44px; color:#8FA1B2; margin-bottom:14px; }
 .empty-state-title {
-  font-size:.9375rem; font-weight:700; color:#263442; margin-bottom:6px;
+  font-size:1.0625rem; font-weight:600; color:#263442; margin-bottom:6px;
 }
 .empty-state-sub {
-  font-size:.8rem; color:#627080; font-weight:500;
-  max-width:280px; line-height:1.6; margin-bottom:20px;
+  font-size:.875rem; color:#627080;
+  max-width:320px; line-height:1.5; margin-bottom:20px;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -583,12 +576,7 @@ body {
 }
 .acceso-logo-chip-claro { background: #FFF7ED; border-color: #FDE8D0; }
 .acceso-marca-centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; }
-.acceso-marca-logo {
-  width: 96px; height: 96px; border-radius: 26px; margin-bottom: 6px;
-  display: grid; place-items: center;
-  background: #F97316; box-shadow: 0 12px 34px rgba(67,20,7,.3);
-}
-.acceso-marca-logo svg { width: 52px; height: 52px; color: #fff }
+.acceso-marca-logo { margin-bottom: 6px; border-radius: 22%; box-shadow: 0 12px 34px rgba(67,20,7,.3); }
 .acceso-marca-nombre { font-weight: 700; font-size: 1.75rem; letter-spacing: -.01em; line-height: 1.1; }
 .acceso-marca-rol { font-size: 15px; color: #fff; max-width: 22em; line-height: 1.45; }
 .acceso-marca-pie { font-size: 12px; color: #fff; }
@@ -619,12 +607,7 @@ body {
   background: #C2410C; color: #fff;
   animation: fadeIn .25s ease-out .15s both;
 }
-.splash-logo {
-  width: 84px; height: 84px; border-radius: 22px;
-  display: grid; place-items: center;
-  background: #F97316; box-shadow: 0 10px 30px rgba(67,20,7,.28);
-}
-.splash-logo svg { width: 46px; height: 46px; color: #fff }
+.splash-logo { border-radius: 22%; box-shadow: 0 10px 30px rgba(67,20,7,.28); }
 .splash-nombre { font-size: 1.375rem; font-weight: 700; letter-spacing: -.01em }
 
 /* ── Header interactive elements ── */
@@ -676,14 +659,15 @@ body {
 .scroll-top-btn {
   position: fixed; bottom: 80px; right: 20px; z-index: 40;
   width: 40px; height: 40px; border-radius: 12px;
-  background: #C2410C; color: #fff; border: none;
+  background: #fff; color: #4A5664; border: 1px solid #D4DDE6;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(249,115,22,.35);
-  cursor: pointer; transition: all .2s;
-  animation: scaleIn .2s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow: 0 2px 8px rgba(38,52,66,.12);
+  cursor: pointer; transition: color .15s, border-color .15s;
   font-family: inherit;
 }
-.scroll-top-btn:hover { background: #C2410C; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(249,115,22,.4) }
+.scroll-top-btn:hover { color: #C2410C; border-color: #FDBA74 }
+/* En el celular tapaba lo que había abajo a la derecha (etiquetas, botones): no se muestra */
+@media (max-width: 1023px) { .scroll-top-btn { display: none } }
 @media (min-width: 1024px) {
   .scroll-top-btn { bottom: 24px }
 }
@@ -691,11 +675,33 @@ body {
 /* ═══════════════════════════════════════════════════════
    PRINT — ticket receipt only
 ═══════════════════════════════════════════════════════ */
+/* Al imprimir con un ticket abierto, sale solo el ticket (antes estas reglas aplicaban siempre y
+   cualquier otra pantalla salía en blanco). */
 @media print {
-  body > * { visibility: hidden; }
-  #ticket-print-area { visibility: visible; position: fixed; top: 0; left: 0; width: 100%; background: #fff; box-shadow: none; border-radius: 0; }
-  #ticket-print-area * { visibility: visible; }
+  body:has(#ticket-print-area) * { visibility: hidden; }
+  body:has(#ticket-print-area) #ticket-print-area,
+  body:has(#ticket-print-area) #ticket-print-area * { visibility: visible; }
+  body:has(#ticket-print-area) #ticket-print-area {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 320px; background: #fff; box-shadow: none; border: none; border-radius: 0;
+  }
   #ticket-print-area .modal-close { display: none; }
+}
+
+/* Cualquier otra pantalla (por ejemplo un reporte): solo el contenido, sin menú ni barras,
+   en blanco y negro amable para la impresora y sin cortar tarjetas a la mitad. */
+@media print {
+  @page { margin: 14mm; }
+  .app-sidebar, header, nav, .scroll-top-btn, .skip-nav, .no-imprimir { display: none !important; }
+  html, body, #root { background: #fff !important; height: auto !important; }
+  .h-screen { height: auto !important; background: #fff !important; }
+  .pestanas-reporte { display: none !important; } /* el subtítulo ya dice qué reporte es */
+  .overflow-hidden { overflow: visible !important; }
+  #main-content { overflow: visible !important; padding-bottom: 0 !important; }
+  .xl\:pl-72 { padding-left: 0 !important; }
+  .card { box-shadow: none !important; border: 1px solid #D4DDE6 !important; break-inside: avoid; }
+  .data-toolbar { background: #fff !important; }
+  * { animation: none !important; transition: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -736,7 +742,7 @@ body {
 
 /* ── Datos cortos de una tarjeta (Sucursales): etiqueta arriba, cifra abajo, en una sola línea ── */
 .datos-fila { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 10px 0; border-top: 1px solid #FDE8D0; border-bottom: 1px solid #FDE8D0 }
-.datos-fila dt { font-size: .75rem; color: #627080 }
+.datos-fila dt { display: flex; align-items: center; gap: 5px; font-size: .75rem; color: #627080 }
 .datos-fila dd { margin: 2px 0 0; font-size: .9375rem; font-weight: 600; color: #263442; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
 /* ── card-glow top accent on hover ── */
@@ -780,8 +786,6 @@ body {
 /* ── btn-primary active press ── */
 .btn-primary:active { transform: translateY(1px) !important; box-shadow: 0 2px 6px rgba(249,115,22,.2) !important }
 
-/* ── empty-state-icon subtle breathe ── */
-.empty-state-icon { animation: breathe 4s ease-in-out infinite }
 
 /* ── kbd shortcut styling ── */
 kbd {
@@ -1008,7 +1012,7 @@ input[type="checkbox"], input[type="radio"] {
 
 /* ── Título de una sección suelta (sin tarjeta) ── */
 .titulo-seccion { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px }
-.titulo-seccion h2 { font-size: 1.0625rem; font-weight: 800; color: #263442; letter-spacing: -.01em }
+.titulo-seccion h2 { display: flex; align-items: center; gap: 8px; font-size: 1.0625rem; font-weight: 700; color: #263442; letter-spacing: -.01em }
 .titulo-seccion p { font-size: .8125rem; color: #627080 }
 
 /* ── Panel que se abre desde un filtro: flota en escritorio, hoja desde abajo en móvil ── */
@@ -1231,20 +1235,7 @@ input[type="checkbox"], input[type="radio"] {
   .dashboard-grid { grid-template-columns: 1fr; }
 }
 
-/* Print: show only the ticket modal, hide everything else */
-@media print {
-  body * { visibility: hidden; }
-  #ticket-print-area, #ticket-print-area * { visibility: visible; }
-  #ticket-print-area {
-    position: fixed;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 320px;
-    background: #fff;
-    box-shadow: none;
-    border: none;
-  }
-}
+
 
 /* ═══════════════════════════════════════════════════════
    ROUND AI — Layout fitting fixes
@@ -1638,6 +1629,7 @@ h1[tabindex="-1"]:focus, h1[tabindex="-1"]:focus-visible { outline: none }
 .pestanas-reporte { display: flex; gap: 2px; border-bottom: 1px solid #FDE8D0; overflow-x: auto; scrollbar-width: none }
 .pestanas-reporte::-webkit-scrollbar { display: none }
 .pestana-reporte {
+  display: inline-flex; align-items: center; gap: 7px;
   padding: 10px 14px; margin-bottom: -1px; white-space: nowrap;
   font: inherit; font-size: .9375rem; font-weight: 500; color: #4A5664;
   background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer;
@@ -1646,3 +1638,11 @@ h1[tabindex="-1"]:focus, h1[tabindex="-1"]:focus-visible { outline: none }
 .pestana-reporte:hover { color: #263442 }
 .pestana-reporte[aria-selected="true"] { color: #C2410C; border-bottom-color: #C2410C; font-weight: 600 }
 .pestana-reporte:focus-visible { outline-offset: -3px }
+
+/* ── Sucursales: estado y vista lado a lado; en el celular, cada uno en su renglón ── */
+.filtros-sucursales { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+@media (max-width: 640px) {
+  .filtros-sucursales { flex-direction: column; align-items: stretch }
+  .filtros-sucursales .segmentado { display: flex }
+  .filtros-sucursales .segmentado-opcion { flex: 1 }
+}

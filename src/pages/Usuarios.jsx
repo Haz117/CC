@@ -28,6 +28,7 @@ import { listarUsuarios, vincularUsuario } from '../api/organizacion'
 import { iniciales } from '../utils/fmt'
 import { esCorreo } from '../utils/validar'
 import Grafica from '../components/Grafica'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PER_PAGE = 8
 
@@ -97,7 +98,7 @@ export default function Usuarios() {
   const [search, setSearch]             = usePersistedState('usuarios-search', '')
   const debouncedSearch = useDebounce(search)
   const [filterRol, setFilterRol]       = useState('Todos')
-  const [sucursalId, setSucursalId]     = useState('')
+  const [sucursalId, setSucursalId]     = useEstadoSesion('usuarios:sucursal', '')
   const [page, setPage]                 = useState(1)
   const [selectedUser, setSelectedUser] = useState(null)
   const [porVincular, setPorVincular]   = useState(null)
@@ -221,6 +222,7 @@ export default function Usuarios() {
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
             <span className="section-head-text"><strong>Usuarios del sistema</strong></span>
             <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} usuario{filtered.length !== 1 ? 's' : ''}</span>
             {stats.inactivos > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{stats.inactivos} inactivo{stats.inactivos !== 1 ? 's' : ''}</span>}

@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useMemo } from 'react'
-import { ShoppingCart, Search, Eye, XCircle, Download, DollarSign, CreditCard, Smartphone, TrendingDown, AlertTriangle, CheckCircle2, Milk, TrendingUp, Wallet, Info, ChevronRight } from 'lucide-react'
+import { ShoppingCart, Search, Eye, XCircle, Download, DollarSign, CreditCard, Smartphone, TrendingDown, AlertTriangle, CheckCircle2, TrendingUp, Wallet, Info, ChevronRight, ReceiptText } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { downloadCSV } from '../utils/csv'
 import Modal from '../components/Modal'
@@ -34,6 +34,8 @@ import {
 } from '../lib/calculos'
 import { pesos, cantidad, fecha, hora, fechaHora, diaCorto, fmtDec } from '../utils/fmt'
 import Grafica from '../components/Grafica'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
+import Logo from '../components/Logo'
 
 const PER_PAGE = 10
 const metodoIcon = { Efectivo: DollarSign, Tarjeta: CreditCard, Transferencia: Smartphone, Mixto: Wallet }
@@ -69,9 +71,7 @@ function Ticket({ venta, onClose }) {
       <div className="p-0">
         {/* Receipt header */}
         <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #FDE8D0' }}>
-          <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: '#FFF7ED' }}>
-            <Milk className="w-6 h-6" style={{ color: '#C2410C' }} />
-          </div>
+          <Logo size={44} className="mx-auto mb-3" style={{ display: 'block' }} />
           <p className="font-bold text-sm" style={{ color: '#263442' }}>{venta.sucursal}</p>
           <p className="text-xs mt-0.5" style={{ color: '#627080' }}>Atendió: {venta.cajeroNombre}</p>
         </div>
@@ -142,9 +142,9 @@ export default function Ventas() {
   const [search, setSearch] = usePersistedState('ventas-search', '')
   const debouncedSearch = useDebounce(search)
   const [filterEstado, setFilterEstado] = useState('Todas')
-  const periodo = usePeriodo('hoy')
+  const periodo = usePeriodo('hoy', 'ventas')
   const { dateFrom, dateTo, desde, hasta } = periodo
-  const [sucursalId, setSucursalId] = useState('')
+  const [sucursalId, setSucursalId] = useEstadoSesion('ventas:sucursal', '')
   const [page, setPage] = useState(1)
   const [ticket, setTicket] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -323,6 +323,7 @@ export default function Ventas() {
         {/* Section head */}
         <div className="section-head">
           <div className="flex items-center gap-2">
+            <ReceiptText className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
             <span className="section-head-text"><strong>Transacciones</strong></span>
             {!sinDatos && <span style={{ fontSize: '.7rem', color: '#627080' }}>{sorted.length} resultado{sorted.length !== 1 ? 's' : ''}</span>}
             {canceladas.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{canceladas.length} cancelada{canceladas.length !== 1 ? 's' : ''}</span>}

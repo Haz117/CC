@@ -205,6 +205,9 @@ export default function Dashboard() {
                 <div key={v.id}>
                   {i > 0 && <div style={{ height: 1, background: '#FDE8D0', margin: '0 4px' }} />}
                   <div style={filaLista}>
+                    {cancelada
+                      ? <XCircle size={17} color="#8A4A42" aria-hidden="true" style={{ flexShrink: 0 }} />
+                      : <Receipt size={17} color="#627080" aria-hidden="true" style={{ flexShrink: 0 }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p className="truncate" style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{v.folio}</p>
                       <p className="truncate" style={{ fontSize: 10, color: '#627080' }}>

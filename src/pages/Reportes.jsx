@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { TrendingUp, Wallet, Scissors, Package, Trash2, HandCoins, X } from 'lucide-react'
+import { useMemo } from 'react'
+import { TrendingUp, Wallet, Scissors, Package, Trash2, HandCoins, X, Printer } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import SelectorSucursal from '../components/SelectorSucursal'
 import FiltroPeriodo from '../components/FiltroPeriodo'
@@ -13,6 +13,7 @@ import ReporteCortes from './reportes/ReporteCortes'
 import ReporteInventario from './reportes/ReporteInventario'
 import ReporteMermas from './reportes/ReporteMermas'
 import ReporteCredito from './reportes/ReporteCredito'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PRESETS = [['hoy', 'Hoy'], ['semana', 'Esta semana'], ['mes', 'Este mes'], ['trimestre', 'Últimos 90 días']]
 
@@ -28,11 +29,11 @@ const TIPOS = [
 export default function Reportes() {
   const { sucursales, nombreCorto, nombreSucursal } = useSucursales()
 
-  const periodo = usePeriodo('semana')
+  const periodo = usePeriodo('semana', 'reportes')
   const { dateFrom, dateTo, desde, hasta } = periodo
-  const [groupBy,   setGroupBy]   = useState('Día')
-  const [active,    setActive]    = useState('ventas')
-  const [sucursalId, setSucursalId] = useState('')
+  const [groupBy,   setGroupBy]   = useEstadoSesion('reportes:agrupar', 'Día')
+  const [active,    setActive]    = useEstadoSesion('reportes:tipo', 'ventas')
+  const [sucursalId, setSucursalId] = useEstadoSesion('reportes:sucursal', '')
 
   const tipo = TIPOS.find(t => t.id === active)
   const filtro = useMemo(
@@ -56,7 +57,12 @@ export default function Reportes() {
     <div className="space-y-6">
 
       <PageHeader title="Reportes"
-        subtitle={`${tipo.desc}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`} />
+        subtitle={`${tipo.desc}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`}>
+        {/* Imprime solo el reporte: el menú, la barra de arriba y este botón no salen en papel */}
+        <button type="button" className="btn-secondary no-imprimir" onClick={() => window.print()}>
+          <Printer className="w-4 h-4" aria-hidden="true" /> Imprimir
+        </button>
+      </PageHeader>
 
       {/* Tipo de reporte: pestañas de texto (con flechas se pasa de una a otra) */}
       <div className="pestanas-reporte" role="tablist" aria-label="Tipo de reporte" onKeyDown={moverPestana}>
@@ -72,6 +78,7 @@ export default function Reportes() {
             onClick={() => setActive(t.id)}
             className="pestana-reporte"
           >
+            <t.icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             {t.label}
           </button>
         ))}

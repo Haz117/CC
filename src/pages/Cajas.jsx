@@ -27,6 +27,7 @@ import { listarTurnosAbiertos, listarCortes } from '../api/cajas'
 import { movimientosDeTurno, signoMovimiento } from '../lib/calculos'
 import { pesos, fecha, hora, fechaHora, diaCorto, fmtDec, rangoCorto } from '../utils/fmt'
 import Grafica from '../components/Grafica'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PER_PAGE = 8
 const MAX_CORTES = 200
@@ -153,9 +154,9 @@ export default function Cajas() {
 
   const [search, setSearch] = usePersistedState('cajas-search', '')
   const debouncedSearch = useDebounce(search)
-  const periodo = usePeriodo('semana')
+  const periodo = usePeriodo('semana', 'cajas')
   const { dateFrom, dateTo, desde, hasta } = periodo
-  const [sucursalId, setSucursalId] = useState('')
+  const [sucursalId, setSucursalId] = useEstadoSesion('cajas:sucursal', '')
   const [page, setPage] = useState(1)
   const [detalle, setDetalle] = useState(null)
 
@@ -244,7 +245,7 @@ export default function Cajas() {
 
       {/* ══ Cajas abiertas: son de este momento, el periodo no las cambia ══ */}
       <div className="titulo-seccion">
-        <h2>Abiertas ahora</h2>
+        <h2><Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />Abiertas ahora</h2>
         {abiertas.datos !== undefined && <p>{modelo.abiertas.length} en operación · no dependen del periodo</p>}
       </div>
 
@@ -255,6 +256,7 @@ export default function Cajas() {
             <div key={c.id} className="card p-5 flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 200)}ms` }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
+                  <Monitor className="w-5 h-5 flex-shrink-0" style={{ color: '#C2410C' }} strokeWidth={1.9} aria-hidden="true" />
                   <div className="min-w-0">
                     <p className="font-bold leading-tight truncate" style={{ color: '#263442' }}>{c.cajaNombre}</p>
                     <p className="text-xs truncate" style={{ color: '#627080' }}>{c.sucursalNombre}</p>
@@ -346,6 +348,7 @@ export default function Cajas() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2 flex-wrap">
+              <Scissors className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Cortes de caja</strong></span>
               <span style={{ fontSize: '.75rem', color: '#627080' }}>{rangoCorto(dateFrom, dateTo)}</span>
               {conDiferencia > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{conDiferencia} con diferencia</span>}

@@ -1,4 +1,5 @@
-import { Milk, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import Logo from './Logo'
 
 // Marco de las pantallas sin sesión: inicio de sesión, recuperar y nueva contraseña.
 // Dos columnas en escritorio (marca + formulario); en móvil solo el formulario.
@@ -9,7 +10,7 @@ export default function PantallaAcceso({ titulo, subtitulo, error, exito, childr
       {/* ── Panel de marca (solo escritorio) ── */}
       <aside className="acceso-marca">
         <div className="acceso-marca-centro">
-          <div className="acceso-marca-logo"><Milk aria-hidden="true" strokeWidth={1.9} /></div>
+          <Logo size={96} className="acceso-marca-logo" />
           <p className="acceso-marca-nombre">Cremerías</p>
           <p className="acceso-marca-rol">Administración de sucursales, cajas e inventario</p>
         </div>
@@ -24,7 +25,7 @@ export default function PantallaAcceso({ titulo, subtitulo, error, exito, childr
 
           {/* Logo: solo visible cuando el panel de marca está oculto (móvil) */}
           <div className="acceso-logo-movil">
-            <div className="acceso-logo-chip acceso-logo-chip-claro"><Milk style={{ width: 22, height: 22, color: '#C2410C' }} /></div>
+            <Logo size={46} />
             <div>
               <p style={{ fontWeight: 800, fontSize: 16, color: '#111', lineHeight: 1.2 }}>Cremerías Admin</p>
               <p style={{ fontSize: 12, color: '#627080', marginTop: 3 }}>Administración</p>

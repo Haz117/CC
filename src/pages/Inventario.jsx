@@ -29,6 +29,8 @@ import { listarProductos, listarExistencias, listarLimites, listarOrdenesPendien
 import { armarInventario, NIVEL, esBajo } from '../lib/calculos'
 import { cantidad } from '../utils/fmt'
 import Grafica from '../components/Grafica'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
+import IconoProducto from '../components/IconoProducto'
 
 const PER_PAGE = 10
 const PER_PAGE_GRID = 12
@@ -39,7 +41,6 @@ const COLORES = ['#C2410C', '#047857', '#92400E', '#7c3aed', '#0d9488', '#C2410C
 // la cifra y su barra son la suma de las sucursales a la vista y se colorean por ese total (`nivelTotal`).
 const bajo      = (p) => esBajo(p.nivel)
 const accent    = (p) => p.nivel === NIVEL.CRITICO ? 'card-accent-red' : p.nivel === NIVEL.BAJO ? 'card-accent-amber' : 'card-accent-blue'
-const fondo     = (p) => p.nivel === NIVEL.CRITICO ? 'rgba(201,122,109,.12)' : p.nivel === NIVEL.BAJO ? 'rgba(217,119,6,.1)' : '#FFF7ED'
 const tono      = (nivel) => esBajo(nivel) ? nivel.tono : '#C2410C'
 const tonoTotal = (p) => esBajo(p.nivelTotal) ? p.nivelTotal.tono : '#263442'
 const fill      = (p) => p.nivelTotal === NIVEL.CRITICO ? 'progress-fill-red' : p.nivelTotal === NIVEL.BAJO ? 'progress-fill-amber' : 'progress-fill-green'
@@ -120,7 +121,7 @@ export default function Inventario() {
   const debouncedSearch = useDebounce(search)
   const [cat, setCat] = useState('Todos')
   const [soloBajos, setSoloBajos] = useState(false)
-  const [sucursalId, setSucursalId] = useState('')
+  const [sucursalId, setSucursalId] = useEstadoSesion('inventario:sucursal', '')
   const [page, setPage] = useState(1)
   const [detalle, setDetalle] = useState(null)
   const [viewMode, setViewMode] = usePersistedState('inventario-view', 'grid')
@@ -314,6 +315,7 @@ export default function Inventario() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Reabastecimiento pendiente</strong></span>
               <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{ordenes.length} pedido{ordenes.length !== 1 ? 's' : ''}</span>
             </div>
@@ -350,9 +352,7 @@ export default function Inventario() {
               style={{ animationDelay: `${Math.min(i * 40, 200)}ms`, fontFamily: 'inherit' }}
             >
               <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: fondo(p) }}>
-                  <Package className="w-6 h-6" style={{ color: tono(p.nivel) }} />
-                </div>
+                <IconoProducto categoria={p.categoria} nombre={p.nombre} size={28} color={esBajo(p.nivel) ? p.nivel.tono : '#C2410C'} />
                 <Badge label={p.nivel.label} color={p.nivel.color} />
               </div>
 
@@ -396,6 +396,7 @@ export default function Inventario() {
           {toolbar}
           <div className="section-head">
             <div className="flex items-center gap-2">
+              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Existencias</strong></span>
               <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} producto{filtered.length !== 1 ? 's' : ''}</span>
               {bajos.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{bajos.length} bajo mínimo</span>}
@@ -419,6 +420,7 @@ export default function Inventario() {
                   <tr key={p.id}>
                     <td>
                       <div className="flex items-center gap-3 min-w-0">
+                        <IconoProducto categoria={p.categoria} nombre={p.nombre} className="flex-shrink-0" />
                         <div className="min-w-0">
                           <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{p.nombre}</p>
                           <p className="text-xs font-mono truncate" style={{ color: '#627080' }}>{p.clave}</p>

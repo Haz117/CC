@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Building2, MapPin, Monitor, TrendingUp, LayoutGrid, LayoutList, Search, Target, Warehouse, HandCoins } from 'lucide-react'
+import { Building2, MapPin, Monitor, TrendingUp, LayoutGrid, LayoutList, Search, Target, Warehouse, HandCoins, Store, Users } from 'lucide-react'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
 import Badge from '../components/Badge'
@@ -134,7 +134,7 @@ export default function Sucursales() {
         <div style={{ flex: 1, minWidth: 200 }}>
           <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o dirección…" resultCount={filtered.length} />
         </div>
-        <div className="flex items-center justify-between gap-2.5">
+        <div className="filtros-sucursales">
           <Segmentado
             opciones={['Todas', 'Activas', 'Inactivas'].map(f => ({ valor: f, texto: f }))}
             value={filterStatus}
@@ -247,6 +247,9 @@ export default function Sucursales() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
+                      {s.es_almacen
+                        ? <Warehouse className="w-5 h-5 flex-shrink-0" style={{ color: '#C2410C' }} strokeWidth={1.9} aria-hidden="true" />
+                        : <Store className="w-5 h-5 flex-shrink-0" style={{ color: s.activa ? '#C2410C' : '#8A4A42' }} strokeWidth={1.9} aria-hidden="true" />}
                       <div className="min-w-0">
                         <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: '#263442' }}>{s.nombre}</p>
                         {s.direccion && (
@@ -269,9 +272,9 @@ export default function Sucursales() {
 
                   <>
                     <dl className="datos-fila">
-                      <div><dt>Cajas abiertas</dt><dd>{s.cajas}</dd></div>
-                      <div><dt>Usuarios</dt><dd>{s.usuarios}</dd></div>
-                      <div><dt>Ventas del mes</dt><dd>{pesosCorto(s.vendido)}</dd></div>
+                      <div><dt><Monitor size={13} aria-hidden="true" />Cajas abiertas</dt><dd>{s.cajas}</dd></div>
+                      <div><dt><Users size={13} aria-hidden="true" />Usuarios</dt><dd>{s.usuarios}</dd></div>
+                      <div><dt><TrendingUp size={13} aria-hidden="true" />Ventas del mes</dt><dd>{pesosCorto(s.vendido)}</dd></div>
                     </dl>
 
                     {s.meta ? (
@@ -327,6 +330,7 @@ export default function Sucursales() {
 
             <div className="section-head">
               <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
                 <span className="section-head-text"><strong>Sucursales</strong></span>
                 <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} encontrada{filtered.length !== 1 ? 's' : ''}</span>
                 {stats.inactivas > 0 && (
@@ -356,6 +360,9 @@ export default function Sucursales() {
                       <tr key={s.id}>
                         <td>
                           <div className="flex items-center gap-3 min-w-0">
+                            {s.es_almacen
+                              ? <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+                              : <Store className="w-4 h-4 flex-shrink-0" style={{ color: s.activa ? '#C2410C' : '#8A4A42' }} aria-hidden="true" />}
                             <div className="min-w-0">
                               <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
                               <p className="text-xs truncate" style={{ color: '#627080' }}>{s.es_almacen ? 'Almacén central' : s.direccion}</p>

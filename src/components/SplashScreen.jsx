@@ -1,4 +1,4 @@
-import { Milk } from 'lucide-react'
+import Logo from './Logo'
 
 // Pantalla de arranque: solo aparece mientras la app de verdad está cargando (revisando la sesión),
 // sin esperas inventadas ni barra de avance falsa. Color sólido y la marca, como la de una app del
@@ -7,7 +7,7 @@ import { Milk } from 'lucide-react'
 export default function SplashScreen() {
   return (
     <div className="splash-screen" role="status" aria-label="Cargando Cremerías Admin">
-      <div className="splash-logo"><Milk aria-hidden="true" strokeWidth={1.9} /></div>
+      <Logo size={88} className="splash-logo" />
       <p className="splash-nombre">Cremerías</p>
     </div>
   )
