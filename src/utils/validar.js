@@ -5,4 +5,4 @@ export const validarContrasena = (nueva, repetida) => {
   return ''
 }
 
-export const esCorreo = (texto) => /^\S+@\S+\.\S+$/.test(texto)
+export const esCorreo = (texto) => /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(texto.trim())

@@ -45,7 +45,12 @@
       "Bash(awk 'NR>=85 && NR<=175' pages/Usuarios.jsx)",
       "Bash(P=\"/c/Users/TI/AppData/Local/Temp/claude/c--Users-TI-Documents-Nueva-carpeta--16--cremeria-admin/dfab1878-8ea8-4590-a9c5-b47f7689e6f3/scratchpad\"; ls -la \"$P/driver\" \"$P/capturas\" \"$P/out\" \"$P/real\" \"$P/reset\" 2>/dev/null | head -80; ls \"/c/Users/TI/AppData/Roaming/npm/node_modules/@playwright\")",
       "Read(//c/Users/TI/AppData/Local/Temp/claude/c--Users-TI-Documents-Nueva-carpeta--16--cremeria-admin/dfab1878-8ea8-4590-a9c5-b47f7689e6f3/scratchpad/driver/**)",
-      "Read(//c/Users/TI/AppData/Roaming/npm/node_modules/@playwright/**)"
+      "Read(//c/Users/TI/AppData/Roaming/npm/node_modules/@playwright/**)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm approve-builds *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm rebuild *)"
     ]
   }
 }

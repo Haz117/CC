@@ -86,7 +86,7 @@ function NavItem({ path, icon: Icon, label, demo, globo, onClose }) {
 export default function Sidebar({ open, onClose, globos = {} }) {
   const { perfil, cerrarSesion } = useAuth()
   const groups = GRUPOS
-  const rol = etiquetaRol(perfil.rol)
+  const rol = etiquetaRol(perfil?.rol)
   const { enLinea } = useSincronizacion()
 
   return (
@@ -131,7 +131,7 @@ export default function Sidebar({ open, onClose, globos = {} }) {
             </div>
             <div>
               <p style={{ fontSize: 14, fontWeight: 800, color: C.text, lineHeight: 1.2 }}>Cremerías Admin</p>
-              <p style={{ fontSize: 11, color: C.sub, marginTop: 1 }}>{perfil.sucursal || rol}</p>
+              <p style={{ fontSize: 11, color: C.sub, marginTop: 1 }}>{perfil?.sucursal || rol}</p>
             </div>
           </div>
 
@@ -188,12 +188,12 @@ export default function Sidebar({ open, onClose, globos = {} }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 12, fontWeight: 800, color: C.orange,
             }}>
-              {iniciales(perfil.nombre)}
+              {iniciales(perfil?.nombre)}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: C.text, lineHeight: 1.2 }}
                 className="truncate">
-                {perfil.nombre}
+                {perfil?.nombre}
               </p>
               <p style={{ fontSize: 11, color: C.sub, marginTop: 1 }}
                 className="truncate">

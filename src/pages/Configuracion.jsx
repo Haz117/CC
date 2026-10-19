@@ -53,7 +53,14 @@ export default function Configuracion() {
   const ticketRfc = 'XAXX010101000'
 
   const togglePayment = (m) => setEnabledPayments(p => p.includes(m) ? p.filter(x => x !== m) : [...p, m])
-  const handleGuardar = () => toast.info('Aún no se guarda en la base', 'Esta sección todavía no tiene tabla: el cambio solo vive en esta pantalla')
+  const handleGuardar = () => toast.info('Esta sección es una vista previa', 'Aún no tiene tabla en la base: los cambios no se guardan al salir de la pantalla')
+
+  const btnLocalStyle = {
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    padding: '8px 16px', borderRadius: 10, fontSize: '.875rem', fontWeight: 600, cursor: 'pointer',
+    background: 'rgba(124,58,237,.1)', color: '#7c3aed', border: '1px solid rgba(124,58,237,.3)',
+    transition: 'background .15s',
+  }
 
   return (
     <div>
@@ -216,7 +223,7 @@ export default function Configuracion() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <button className="btn-primary" onClick={handleGuardar}>
+                <button style={btnLocalStyle} onClick={handleGuardar}>
                   <Save className="w-4 h-4" /> Guardar cambios
                 </button>
               </div>
@@ -266,7 +273,7 @@ export default function Configuracion() {
                 />
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
               </div>
             </div>
           )}
@@ -309,7 +316,7 @@ export default function Configuracion() {
                 })}
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
               </div>
             </div>
           )}
@@ -383,7 +390,7 @@ export default function Configuracion() {
                 </div>
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar configuración</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar configuración</button>
               </div>
             </div>
           )}

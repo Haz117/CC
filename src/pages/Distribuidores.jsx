@@ -12,9 +12,8 @@ import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
-import { distribuidores } from '../data/distribuidores'
+import { listarDistribuidores } from '../api/distribuidores'
 import { fmt } from '../utils/fmt'
-import { useLoadDelay } from '../hooks/useLoadDelay'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useDebounce } from '../hooks/useDebounce'
 import { usePersistedState } from '../hooks/usePersistedState'
@@ -28,7 +27,7 @@ const BLANK_FORM = { nombre: '', telefono: '', ruta: 'Sin ruta', listaPrecio: 'L
 
 export default function Distribuidores() {
   const PER_PAGE = 5
-  const loaded = useLoadDelay()
+  const [loaded, setLoaded]       = useState(false)
   const [search, setSearch]       = usePersistedState('distribuidores-search', '')
   const debouncedSearch = useDebounce(search)
   const [page, setPage]           = useState(1)
@@ -38,8 +37,10 @@ export default function Distribuidores() {
   const [editForm, setEditForm]   = useState(null)
   const [confirmDel, setConfirmDel] = useState(null)
   const [newForm, setNewForm]     = useState(BLANK_FORM)
-  const [data, setData]           = useState(distribuidores)
+  const [data, setData]           = useState([])
   const { sortKey, sortDir, handleSort } = useSort('nombre')
+
+  useEffect(() => { listarDistribuidores().then(d => { setData(d); setLoaded(true) }) }, [])
 
   const filtered = useMemo(() => data.filter(d =>
     d.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) || d.ruta.toLowerCase().includes(debouncedSearch.toLowerCase())
@@ -186,7 +187,7 @@ export default function Distribuidores() {
       <div className="card overflow-hidden mb-6 hidden lg:block">
         <div className="data-toolbar">
           <div className="data-toolbar-row">
-            <SearchInput value={search} onChange={setSearch} placeholder="Buscar distribuidor o ruta..." resultCount={filtered.length} />
+            <SearchInput value={search} onChange={setSearch} placeholder="Buscar distribuidor o ruta…" resultCount={filtered.length} />
           </div>
         </div>
         <div className="section-head">

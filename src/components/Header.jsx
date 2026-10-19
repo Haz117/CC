@@ -31,8 +31,8 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
 
   useEffect(() => () => clearTimeout(spinTimer.current), [])
 
-  const rol       = etiquetaRol(perfil.rol)
-  const initials  = iniciales(perfil.nombre)
+  const rol       = etiquetaRol(perfil?.rol)
+  const initials  = iniciales(perfil?.nombre)
   const pageTitle = tituloDe(location.pathname)
   // El nombre de la página sale aquí solo cuando el título grande ya se desplazó fuera de la vista
   const tituloVisible = useTituloVisible()
@@ -250,8 +250,8 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-bold truncate" style={{ color: '#263442' }}>{perfil.nombre}</p>
-                      <p className="text-xs truncate" style={{ color: '#627080' }}>{rol} · {perfil.sucursal}</p>
+                      <p className="text-sm font-bold truncate" style={{ color: '#263442' }}>{perfil?.nombre}</p>
+                      <p className="text-xs truncate" style={{ color: '#627080' }}>{rol} · {perfil?.sucursal}</p>
                     </div>
                   </div>
                 </div>

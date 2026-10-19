@@ -38,7 +38,8 @@ function PageLoader({ pantallaCompleta = false }) {
 
 function pantallaDe(pagina) {
   const Pantalla = PANTALLAS[pagina.path]
-  return pagina.demo ? <ModuloDemo nombre={pagina.label}><Pantalla /></ModuloDemo> : <Pantalla />
+  const contenido = pagina.demo ? <ModuloDemo nombre={pagina.label}><Pantalla /></ModuloDemo> : <Pantalla />
+  return <ErrorBoundary>{contenido}</ErrorBoundary>
 }
 
 function Contenido() {
@@ -65,7 +66,6 @@ function Contenido() {
       <OfflineIndicator />
       <PwaInstallPrompt />
       <Layout>
-        <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -75,7 +75,6 @@ function Contenido() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        </ErrorBoundary>
       </Layout>
     </Router>
   )

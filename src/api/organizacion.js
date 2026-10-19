@@ -19,6 +19,12 @@ export async function listarUsuarios() {
   return usuarios.sort(porNombre('nombre_completo'))
 }
 
+// Versión ligera para contar usuarios por sucursal sin traer todas las columnas.
+export async function listarUsuariosSlim() {
+  if (esDemo()) return (await demo()).listarUsuarios()
+  return filas(supabase.from('usuarios').select('id, sucursal_id, activo').is('eliminado_en', null))
+}
+
 // Liga a una persona de `usuarios` con su cuenta de Auth. Solo administrador.
 // Antes hay que crear la cuenta en el panel: Authentication → Users → Add user (con Auto Confirm User).
 export async function vincularUsuario(usuarioId, correo) {

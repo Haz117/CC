@@ -411,3 +411,56 @@ export async function contarAvisos({ hoy }) {
     cajasAbiertas:       turnos.filter(t => t.estado === 'ABIERTO').length,
   }
 }
+
+/* ── Rutas de distribución ───────────────────────────────── */
+const RUTAS_DEMO = [
+  { id: 'R-001', nombre: 'Ruta Norte',    distribuidor: 'Juan Pérez',    vehiculo: 'JAL-123-B', salida: '07:30', llegada: '--', cierre: '--', status: 'En proceso',  clientesTotal: 12, clientesVisitados: 8,  ventas: 3200, devoluciones: 150, cobros: 2800 },
+  { id: 'R-002', nombre: 'Ruta Sur',      distribuidor: 'Carlos López',  vehiculo: 'QRO-456-C', salida: '07:00', llegada: '11:45', cierre: '11:50', status: 'Finalizada',  clientesTotal: 15, clientesVisitados: 15, ventas: 5200, devoluciones: 0,   cobros: 5200 },
+  { id: 'R-003', nombre: 'Ruta Centro',   distribuidor: 'Mario García',  vehiculo: 'JAL-789-D', salida: '--',    llegada: '--', cierre: '--', status: 'Pendiente',   clientesTotal: 10, clientesVisitados: 0,  ventas: 0,    devoluciones: 0,   cobros: 0 },
+  { id: 'R-004', nombre: 'Ruta Oriente',  distribuidor: 'Luis Martínez', vehiculo: 'QRO-321-A', salida: '08:00', llegada: '--', cierre: '--', status: 'En proceso',  clientesTotal: 9,  clientesVisitados: 5,  ventas: 1850, devoluciones: 80,  cobros: 1400 },
+  { id: 'R-005', nombre: 'Ruta Poniente', distribuidor: 'Roberto Cruz',  vehiculo: 'JAL-654-E', salida: '--',    llegada: '--', cierre: '--', status: 'Cancelada',  clientesTotal: 8,  clientesVisitados: 0,  ventas: 0,    devoluciones: 0,   cobros: 0 },
+]
+
+export async function listarRutas() {
+  await espera()
+  return [...RUTAS_DEMO]
+}
+
+/* ── Distribuidores ──────────────────────────────────────── */
+const DISTRIBUIDORES_DEMO = [
+  { id: 1, codigo: 'D-001', nombre: 'Juan Pérez Gómez',    ruta: 'Ruta Norte',    telefono: '442-111-2233', clientes: 12, mercancia: 4800, vendido: 3200, saldo: 0,   devoluciones: 150, status: 'Activo'          },
+  { id: 2, codigo: 'D-002', nombre: 'Carlos López Díaz',   ruta: 'Ruta Sur',      telefono: '442-555-8899', clientes: 15, mercancia: 5200, vendido: 5200, saldo: 0,   devoluciones: 0,   status: 'Activo'          },
+  { id: 3, codigo: 'D-003', nombre: 'Mario García Soto',   ruta: 'Ruta Centro',   telefono: '442-333-7712', clientes: 10, mercancia: 3900, vendido: 0,    saldo: 0,   devoluciones: 0,   status: 'En ruta'         },
+  { id: 4, codigo: 'D-004', nombre: 'Luis Martínez Ríos',  ruta: 'Ruta Oriente',  telefono: '442-777-4456', clientes: 9,  mercancia: 3100, vendido: 1850, saldo: 450, devoluciones: 80,  status: 'Activo'          },
+  { id: 5, codigo: 'D-005', nombre: 'Roberto Cruz Vega',   ruta: 'Ruta Poniente', telefono: '442-222-6634', clientes: 8,  mercancia: 2600, vendido: 2600, saldo: 200, devoluciones: 120, status: 'Saldo pendiente' },
+]
+
+export async function listarDistribuidores() {
+  await espera()
+  return [...DISTRIBUIDORES_DEMO]
+}
+
+/* ── Compras (proveedores y órdenes) ─────────────────────── */
+const PROVEEDORES_DEMO = [
+  { id: 1, nombre: 'Lácteos del Norte S.A.',     rfc: 'LNO820415GH3', contacto: 'Ing. Pedro Soto',    telefono: '442-800-1234', email: 'ventas@lacteosdelNorte.mx',    categoria: 'Lácteos'   },
+  { id: 2, nombre: 'Cremería Industrial CDMX',   rfc: 'CIC940230JK7', contacto: 'Lic. Sofía Ávila',   telefono: '55-1234-5678', email: 'pedidos@cremeriaindustrial.mx', categoria: 'Derivados' },
+  { id: 3, nombre: 'Distribuidora Láctea Bajío', rfc: 'DLB761005PQ2', contacto: 'Sr. Armando Cruz',   telefono: '476-200-9900', email: 'a.cruz@lacteabajio.com',        categoria: 'Lácteos'   },
+]
+
+const ORDENES_DEMO = [
+  { id: 'OC-0234', proveedor: 'Lácteos del Norte S.A.',     fecha: '2026-07-28', items: 8,  total: 24500, status: 'Recibida',    pago: 'Pagado'      },
+  { id: 'OC-0233', proveedor: 'Cremería Industrial CDMX',   fecha: '2026-07-27', items: 5,  total: 18900, status: 'En tránsito', pago: 'Pendiente'   },
+  { id: 'OC-0232', proveedor: 'Distribuidora Láctea Bajío', fecha: '2026-07-25', items: 12, total: 32400, status: 'Recibida',    pago: 'Pagado'      },
+  { id: 'OC-0231', proveedor: 'Lácteos del Norte S.A.',     fecha: '2026-07-22', items: 6,  total: 15800, status: 'Recibida',    pago: 'Pagado'      },
+  { id: 'OC-0230', proveedor: 'Cremería Industrial CDMX',   fecha: '2026-07-20', items: 9,  total: 27100, status: 'Recibida',    pago: 'Crédito 30d' },
+]
+
+export async function listarProveedores() {
+  await espera()
+  return [...PROVEEDORES_DEMO]
+}
+
+export async function listarOrdenes() {
+  await espera()
+  return [...ORDENES_DEMO]
+}

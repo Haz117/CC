@@ -17,7 +17,7 @@ import { useConsulta } from '../hooks/useConsulta'
 import { useSucursales } from '../hooks/useSucursales'
 import { listarVentasResumen } from '../api/ventas'
 import { listarTurnosAbiertos } from '../api/cajas'
-import { listarMetas, listarSaldosCredito, listarUsuarios } from '../api/organizacion'
+import { listarMetas, listarSaldosCredito, listarUsuariosSlim } from '../api/organizacion'
 import { ventasPorSucursal } from '../lib/calculos'
 import { pesos, pesosCorto, inicioDelMes, mesLargo } from '../utils/fmt'
 import Grafica from '../components/Grafica'
@@ -59,7 +59,7 @@ export default function Sucursales() {
   const { datos, cargando, error, recargar } = useConsulta(async () => {
     const [ventas, metas, saldos, usuarios, abiertas] = await Promise.all([
       listarVentasResumen({ desde: desdeMes }),
-      listarMetas(), listarSaldosCredito(), listarUsuarios(), listarTurnosAbiertos(),
+      listarMetas(), listarSaldosCredito(), listarUsuariosSlim(), listarTurnosAbiertos(),
     ])
     return { ventas, metas, saldos, usuarios, abiertas }
   }, [desdeMes])
