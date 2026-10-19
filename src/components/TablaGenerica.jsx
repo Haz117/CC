@@ -4,7 +4,11 @@ import { pesos, fechaHora } from '../utils/fmt'
 
 const TECNICAS = new Set(['id', 'creado_en', 'actualizado_en', 'eliminado_en', 'sincronizado_en', 'activo'])
 
-const titulo = (columna) => columna.replace(/_centavos$|_id$/, '').replace(/_/g, ' ')
+// "cantidad_sugerida" → "Cantidad sugerida" (antes la mayúscula la ponía el CSS en toda la palabra)
+const titulo = (columna) => {
+  const t = columna.replace(/_centavos$|_id$/, '').replace(/_/g, ' ')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
 
 function texto(columna, valor) {
   if (valor == null || valor === '') return '—'

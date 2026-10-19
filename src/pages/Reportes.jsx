@@ -18,7 +18,7 @@ const PRESETS = [['hoy', 'Hoy'], ['semana', 'Esta semana'], ['mes', 'Este mes'],
 
 const TIPOS = [
   { id: 'ventas',     label: 'Ventas',          desc: 'Por día y por sucursal',       icon: TrendingUp, Reporte: ReporteVentas,     conFechas: true },
-  { id: 'pagos',      label: 'Métodos de pago', desc: 'Efectivo, tarjeta y transfer.', icon: Wallet,     Reporte: ReportePagos,      conFechas: true },
+  { id: 'pagos',      label: 'Métodos de pago', desc: 'Efectivo, tarjeta y transferencia', icon: Wallet,     Reporte: ReportePagos,      conFechas: true },
   { id: 'cortes',     label: 'Cortes de caja',  desc: 'Esperado, contado, diferencia', icon: Scissors,   Reporte: ReporteCortes,     conFechas: true },
   { id: 'inventario', label: 'Inventario',      desc: 'Existencias contra el mínimo', icon: Package,    Reporte: ReporteInventario, conFechas: false },
   { id: 'mermas',     label: 'Mermas',          desc: 'Producto perdido o dañado',    icon: Trash2,     Reporte: ReporteMermas,     conFechas: true },
@@ -41,35 +41,40 @@ export default function Reportes() {
   )
   const conFiltros = periodo.preset !== 'semana' || sucursalId !== ''
 
+  // Flechas izquierda/derecha entre pestañas, como en cualquier lista de pestañas
+  const moverPestana = (e) => {
+    const paso = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (!paso) return
+    e.preventDefault()
+    const i = TIPOS.findIndex(t => t.id === active)
+    const siguiente = TIPOS[(i + paso + TIPOS.length) % TIPOS.length]
+    setActive(siguiente.id)
+    document.getElementById(`pestana-${siguiente.id}`)?.focus()
+  }
+
   return (
     <div className="space-y-6">
 
-      <PageHeader breadcrumb="Reportes" title="Reportes y Analítica"
-        subtitle={`${tipo.label}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`} />
+      <PageHeader title="Reportes"
+        subtitle={`${tipo.desc}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`} />
 
-      {/* Report type selector */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        {TIPOS.map((t, i) => {
-          const isAct = active === t.id
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActive(t.id)}
-              className="p-4 rounded-2xl border text-left transition-all animate-fade-in-up flex flex-col items-start"
-              style={{ animationDelay: `${Math.min(i * 55, 200)}ms`, ...(isAct
-                ? { background: '#FFF7ED', border: '1px solid #F97316', boxShadow: '0 2px 12px rgba(249,115,22,.15)', color: '#C2410C' }
-                : { background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 1px 3px rgba(38,52,66,.06)' }
-              ) }}
-            >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: isAct ? 'rgba(249,115,22,.15)' : '#FFF7ED' }}>
-                <t.icon className="w-4 h-4" style={{ color: '#C2410C' }} />
-              </div>
-              <p className="text-xs font-bold leading-tight" style={{ color: isAct ? '#C2410C' : '#263442' }}>{t.label}</p>
-              <p className="text-[10px] mt-1 leading-tight" style={{ color: '#627080' }}>{t.desc}</p>
-            </button>
-          )
-        })}
+      {/* Tipo de reporte: pestañas de texto (con flechas se pasa de una a otra) */}
+      <div className="pestanas-reporte" role="tablist" aria-label="Tipo de reporte" onKeyDown={moverPestana}>
+        {TIPOS.map(t => (
+          <button
+            key={t.id}
+            id={`pestana-${t.id}`}
+            type="button"
+            role="tab"
+            aria-selected={active === t.id}
+            aria-controls="reporte-activo"
+            tabIndex={active === t.id ? 0 : -1}
+            onClick={() => setActive(t.id)}
+            className="pestana-reporte"
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {/* Filters */}
@@ -109,7 +114,9 @@ export default function Reportes() {
         </div>
       </div>
 
-      <tipo.Reporte key={tipo.id} filtro={filtro} groupBy={groupBy} nombreCorto={nombreCorto} nombreSucursal={nombreSucursal} />
+      <div id="reporte-activo" role="tabpanel" aria-labelledby={`pestana-${tipo.id}`}>
+        <tipo.Reporte key={tipo.id} filtro={filtro} groupBy={groupBy} nombreCorto={nombreCorto} nombreSucursal={nombreSucursal} />
+      </div>
     </div>
   )
 }

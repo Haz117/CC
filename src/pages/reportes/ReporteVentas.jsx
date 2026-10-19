@@ -67,7 +67,7 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="etiqueta" tick={tick} axisLine={false} tickLine={false} minTickGap={10} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <Tooltip formatter={v => [fmtDec(v), 'Ventas']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Ventas']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                 {serie.map((s, i) => <Cell key={s.dia} fill={groupBy === 'Sucursal' ? COLORS[i % COLORS.length] : '#C2410C'} />)}
               </Bar>

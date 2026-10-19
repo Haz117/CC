@@ -1,7 +1,7 @@
 // Pruebas del formato de dinero y cantidades, y de los rangos de fechas que se mandan a la base.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto } from '../src/utils/fmt.js'
+import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto } from '../src/utils/fmt.js'
 
 test('pesos: la base guarda centavos enteros', () => {
   assert.equal(pesos(1250), '$12.50')
@@ -47,6 +47,12 @@ test('rangoCorto: solo repite el mes y el año cuando cambian', () => {
   assert.equal(rangoCorto('2026-10-13', '2026-10-19'), '13 – 19 oct 2026')
   assert.equal(rangoCorto('2026-09-28', '2026-10-19'), '28 sep – 19 oct 2026')
   assert.equal(rangoCorto('2025-12-28', '2026-01-03'), '28 dic 2025 – 3 ene 2026')
+})
+
+test('diaCorto: día y mes separados por espacio, sin guion ni punto', () => {
+  assert.equal(diaCorto(new Date(2026, 9, 19, 12).toISOString()), '19 oct')
+  assert.equal(diaCorto(new Date(2026, 8, 3, 12).toISOString()), '03 sep')
+  assert.equal(diaCorto(null), '—')
 })
 
 test('haceCuanto: justo ahora, minutos y, pasada una hora, la hora', () => {

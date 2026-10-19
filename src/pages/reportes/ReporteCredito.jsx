@@ -42,7 +42,7 @@ export default function ReporteCredito({ filtro, nombreSucursal, nombreCorto }) 
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="name" tick={tick} axisLine={false} tickLine={false} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <Tooltip formatter={v => [fmtDec(v), 'Saldo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Saldo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="saldo" fill="#d97706" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

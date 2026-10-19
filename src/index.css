@@ -1633,3 +1633,16 @@ button, a, [role="button"] {
 
 /* El foco llega al título solo para anunciar la pantalla: no se dibuja el anillo */
 h1[tabindex="-1"]:focus, h1[tabindex="-1"]:focus-visible { outline: none }
+
+/* ── Pestañas de texto (tipo de reporte) ── */
+.pestanas-reporte { display: flex; gap: 2px; border-bottom: 1px solid #FDE8D0; overflow-x: auto; scrollbar-width: none }
+.pestanas-reporte::-webkit-scrollbar { display: none }
+.pestana-reporte {
+  padding: 10px 14px; margin-bottom: -1px; white-space: nowrap;
+  font: inherit; font-size: .9375rem; font-weight: 500; color: #4A5664;
+  background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.pestana-reporte:hover { color: #263442 }
+.pestana-reporte[aria-selected="true"] { color: #C2410C; border-bottom-color: #C2410C; font-weight: 600 }
+.pestana-reporte:focus-visible { outline-offset: -3px }

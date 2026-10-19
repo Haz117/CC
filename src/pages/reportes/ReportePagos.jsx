@@ -48,7 +48,7 @@ export default function ReportePagos({ filtro }) {
                 <Pie data={metodos.map(m => ({ name: etiquetaMetodo(m.metodo), value: m.centavos / 100 }))} cx="50%" cy="50%" innerRadius={65} outerRadius={95} dataKey="value" paddingAngle={3}>
                   {metodos.map(m => <Cell key={m.metodo} fill={colorMetodo(m.metodo)} />)}
                 </Pie>
-                <Tooltip formatter={v => [fmtDec(v)]} contentStyle={tooltipStyle} />
+                <Tooltip separator=": " formatter={v => [fmtDec(v)]} contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
               </PieChart>
             </ResponsiveContainer>

@@ -23,7 +23,12 @@ const fHora     = new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2
 const fMes      = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
 
 export const fecha     = (iso) => iso ? fFecha.format(new Date(iso)) : '—'
-export const diaCorto  = (iso) => iso ? fDiaCorto.format(new Date(iso)) : '—'
+// Chrome escribe "19-oct" en es-MX; se arma con las partes para que siempre diga "19 oct"
+export const diaCorto  = (iso) => {
+  if (!iso) return '—'
+  const partes = Object.fromEntries(fDiaCorto.formatToParts(new Date(iso)).map(p => [p.type, p.value]))
+  return `${partes.day} ${String(partes.month).replace('.', '')}`
+}
 export const hora      = (iso) => iso ? fHora.format(new Date(iso)) : '—'
 export const fechaHora = (iso) => iso ? `${fecha(iso)} · ${hora(iso)}` : '—'
 export const mesLargo  = (d = new Date()) => fMes.format(d)

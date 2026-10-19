@@ -70,7 +70,7 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
               <XAxis dataKey="etiqueta" tick={tick} axisLine={false} tickLine={false} minTickGap={10} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
               <ReferenceLine y={0} stroke="#D4DDE6" />
-              <Tooltip formatter={v => [fmtDec(v), 'Diferencia']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Diferencia']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="diferencia" radius={[4, 4, 4, 4]} minPointSize={3}>
                 {dias.map(d => <Cell key={d.dia} fill={d.diferencia < 0 ? '#8A4A42' : d.diferencia > 0 ? '#92400E' : '#047857'} />)}
               </Bar>

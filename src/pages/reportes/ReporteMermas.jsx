@@ -59,7 +59,7 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="motivo" tick={tick} axisLine={false} tickLine={false} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <Tooltip formatter={v => [fmtDec(v), 'Costo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Costo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="costo" fill="#8A4A42" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

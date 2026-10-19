@@ -56,7 +56,7 @@ export default function ReporteInventario({ filtro, nombreCorto }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="clave" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} minTickGap={6} />
               <YAxis tick={tick} axisLine={false} tickLine={false} width={40} />
-              <Tooltip
+              <Tooltip separator=": "
                 labelFormatter={(clave) => {
                   const p = grafica.find(x => x.clave === clave)
                   return p ? `${p.nombre} · ${nombreCorto(p.sucursal_id)}` : clave

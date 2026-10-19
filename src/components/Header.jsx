@@ -179,12 +179,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         onClick={() => { closeAll(); navigate(n.path) }}
                       >
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                          style={{ background: ns.bg, border: `1px solid ${ns.dot}33` }}
-                        >
-                          <n.Icon className="w-3.5 h-3.5" style={{ color: ns.icon }} />
-                        </div>
+                        <n.Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: ns.icon }} aria-hidden="true" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs leading-snug font-semibold" style={{ color: '#263442' }}>{n.texto}</p>
                           <p className="text-[10px] mt-1" style={{ color: '#627080' }}>Ver en {tituloDe(n.path)} →</p>
