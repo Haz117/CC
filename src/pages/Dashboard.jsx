@@ -4,8 +4,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { DollarSign, AlertTriangle, LayoutGrid, Receipt, ChevronRight, Monitor, Target, XCircle } from 'lucide-react'
 import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
+import EnVivo from '../components/EnVivo'
 import { SkeletonLine } from '../components/Skeleton'
 import { useConsulta } from '../hooks/useConsulta'
+import { useEnfocarTitulo } from '../hooks/useEnfocarTitulo'
 import { useSucursales } from '../hooks/useSucursales'
 import { useAuth } from '../auth/contexto'
 import { listarVentasResumen, listarUltimasVentas } from '../api/ventas'
@@ -14,10 +16,11 @@ import { listarOrdenesPendientes } from '../api/inventario'
 import { listarMetas } from '../api/organizacion'
 import { resumenVentas, ventasPorDia, ventasPorSucursal, esCancelada } from '../lib/calculos'
 import { pesos, pesosCorto, hora, fmtDec, inicioDelDia, inicioDelMes, sumarDias, mesLargo, diaLocal } from '../utils/fmt'
+import Grafica from '../components/Grafica'
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-const enlace = { fontSize: 12, fontWeight: 700, color: '#F97316', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }
+const enlace = { fontSize: 12, fontWeight: 700, color: '#C2410C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }
 const tarjeta = { display: 'flex', flexDirection: 'column', minWidth: 0 }
 const filaLista = { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 6px', borderRadius: 10 }
 
@@ -88,13 +91,14 @@ export default function Dashboard() {
   const nombre = perfil.nombre?.split(' ')[0]
   const h = new Date().getHours()
   const saludo = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+  const titulo = useEnfocarTitulo()
   const ir = (path) => () => navigate(path)
 
   const kpis = [
-    { Icon: DollarSign,    label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'ventas completadas' : `${r.delta >= 0 ? '+' : ''}${r.delta}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, pill: r.delta, iconColor: '#F97316', iconBg: '#FFF7ED', path: '/ventas' },
-    { Icon: Receipt,       label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#2F8CEB', iconBg: '#EBF5FF', path: '/ventas' },
-    { Icon: LayoutGrid,    label: 'Cajas abiertas', value: abiertas.length,           sub: abiertas.length ? 'turnos en operación' : 'ninguna en este momento', iconColor: '#059669', iconBg: 'rgba(5,150,105,.1)', path: '/cajas' },
-    { Icon: AlertTriangle, label: 'Bajo mínimo',    value: ordenes.length,            sub: ordenes.length ? 'por reabastecer' : 'inventario en orden', alert: ordenes.length > 0, punto: ordenes.length > 0, iconColor: '#C97A6D', iconBg: 'rgba(201,122,109,.1)', path: '/inventario' },
+    { Icon: DollarSign,    label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'ventas completadas' : `${r.delta >= 0 ? '+' : ''}${r.delta}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#C2410C', path: '/ventas' },
+    { Icon: Receipt,       label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#2F8CEB', path: '/ventas' },
+    { Icon: LayoutGrid,    label: 'Cajas abiertas', value: abiertas.length,           sub: abiertas.length ? 'turnos en operación' : 'ninguna en este momento', iconColor: '#047857', path: '/cajas' },
+    { Icon: AlertTriangle, label: 'Bajo mínimo',    value: ordenes.length,            sub: ordenes.length ? 'por reabastecer' : 'inventario en orden', alert: ordenes.length > 0, iconColor: '#8A4A42', path: '/inventario' },
   ]
 
   return (
@@ -104,10 +108,10 @@ export default function Dashboard() {
       <div className="panel-hero">
         <div className="min-w-0">
           <p className="panel-hero-crumb">Panel principal · {mesLargo(hoy)}</p>
-          <h1 className="panel-hero-title">{saludo}, {nombre}</h1>
+          <h1 ref={titulo} className="panel-hero-title">{saludo}, {nombre}</h1>
           <p className="panel-hero-sub">Resumen de hoy — todas las sucursales</p>
           <div className="panel-hero-tags">
-            <span className="live-badge-light"><span className="live-dot" /> En vivo</span>
+            <EnVivo />
             {r.hoy.canceladas > 0 && !sinDatos && (
               <button onClick={ir('/ventas')} className="cancel-chip-light">
                 <XCircle size={12} /> {r.hoy.canceladas} cancelada{r.hoy.canceladas > 1 ? 's' : ''} hoy
@@ -131,31 +135,20 @@ export default function Dashboard() {
 
       <AvisoError error={error} onReintentar={recargar} />
 
-      {/* ══ KPI GRID ══════════════════════════════════════════ */}
+      {/* ══ KPI GRID: cada indicador lleva a su pantalla; es un botón de verdad, también con teclado ══ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-        {kpis.map(({ Icon, label, value, sub, good, alert, pill, punto, iconColor, iconBg, path }) => {
-          const abrir = ir(path)
-          return (
-            <div key={label} className="card" onClick={abrir} style={{ padding: '18px 20px', cursor: abrir ? 'pointer' : 'default' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 11, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon size={18} color={iconColor} />
-                </div>
-                {pill != null && !sinDatos && (
-                  <span style={{ fontSize: '.62rem', fontWeight: 700, color: pill >= 0 ? '#059669' : '#A05A52', background: pill >= 0 ? 'rgba(5,150,105,.08)' : 'rgba(201,122,109,.1)', padding: '3px 8px', borderRadius: 99, border: `1px solid ${pill >= 0 ? 'rgba(5,150,105,.15)' : 'rgba(201,122,109,.2)'}` }}>
-                    {pill >= 0 ? '+' : ''}{pill}%
-                  </span>
-                )}
-                {punto && !sinDatos && <span className="red-dot" style={{ marginTop: 5 }} />}
-              </div>
-              {cargando
-                ? <SkeletonLine w="w-2/3" h="h-7" />
-                : <p style={{ fontSize: '1.55rem', fontWeight: 900, color: '#263442', letterSpacing: '-.04em', lineHeight: 1 }}>{sinDatos ? '—' : value}</p>}
-              <p style={{ fontSize: '.67rem', fontWeight: 700, color: '#627080', marginTop: 6, textTransform: 'uppercase', letterSpacing: '.07em' }}>{label}</p>
-              <p style={{ fontSize: '.72rem', color: good ? '#059669' : alert ? '#C97A6D' : '#627080', marginTop: 3 }}>{sinDatos ? '\u00a0' : sub}</p>
-            </div>
-          )
-        })}
+        {kpis.map(({ Icon, label, value, sub, good, alert, iconColor, path }) => (
+          <button key={label} type="button" className="card kpi-enlace" onClick={ir(path)}>
+            <span className="kpi-cell-label">
+              <Icon size={15} color={iconColor} aria-hidden="true" style={{ flexShrink: 0 }} />
+              {label}
+            </span>
+            {cargando
+              ? <SkeletonLine w="w-2/3" h="h-7" />
+              : <span className="kpi-cell-value" style={{ color: '#263442' }}>{sinDatos ? '—' : value}</span>}
+            <span className="kpi-cell-sub" style={{ color: good ? '#047857' : alert ? '#8A4A42' : '#627080' }}>{sinDatos ? ' ' : sub}</span>
+          </button>
+        ))}
       </div>
 
       {/* ══ GRID 60/40: cada renglón empareja el alto de sus dos tarjetas ══ */}
@@ -177,18 +170,20 @@ export default function Dashboard() {
           {/* La gráfica ocupa el alto que le deje la tarjeta de al lado */}
           <div style={{ flex: 1, minHeight: 200, position: 'relative' }}>
             <div style={{ position: 'absolute', inset: 0 }}>
+              <Grafica titulo="Ventas de los últimos 7 días" datos={r.semana} etiqueta="etiqueta" valor="total">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={r.semana} barCategoryGap="32%" margin={{ top: 8, left: 0, right: 4, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 0" stroke="#FDE8D0" vertical={false} />
                   <XAxis dataKey="etiqueta" tick={{ fontSize: 10, fill: '#627080', fontWeight: 600 }} axisLine={false} tickLine={false} />
                   {/* Eje con montos para leer la gráfica sin pasar el mouse */}
-                  <YAxis tick={{ fontSize: 10, fill: '#8FA1B2' }} axisLine={false} tickLine={false} width={46} tickFormatter={v => (v >= 1000 ? `$${Math.round(v / 100) / 10}k` : `$${v}`)} />
+                  <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickFormatter={v => (v >= 1000 ? `$${Math.round(v / 100) / 10}k` : `$${v}`)} />
                   <Tooltip content={props => <ChartTooltip {...props} format={fmtDec} />} cursor={{ fill: 'rgba(249,115,22,.06)' }} />
                   <Bar dataKey="total" radius={[7, 7, 2, 2]}>
-                    {r.semana.map(d => <Cell key={d.dia} fill={d.dia === diaLocal(hoy) ? '#F97316' : '#FDBA74'} />)}
+                    {r.semana.map(d => <Cell key={d.dia} fill={d.dia === diaLocal(hoy) ? '#C2410C' : '#FDBA74'} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </Grafica>
             </div>
           </div>
         </div>
@@ -210,16 +205,13 @@ export default function Dashboard() {
                 <div key={v.id}>
                   {i > 0 && <div style={{ height: 1, background: '#FDE8D0', margin: '0 4px' }} />}
                   <div style={filaLista}>
-                    <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: cancelada ? 'rgba(201,122,109,.1)' : '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {cancelada ? <XCircle size={15} color="#C97A6D" /> : <Receipt size={15} color="#F97316" />}
-                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p className="truncate" style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{v.folio}</p>
                       <p className="truncate" style={{ fontSize: 10, color: '#627080' }}>
                         {hora(v.fecha)} · {v.cajero?.nombre_completo ?? nombreCorto(v.sucursal_id)}{cancelada ? ' · cancelada' : ''}
                       </p>
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: cancelada ? '#C97A6D' : '#263442', textDecoration: cancelada ? 'line-through' : 'none', flexShrink: 0 }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: cancelada ? '#8A4A42' : '#263442', textDecoration: cancelada ? 'line-through' : 'none', flexShrink: 0 }}>
                       {pesos(v.total_centavos)}
                     </span>
                   </div>
@@ -246,14 +238,14 @@ export default function Dashboard() {
         <div className="card p-5" style={tarjeta}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={15} color="#F97316" />
+              <Target size={15} color="#C2410C" />
               <p style={{ fontSize: 13, fontWeight: 800, color: '#263442' }}>Meta de {mesLargo(hoy)}</p>
             </div>
             <button onClick={ir('/sucursales')} style={enlace}>Ver sucursales</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, justifyContent: 'space-around' }}>
             {r.metas.map(m => {
-              const color = m.avance >= esperado ? '#059669' : m.avance >= esperado * 0.8 ? '#d97706' : '#C97A6D'
+              const color = m.avance >= esperado ? '#047857' : m.avance >= esperado * 0.8 ? '#92400E' : '#8A4A42'
               return (
                 <div key={m.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
@@ -292,7 +284,7 @@ export default function Dashboard() {
                     <p className="truncate" style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{t.caja?.nombre ?? 'Caja'} · {nombreCorto(t.sucursal_id)}</p>
                     <p className="truncate" style={{ fontSize: 10, color: '#627080' }}>{t.cajero?.nombre_completo ?? '—'}</p>
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', flexShrink: 0 }}>desde {hora(t.abierto_en)}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#047857', flexShrink: 0 }}>desde {hora(t.abierto_en)}</span>
                 </div>
               </div>
             ))}

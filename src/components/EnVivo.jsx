@@ -1,17 +1,34 @@
-import { useAuth } from '../auth/contexto'
+import { useEffect, useState } from 'react'
+import { RefreshCw, CloudOff } from 'lucide-react'
+import { useSincronizacion } from '../lib/sincronizacion'
+import { haceCuanto, hora } from '../utils/fmt'
 
-// Indica que la pantalla se actualiza sola cuando las cajas suben cambios.
+// Cuándo llegaron los últimos datos de la base, dicho en palabras ("Actualizado hace 2 min").
+// La pantalla se actualiza sola con los cambios de las cajas; tocarlo vuelve a consultar ya.
 export default function EnVivo({ actualizando = false }) {
-  const { modoDemo } = useAuth()
-  if (modoDemo) return null
+  const { desde, enLinea } = useSincronizacion()
+  const [ahora, setAhora] = useState(Date.now)
+
+  useEffect(() => {
+    const reloj = setInterval(() => setAhora(Date.now()), 20000)
+    return () => clearInterval(reloj)
+  }, [])
+
+  const texto = !enLinea
+    ? (desde ? `Sin conexión · datos de las ${hora(desde)}` : 'Sin conexión')
+    : actualizando || !desde ? 'Actualizando…' : `Actualizado ${haceCuanto(desde, ahora)}`
+  const Icono = enLinea ? RefreshCw : CloudOff
+
   return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold"
-      style={{ background: 'rgba(5,150,105,.08)', color: '#059669', border: '1px solid rgba(5,150,105,.18)' }}
-      title="Se actualiza sola cuando las cajas suben cambios"
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new Event('app:refrescar'))}
+      disabled={!enLinea}
+      title="Se actualiza sola cuando las cajas suben cambios. Toca para consultar ahora."
+      className={`sincronia${enLinea ? '' : ' sin-red'}`}
     >
-      <span className="live-dot" style={{ background: '#059669' }} />
-      {actualizando ? 'Actualizando…' : 'En vivo'}
-    </span>
+      <Icono className={`sincronia-icono${actualizando && enLinea ? ' animate-spin' : ''}`} aria-hidden="true" />
+      <span aria-live="polite">{texto}</span>
+    </button>
   )
 }

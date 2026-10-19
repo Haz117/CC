@@ -11,6 +11,7 @@ import { resumenVentas, ventasPorDia, ventasPorSucursal } from '../../lib/calcul
 import { pesos, diaCorto, fmtDec, mesLargo, diaLocal, inicioDelDia, sumarDias } from '../../utils/fmt'
 import { COLORS, tooltipStyle, ejeMiles, tick, totalRow, celdaTotal } from './constantes'
 import { Kpis, Parcial, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 // Junta los días en semanas (de lunes a domingo) o meses.
 function agrupar(dias, groupBy) {
@@ -60,6 +61,7 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
       ]} />
       <ChartCard title={`Ventas por ${groupBy.toLowerCase()}`} subtitle={`Total: ${pesos(resumen.vendido)}`}>
         {serie.every(s => !s.total) ? <SinDatos>Sin ventas en este periodo</SinDatos> : (
+          <Grafica titulo="Ventas del periodo" datos={serie} etiqueta="etiqueta" valor="total">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={serie} barCategoryGap="30%" maxBarSize={48}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
@@ -67,36 +69,37 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
               <Tooltip formatter={v => [fmtDec(v), 'Ventas']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="total" radius={[4, 4, 0, 0]}>
-                {serie.map((s, i) => <Cell key={s.dia} fill={groupBy === 'Sucursal' ? COLORS[i % COLORS.length] : '#F97316'} />)}
+                {serie.map((s, i) => <Cell key={s.dia} fill={groupBy === 'Sucursal' ? COLORS[i % COLORS.length] : '#C2410C'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Detalle por sucursal" exportLabel="Exportar CSV"
         onExport={() => downloadCSV(porSucursal.map(s => ({ sucursal: s.nombre, ventas: (s.centavos / 100).toFixed(2), tickets: s.tickets, ticket_promedio: s.tickets ? (s.centavos / s.tickets / 100).toFixed(2) : '0.00', canceladas: s.canceladas })), 'reporte_ventas')}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Sucursal', 'Ventas', 'Tickets', 'Ticket prom.', 'Canceladas', 'Participación'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>
               {porSucursal.map(s => (
                 <tr key={s.sucursal_id}>
                   <td className="font-semibold" style={{ color: '#263442' }}>{s.nombre}</td>
-                  <td className="font-bold" style={{ color: '#059669' }}>{pesos(s.centavos)}</td>
+                  <td className="font-bold" style={{ color: '#047857' }}>{pesos(s.centavos)}</td>
                   <td style={{ color: '#263442' }}>{s.tickets}</td>
                   <td style={{ color: '#263442' }}>{pesos(s.tickets ? s.centavos / s.tickets : 0)}</td>
-                  <td className="font-medium" style={{ color: s.canceladas ? '#C97A6D' : '#627080' }}>{s.canceladas}</td>
-                  <td className="font-bold" style={{ color: '#F97316' }}>{resumen.vendido ? Math.round(s.centavos / resumen.vendido * 100) : 0}%</td>
+                  <td className="font-medium" style={{ color: s.canceladas ? '#8A4A42' : '#627080' }}>{s.canceladas}</td>
+                  <td className="font-bold" style={{ color: '#C2410C' }}>{resumen.vendido ? Math.round(s.centavos / resumen.vendido * 100) : 0}%</td>
                 </tr>
               ))}
             </tbody>
             {porSucursal.length > 0 && <tfoot>
               <tr style={totalRow}>
                 <td className={celdaTotal} style={{ color: '#263442' }}>Total</td>
-                <td className={celdaTotal} style={{ color: '#059669' }}>{pesos(resumen.vendido)}</td>
+                <td className={celdaTotal} style={{ color: '#047857' }}>{pesos(resumen.vendido)}</td>
                 <td className={celdaTotal} style={{ color: '#263442' }}>{resumen.completadas}</td>
                 <td className={celdaTotal} style={{ color: '#263442' }}>{pesos(resumen.ticketPromedio)}</td>
-                <td className={celdaTotal} style={{ color: '#C97A6D' }}>{resumen.canceladas}</td>
+                <td className={celdaTotal} style={{ color: '#8A4A42' }}>{resumen.canceladas}</td>
                 <td />
               </tr>
             </tfoot>}

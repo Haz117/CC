@@ -28,6 +28,14 @@ export const hora      = (iso) => iso ? fHora.format(new Date(iso)) : '—'
 export const fechaHora = (iso) => iso ? `${fecha(iso)} · ${hora(iso)}` : '—'
 export const mesLargo  = (d = new Date()) => fMes.format(d)
 
+// Cuánto hace de un momento (ms), para "Actualizado justo ahora / hace 3 min / a las 13:05".
+export const haceCuanto = (desde, ahora = Date.now()) => {
+  const segundos = Math.max(0, (ahora - desde) / 1000)
+  if (segundos < 45) return 'justo ahora'
+  const minutos = Math.max(1, Math.round(segundos / 60))
+  return minutos < 60 ? `hace ${minutos} min` : `a las ${hora(desde)}`
+}
+
 const dos = (n) => String(n).padStart(2, '0')
 
 // 'yyyy-mm-dd' en hora local (el formato de <input type="date">)
@@ -61,6 +69,19 @@ export const rangoISO = (primerDia, ultimoDia = primerDia) => ({
   desde: inicioDelDia(primerDia).toISOString(),
   hasta: sumarDias(inicioDelDia(ultimoDia), 1).toISOString(),
 })
+
+// Rango 'yyyy-mm-dd' en corto para el botón del filtro: "19 oct 2026", "13 – 19 oct 2026",
+// "28 sep – 19 oct 2026" o "28 dic 2025 – 3 ene 2026". Solo repite lo que cambia.
+const fMesCorto = new Intl.DateTimeFormat('es-MX', { month: 'short' })
+export const rangoCorto = (primerDia, ultimoDia = primerDia) => {
+  const [a, b] = [inicioDelDia(primerDia), inicioDelDia(ultimoDia)]
+  const mes = (d) => fMesCorto.format(d).replace('.', '')
+  const fin = `${b.getDate()} ${mes(b)} ${b.getFullYear()}`
+  if (primerDia === ultimoDia) return fin
+  if (a.getFullYear() !== b.getFullYear()) return `${a.getDate()} ${mes(a)} ${a.getFullYear()} – ${fin}`
+  if (a.getMonth() !== b.getMonth()) return `${a.getDate()} ${mes(a)} – ${fin}`
+  return `${a.getDate()} – ${fin}`
+}
 
 export const iniciales = (nombre) =>
   (nombre || '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '—'

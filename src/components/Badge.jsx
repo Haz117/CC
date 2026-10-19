@@ -1,15 +1,17 @@
 const palette = {
-  orange: { bg: '#FFF7ED',                   text: '#C2410C', border: '#FDBA74',                   dot: '#F97316' },
-  blue:   { bg: '#FFF7ED',                   text: '#C2410C', border: '#FDBA74',                   dot: '#F97316' },
-  green:  { bg: 'rgba(5,150,105,.09)',        text: '#059669', border: 'rgba(5,150,105,.22)',        dot: '#059669' },
-  red:    { bg: 'rgba(201,122,109,.1)',       text: '#A05A52', border: 'rgba(201,122,109,.28)',      dot: '#C97A6D' },
-  amber:  { bg: 'rgba(217,119,6,.09)',        text: '#d97706', border: 'rgba(217,119,6,.22)',        dot: '#d97706' },
-  gray:   { bg: '#F2F3F5',                   text: '#627080', border: '#D4DDE6',                   dot: '#8FA1B2' },
-  purple: { bg: 'rgba(124,58,237,.09)',        text: '#7c3aed', border: 'rgba(124,58,237,.22)',        dot: '#7c3aed' },
-  teal:   { bg: 'rgba(13,148,136,.09)',       text: '#0d9488', border: 'rgba(13,148,136,.22)',       dot: '#0d9488' },
+  orange: { bg: '#FFF1E3',               text: '#C2410C', dot: '#C2410C' },
+  blue:   { bg: '#FFF1E3',               text: '#C2410C', dot: '#C2410C' },
+  green:  { bg: 'rgba(5,150,105,.1)',    text: '#047857', dot: '#047857' },
+  red:    { bg: 'rgba(201,122,109,.13)', text: '#8A4A42', dot: '#8A4A42' },
+  amber:  { bg: 'rgba(217,119,6,.11)',   text: '#92400E', dot: '#92400E' },
+  gray:   { bg: '#EEF0F3',               text: '#4A5664', dot: '#627080' },
+  purple: { bg: 'rgba(124,58,237,.1)',   text: '#6D28D9', dot: '#7c3aed' },
+  teal:   { bg: 'rgba(13,148,136,.1)',   text: '#0F766E', dot: '#0d9488' },
 }
 
-export default function Badge({ label, color = 'orange', dot = true }) {
+// Etiqueta de estado: texto normal (sin mayúsculas forzadas) sobre un tinte suave, como las
+// etiquetas de una app de sistema. El punto de color queda solo para quien lo pida con `dot`.
+export default function Badge({ label, color = 'orange', dot = false }) {
   const p = palette[color] || palette.orange
   return (
     <span
@@ -17,29 +19,17 @@ export default function Badge({ label, color = 'orange', dot = true }) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '5px',
-        padding: '3px 10px',
-        fontSize: '.68rem',
-        fontWeight: 700,
-        borderRadius: '99px',
-        letterSpacing: '.03em',
-        textTransform: 'uppercase',
+        padding: '2px 8px',
+        fontSize: '.75rem',
+        fontWeight: 600,
+        lineHeight: 1.5,
+        borderRadius: '6px',
+        whiteSpace: 'nowrap',
         background: p.bg,
         color: p.text,
-        border: `1px solid ${p.border}`,
       }}
     >
-      {dot && (
-        <span
-          style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            background: p.dot,
-            flexShrink: 0,
-            display: 'inline-block',
-          }}
-        />
-      )}
+      {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: p.dot, flexShrink: 0 }} />}
       {label}
     </span>
   )

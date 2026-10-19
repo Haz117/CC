@@ -10,6 +10,7 @@ import { pagosPorMetodo, etiquetaMetodo, colorMetodo } from '../../lib/calculos'
 import { pesos, fmtDec } from '../../utils/fmt'
 import { tooltipStyle, totalRow, celdaTotal } from './constantes'
 import { Kpis, Parcial, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── MÉTODOS DE PAGO ─────────────────────────────────────── */
 export default function ReportePagos({ filtro }) {
@@ -41,6 +42,7 @@ export default function ReportePagos({ filtro }) {
             <p className="text-xs" style={{ color: '#627080' }}>Total: {pesos(total)}</p>
           </div>
           {metodos.length === 0 ? <SinDatos>Sin pagos en este periodo</SinDatos> : (
+            <Grafica titulo="Cobrado por forma de pago" datos={metodos.map(m => ({ n: etiquetaMetodo(m.metodo), v: m.centavos / 100 }))} etiqueta="n" valor="v">
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={metodos.map(m => ({ name: etiquetaMetodo(m.metodo), value: m.centavos / 100 }))} cx="50%" cy="50%" innerRadius={65} outerRadius={95} dataKey="value" paddingAngle={3}>
@@ -50,6 +52,7 @@ export default function ReportePagos({ filtro }) {
                 <Legend wrapperStyle={{ fontSize: 12 }} />
               </PieChart>
             </ResponsiveContainer>
+            </Grafica>
           )}
         </div>
         <TableCard title="Detalle por método" exportLabel="Exportar CSV"
@@ -64,15 +67,15 @@ export default function ReportePagos({ filtro }) {
                     <span className="font-semibold" style={{ color: '#263442' }}>{etiquetaMetodo(m.metodo)}</span>
                   </td>
                   <td style={{ color: '#263442' }}>{m.pagos}</td>
-                  <td className="font-bold" style={{ color: '#059669' }}>{pesos(m.centavos)}</td>
-                  <td className="font-bold" style={{ color: '#F97316' }}>{pct(m.centavos)}%</td>
+                  <td className="font-bold" style={{ color: '#047857' }}>{pesos(m.centavos)}</td>
+                  <td className="font-bold" style={{ color: '#C2410C' }}>{pct(m.centavos)}%</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr style={totalRow}>
                 <td className={celdaTotal} style={{ color: '#263442' }} colSpan={2}>Total cobrado</td>
-                <td className={celdaTotal} style={{ color: '#059669' }}>{pesos(total)}</td>
+                <td className={celdaTotal} style={{ color: '#047857' }}>{pesos(total)}</td>
                 <td />
               </tr>
             </tfoot>

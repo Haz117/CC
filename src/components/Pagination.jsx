@@ -31,7 +31,7 @@ export default function Pagination({ total, page, perPage, onChange }) {
     >
       <p className="text-xs font-medium" style={{ color: '#627080' }}>
         {start}–{end}{' '}
-        <span style={{ color: '#D4DDE6' }}>de</span>{' '}
+        <span style={{ color: '#627080' }}>de</span>{' '}
         <strong style={{ color: '#627080' }}>{total}</strong>
       </p>
 
@@ -40,29 +40,32 @@ export default function Pagination({ total, page, perPage, onChange }) {
         <button
           disabled={page === 1}
           onClick={() => onChange(page - 1)}
+          aria-label="Página anterior"
           style={{ ...btnBase, opacity: page === 1 ? .35 : 1, color: '#627080' }}
-          onMouseEnter={e => { if (page > 1) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#F97316'; e.currentTarget.style.borderColor = '#FDBA74' } }}
+          onMouseEnter={e => { if (page > 1) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' }}
         >
-          <ChevronLeft size={15} />
+          <ChevronLeft size={15} aria-hidden="true" />
         </button>
 
         {/* Pages */}
         {range.map((p, i) =>
           p === '…'
-            ? <span key={`ellipsis-${i}`} style={{ width: 28, textAlign: 'center', fontSize: '.7rem', color: '#D4DDE6' }}>…</span>
+            ? <span key={`ellipsis-${i}`} style={{ width: 28, textAlign: 'center', fontSize: '.7rem', color: '#627080' }}>…</span>
             : <button
                 key={p}
                 onClick={() => onChange(p)}
+                aria-label={`Página ${p}`}
+                aria-current={p === page ? 'page' : undefined}
                 style={{
                   ...btnBase,
                   fontSize: '.75rem', fontWeight: p === page ? 800 : 500,
                   ...(p === page
-                    ? { background: '#F97316', color: '#fff', borderColor: '#F97316', boxShadow: '0 2px 8px rgba(249,115,22,.28)' }
+                    ? { background: '#C2410C', color: '#fff', borderColor: '#C2410C', boxShadow: '0 2px 8px rgba(249,115,22,.28)' }
                     : { color: '#627080' }
                   ),
                 }}
-                onMouseEnter={e => { if (p !== page) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#F97316'; e.currentTarget.style.borderColor = '#FDBA74' } }}
+                onMouseEnter={e => { if (p !== page) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
                 onMouseLeave={e => { if (p !== page) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' } }}
               >
                 {p}
@@ -73,11 +76,12 @@ export default function Pagination({ total, page, perPage, onChange }) {
         <button
           disabled={page === totalPages}
           onClick={() => onChange(page + 1)}
+          aria-label="Página siguiente"
           style={{ ...btnBase, opacity: page === totalPages ? .35 : 1, color: '#627080' }}
-          onMouseEnter={e => { if (page < totalPages) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#F97316'; e.currentTarget.style.borderColor = '#FDBA74' } }}
+          onMouseEnter={e => { if (page < totalPages) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' }}
         >
-          <ChevronRight size={15} />
+          <ChevronRight size={15} aria-hidden="true" />
         </button>
       </div>
     </div>

@@ -59,7 +59,7 @@ export default function Modal({
         {...(id ? { id } : {})}
       >
         <div className="modal-header">
-          {header ?? (subtitle
+          {header ? <div id={titleId}>{header}</div> : (subtitle
             ? <div id={titleId}>
                 <h3 className="font-bold" style={{ color: '#263442' }}>{title}</h3>
                 <p className="text-xs mt-0.5" style={{ color: '#627080' }}>{subtitle}</p>

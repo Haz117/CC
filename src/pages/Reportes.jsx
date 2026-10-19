@@ -3,9 +3,10 @@ import { TrendingUp, Wallet, Scissors, Package, Trash2, HandCoins, X } from 'luc
 import PageHeader from '../components/PageHeader'
 import SelectorSucursal from '../components/SelectorSucursal'
 import FiltroPeriodo from '../components/FiltroPeriodo'
+import Segmentado from '../components/Segmentado'
 import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
-import { fecha } from '../utils/fmt'
+import { rangoCorto } from '../utils/fmt'
 import ReporteVentas from './reportes/ReporteVentas'
 import ReportePagos from './reportes/ReportePagos'
 import ReporteCortes from './reportes/ReporteCortes'
@@ -44,7 +45,7 @@ export default function Reportes() {
     <div className="space-y-6">
 
       <PageHeader breadcrumb="Reportes" title="Reportes y Analítica"
-        subtitle={`${tipo.label}${tipo.conFechas ? ` · ${fecha(desde)} – ${fecha(dateTo + 'T12:00')}` : ' · al día de hoy'}`} />
+        subtitle={`${tipo.label}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`} />
 
       {/* Report type selector */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
@@ -62,7 +63,7 @@ export default function Reportes() {
             >
               <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
                 style={{ background: isAct ? 'rgba(249,115,22,.15)' : '#FFF7ED' }}>
-                <t.icon className="w-4 h-4" style={{ color: '#F97316' }} />
+                <t.icon className="w-4 h-4" style={{ color: '#C2410C' }} />
               </div>
               <p className="text-xs font-bold leading-tight" style={{ color: isAct ? '#C2410C' : '#263442' }}>{t.label}</p>
               <p className="text-[10px] mt-1 leading-tight" style={{ color: '#627080' }}>{t.desc}</p>
@@ -80,12 +81,12 @@ export default function Reportes() {
             ) : (
               <p className="text-xs font-semibold" style={{ color: '#627080' }}>Este reporte muestra el estado actual: no depende del periodo.</p>
             )}
-            <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas={active !== 'inventario'} className="filter-input ml-auto" />
+            <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas={active !== 'inventario'} className="ml-auto" />
             {conFiltros && (
               <button
                 onClick={() => { periodo.elegirPreset('semana'); setSucursalId('') }}
                 style={{ fontSize: '.72rem', fontWeight: 700, color: '#627080', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, transition: 'color .15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#C97A6D'}
+                onMouseEnter={e => e.currentTarget.style.color = '#8A4A42'}
                 onMouseLeave={e => e.currentTarget.style.color = '#627080'}
               >
                 <X size={12} /> Limpiar
@@ -96,11 +97,12 @@ export default function Reportes() {
             <div className="data-toolbar-footer">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#627080' }}>Agrupar por:</span>
-                <div className="filter-bar">
-                  {['Día', 'Semana', 'Mes', 'Sucursal'].map(g => (
-                    <button key={g} onClick={() => setGroupBy(g)} className={`chip ${groupBy === g ? 'active' : ''}`}>{g}</button>
-                  ))}
-                </div>
+                <Segmentado
+                  opciones={['Día', 'Semana', 'Mes', 'Sucursal'].map(g => ({ valor: g, texto: g }))}
+                  value={groupBy}
+                  onChange={setGroupBy}
+                  etiqueta="Agrupar por"
+                />
               </div>
             </div>
           )}

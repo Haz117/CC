@@ -11,6 +11,7 @@ import { listarCortes } from '../../api/cajas'
 import { pesos, fecha, hora, diaCorto, fmtDec, diaLocal } from '../../utils/fmt'
 import { PAGE_SIZE, tooltipStyle, ejeMiles, tick } from './constantes'
 import { Kpis, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── CORTES DE CAJA ──────────────────────────────────────── */
 export default function ReporteCortes({ filtro, nombreCorto }) {
@@ -62,6 +63,7 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
       ]} />
       <ChartCard title="Diferencia de los cortes por día" subtitle={`Neto del periodo: ${faltante + sobrante < 0 ? '-' : ''}${pesos(Math.abs(faltante + sobrante))}`}>
         {dias.length === 0 ? <SinDatos>Sin cortes en este periodo</SinDatos> : (
+          <Grafica titulo="Diferencia de los cortes por día" datos={dias} etiqueta="etiqueta" valor="diferencia">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dias} barCategoryGap="35%" maxBarSize={48}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
@@ -70,14 +72,15 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
               <ReferenceLine y={0} stroke="#D4DDE6" />
               <Tooltip formatter={v => [fmtDec(v), 'Diferencia']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="diferencia" radius={[4, 4, 4, 4]} minPointSize={3}>
-                {dias.map(d => <Cell key={d.dia} fill={d.diferencia < 0 ? '#C97A6D' : d.diferencia > 0 ? '#d97706' : '#059669'} />)}
+                {dias.map(d => <Cell key={d.dia} fill={d.diferencia < 0 ? '#8A4A42' : d.diferencia > 0 ? '#92400E' : '#047857'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Detalle de cortes" exportLabel="Exportar CSV" onExport={exportar}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Caja', 'Sucursal', 'Cajero', 'Cierre', 'Esperado', 'Contado', 'Diferencia'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>
@@ -91,7 +94,7 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
                     <td className="text-xs" style={{ color: '#627080' }}>{fecha(c.cerrado_en)} · {hora(c.cerrado_en)}</td>
                     <td style={{ color: '#627080' }}>{pesos(c.efectivo_esperado_centavos)}</td>
                     <td className="font-semibold" style={{ color: '#263442' }}>{pesos(c.efectivo_contado_centavos)}</td>
-                    <td className="font-bold" style={{ color: d < 0 ? '#C97A6D' : d > 0 ? '#d97706' : '#059669' }}>
+                    <td className="font-bold" style={{ color: d < 0 ? '#8A4A42' : d > 0 ? '#92400E' : '#047857' }}>
                       {d === 0 ? 'Sin diferencia' : `${d < 0 ? '-' : '+'}${pesos(Math.abs(d))}`}
                     </td>
                   </tr>

@@ -59,15 +59,15 @@ export default function Layout({ children }) {
         {modoDemo && (
           <div
             role="status"
-            className="flex items-center justify-center gap-2 px-4 py-1.5 text-[11px] font-bold flex-shrink-0"
-            style={{ background: 'rgba(124,58,237,.08)', color: '#7c3aed', borderBottom: '1px solid rgba(124,58,237,.18)' }}
+            className="flex items-center justify-center gap-2 px-4 py-1.5 text-xs font-medium flex-shrink-0"
+            style={{ background: '#FFF7ED', color: '#9A3412', borderBottom: '1px solid #FDE8D0' }}
           >
-            <FlaskConical className="w-3.5 h-3.5 flex-shrink-0" />
+            <FlaskConical className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
             Modo demostración · datos de ejemplo, sin conexión a la base
           </div>
         )}
         <main id="main-content" className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-20 lg:pb-0" style={{ overscrollBehavior: 'contain' }}>
-          <div key={location.key} className="max-w-screen-2xl min-w-0 mx-auto p-4 sm:p-5 lg:p-8" style={{ animation: 'pageReveal .38s cubic-bezier(.16,1,.3,1) both' }}>
+          <div key={location.key} className="max-w-screen-2xl min-w-0 mx-auto p-4 sm:p-5 lg:p-8" style={{ animation: 'fadeIn .18s ease-out both' }}>
             {children}
           </div>
         </main>

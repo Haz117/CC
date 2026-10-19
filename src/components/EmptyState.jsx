@@ -5,8 +5,8 @@ export default function EmptyState({ icon: Icon, title, subtitle, children, clas
       <div style={{ position: 'relative', marginBottom: 20 }}>
         {/* Círculos decorativos */}
         <svg width="96" height="96" viewBox="0 0 96 96" fill="none" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: .06 }}>
-          <circle cx="48" cy="48" r="46" stroke="#F97316" strokeWidth="2"/>
-          <circle cx="48" cy="48" r="32" stroke="#F97316" strokeWidth="1.5"/>
+          <circle cx="48" cy="48" r="46" stroke="#C2410C" strokeWidth="2"/>
+          <circle cx="48" cy="48" r="32" stroke="#C2410C" strokeWidth="1.5"/>
         </svg>
         {/* Caja del ícono */}
         <div className="empty-state-icon" style={{ position: 'relative', zIndex: 1 }}>

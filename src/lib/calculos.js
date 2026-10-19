@@ -17,9 +17,9 @@ export const etiquetaEstado = (estado) => capital(estado) || '—'
 export const colorEstado    = (estado) => ({ COMPLETADA: 'green', CANCELADA: 'red' })[estado] ?? 'amber'
 
 const ETIQUETA_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', TRANSFERENCIA: 'Transferencia' }
-const COLOR_METODO    = { EFECTIVO: '#059669', TARJETA: '#F97316', TRANSFERENCIA: '#7c3aed' }
+const COLOR_METODO    = { EFECTIVO: '#047857', TARJETA: '#C2410C', TRANSFERENCIA: '#6D28D9' }
 export const etiquetaMetodo = (metodo) => ETIQUETA_METODO[metodo] ?? capital(metodo)
-export const colorMetodo    = (metodo) => COLOR_METODO[metodo] ?? '#8FA1B2'
+export const colorMetodo    = (metodo) => COLOR_METODO[metodo] ?? '#627080'
 
 // Un ticket puede pagarse con varios métodos.
 export function metodoDeVenta(venta) {
@@ -118,11 +118,11 @@ export const signoMovimiento = (movimiento) => (esRetiro(movimiento) ? -1 : 1)
 
 /* ── Inventario ──────────────────────────────────────────── */
 export const NIVEL = {
-  CRITICO: { clave: 'CRITICO', label: 'Crítico',    color: 'red',   tono: '#C97A6D' },
-  BAJO:    { clave: 'BAJO',    label: 'Bajo',       color: 'amber', tono: '#d97706' },
-  NORMAL:  { clave: 'NORMAL',  label: 'Normal',     color: 'green', tono: '#059669' },
-  LIBRE:   { clave: 'LIBRE',   label: 'Sin mínimo', color: 'gray',  tono: '#8FA1B2' },
-  SIN:     { clave: 'SIN',     label: 'Sin existencia', color: 'gray', tono: '#8FA1B2' },
+  CRITICO: { clave: 'CRITICO', label: 'Crítico',    color: 'red',   tono: '#8A4A42' },
+  BAJO:    { clave: 'BAJO',    label: 'Bajo',       color: 'amber', tono: '#92400E' },
+  NORMAL:  { clave: 'NORMAL',  label: 'Normal',     color: 'green', tono: '#047857' },
+  LIBRE:   { clave: 'LIBRE',   label: 'Sin mínimo', color: 'gray',  tono: '#627080' },
+  SIN:     { clave: 'SIN',     label: 'Sin existencia', color: 'gray', tono: '#627080' },
 }
 
 // Bajar del mínimo dispara el reabastecimiento; a la mitad del mínimo (o agotado) ya es crítico.

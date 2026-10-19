@@ -10,7 +10,7 @@ export function Toggle({ on, onChange, etiqueta }) {
       aria-label={etiqueta}
       onClick={e => { e.stopPropagation(); onChange() }}
       className="w-11 h-6 rounded-full relative transition-all duration-200 flex-shrink-0"
-      style={{ background: on ? '#F97316' : '#D4DDE6', boxShadow: on ? '0 0 0 3px rgba(249,115,22,.15)' : 'none' }}
+      style={{ background: on ? '#C2410C' : '#D4DDE6', boxShadow: on ? '0 0 0 3px rgba(249,115,22,.15)' : 'none' }}
     >
       <div
         className="absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200"
@@ -41,9 +41,9 @@ export function SettingRow({ label, sub, on, onChange }) {
 export function Dato({ icon: Icon, label, children }) {
   return (
     <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-      <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#8FA1B2' }} />
+      <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#627080' }} />
       <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>{label}</p>
+        <p className="text-xs font-semibold" style={{ color: '#627080' }}>{label}</p>
         <p className="text-sm font-semibold break-words" style={{ color: '#263442' }}>{children}</p>
       </div>
     </div>

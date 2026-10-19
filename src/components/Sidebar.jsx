@@ -3,6 +3,7 @@ import { X, Milk, LogOut } from 'lucide-react'
 import { useAuth } from '../auth/contexto'
 import { PAGINAS, etiquetaRol } from '../lib/navegacion'
 import { iniciales } from '../utils/fmt'
+import { useSincronizacion } from '../lib/sincronizacion'
 
 // Menú lateral oscuro (marrón cálido), a juego con el login y el splash.
 const C = {
@@ -10,7 +11,7 @@ const C = {
   text:    '#FFFFFF',
   sub:     'rgba(255,255,255,.58)',
   icono:   'rgba(255,255,255,.6)',
-  orange:  '#F97316',
+  orange:  '#FB923C',   // sobre el fondo oscuro el naranja claro se lee mejor (8:1)
   tintA:   'rgba(249,115,22,.18)',   // fondo del ítem activo
   chip:    'rgba(255,255,255,.07)',  // recuadro del ícono inactivo
   chipA:   'rgba(249,115,22,.22)',   // recuadro del ícono activo
@@ -30,7 +31,7 @@ function agrupar() {
 
 const GRUPOS = agrupar()
 
-function NavItem({ path, icon: Icon, label, demo, globo, onClose, index = 0 }) {
+function NavItem({ path, icon: Icon, label, demo, globo, onClose }) {
   const resolved = useResolvedPath(path)
   const isActive = !!useMatch({ path: resolved.pathname, end: true })
 
@@ -39,37 +40,18 @@ function NavItem({ path, icon: Icon, label, demo, globo, onClose, index = 0 }) {
       to={path}
       onClick={onClose}
       aria-current={isActive ? 'page' : undefined}
-      className="animate-slide-left"
       style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '9px 12px', borderRadius: 10,
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '10px 12px', borderRadius: 10,
         background: isActive ? C.tintA : 'transparent',
-        border: isActive ? '1px solid rgba(249,115,22,.3)' : '1px solid transparent',
-        animationDelay: `${index * 35}ms`,
-        animationFillMode: 'both',
         textDecoration: 'none',
         position: 'relative',
-        transition: 'background .15s, border-color .15s',
+        transition: 'background .15s',
       }}
       onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = C.hover }}
       onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
     >
-      {isActive && (
-        <span style={{
-          position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-          width: 3, height: 20, borderRadius: '0 3px 3px 0',
-          background: C.orange,
-        }} />
-      )}
-
-      <div style={{
-        width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: isActive ? C.chipA : C.chip,
-        transition: 'background .15s',
-      }}>
-        <Icon size={15} style={{ color: isActive ? C.orange : C.icono }} strokeWidth={isActive ? 2.2 : 1.8} />
-      </div>
+      <Icon size={18} aria-hidden="true" style={{ color: isActive ? C.orange : C.icono, flexShrink: 0 }} strokeWidth={isActive ? 2.2 : 1.8} />
 
       <span style={{
         flex: 1, fontSize: 13, fontWeight: isActive ? 700 : 500,
@@ -91,7 +73,7 @@ function NavItem({ path, icon: Icon, label, demo, globo, onClose, index = 0 }) {
       {globo && (
         <span style={{
           fontSize: 10, fontWeight: 700, color: '#fff',
-          background: globo.rojo ? '#C97A6D' : 'rgba(255,255,255,.22)', padding: '2px 6px',
+          background: globo.rojo ? '#8A4A42' : 'rgba(255,255,255,.22)', padding: '2px 6px',
           borderRadius: 99, lineHeight: 1.4,
         }}>
           {globo.n}
@@ -105,6 +87,7 @@ export default function Sidebar({ open, onClose, globos = {} }) {
   const { perfil, cerrarSesion } = useAuth()
   const groups = GRUPOS
   const rol = etiquetaRol(perfil.rol)
+  const { enLinea } = useSincronizacion()
 
   return (
     <>
@@ -175,18 +158,14 @@ export default function Sidebar({ open, onClose, globos = {} }) {
             <div key={gi} style={{ marginTop: gi > 0 ? 20 : 0 }}>
               {group.label && (
                 <p style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '.14em',
-                  textTransform: 'uppercase', color: 'rgba(255,255,255,.4)',
+                  fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.62)',
                   padding: '0 12px', marginBottom: 6,
                 }}>
                   {group.label}
                 </p>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {group.items.map((item, ii) => {
-                  const globalIdx = groups.slice(0, gi).reduce((s, g) => s + g.items.length, 0) + ii
-                  return <NavItem key={item.path} {...item} globo={globos[item.path]} index={globalIdx} onClose={onClose} />
-                })}
+                {group.items.map(item => <NavItem key={item.path} {...item} globo={globos[item.path]} onClose={onClose} />)}
               </div>
             </div>
           ))}
@@ -218,10 +197,9 @@ export default function Sidebar({ open, onClose, globos = {} }) {
               </p>
               <p style={{ fontSize: 11, color: C.sub, marginTop: 1 }}
                 className="truncate">
-                {rol}
+                {rol} · <span style={enLinea ? undefined : { color: '#EBA89B' }}>{enLinea ? 'en línea' : 'sin conexión'}</span>
               </p>
             </div>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
           </div>
 
           <button

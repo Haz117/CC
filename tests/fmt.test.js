@@ -1,7 +1,7 @@
 // Pruebas del formato de dinero y cantidades, y de los rangos de fechas que se mandan a la base.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset } from '../src/utils/fmt.js'
+import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto } from '../src/utils/fmt.js'
 
 test('pesos: la base guarda centavos enteros', () => {
   assert.equal(pesos(1250), '$12.50')
@@ -39,6 +39,23 @@ test('rangoISO: de la medianoche local del primer día a la del día siguiente a
 
   // Fin de mes: el día siguiente cae en el mes que sigue
   assert.equal(rangoISO('2026-10-31').hasta, new Date(2026, 10, 1).toISOString())
+})
+
+test('rangoCorto: solo repite el mes y el año cuando cambian', () => {
+  assert.equal(rangoCorto('2026-10-19'), '19 oct 2026')
+  assert.equal(rangoCorto('2026-10-19', '2026-10-19'), '19 oct 2026')
+  assert.equal(rangoCorto('2026-10-13', '2026-10-19'), '13 – 19 oct 2026')
+  assert.equal(rangoCorto('2026-09-28', '2026-10-19'), '28 sep – 19 oct 2026')
+  assert.equal(rangoCorto('2025-12-28', '2026-01-03'), '28 dic 2025 – 3 ene 2026')
+})
+
+test('haceCuanto: justo ahora, minutos y, pasada una hora, la hora', () => {
+  const t = new Date(2026, 9, 19, 13, 5).getTime()
+  assert.equal(haceCuanto(t, t + 10_000), 'justo ahora')
+  assert.equal(haceCuanto(t, t - 5_000), 'justo ahora') // reloj desfasado: nunca "hace -1 min"
+  assert.equal(haceCuanto(t, t + 50_000), 'hace 1 min')
+  assert.equal(haceCuanto(t, t + 12 * 60_000), 'hace 12 min')
+  assert.equal(haceCuanto(t, t + 2 * 3600_000), 'a las 13:05')
 })
 
 test('diaLocal e inicioDelDia usan la hora local, no UTC', () => {

@@ -51,7 +51,7 @@ export default function PwaInstallPrompt() {
           background: '#FFF7ED', border: '1px solid #FDBA74',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <Smartphone size={19} style={{ color: '#F97316' }} />
+          <Smartphone size={19} style={{ color: '#C2410C' }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: '#263442', lineHeight: 1.3 }}>
@@ -63,7 +63,7 @@ export default function PwaInstallPrompt() {
         </div>
         <button
           onClick={dismiss}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#8FA1B2', flexShrink: 0 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#627080', flexShrink: 0 }}
           aria-label="Cerrar"
         >
           <X size={14} />

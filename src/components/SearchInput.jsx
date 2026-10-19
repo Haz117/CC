@@ -19,7 +19,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
     <div className={`relative flex-1 ${className}`}>
       <Search
         className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-        style={{ color: '#8FA1B2' }}
+        style={{ color: '#627080' }}
       />
       <input
         ref={inputRef}
@@ -43,9 +43,9 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar...'
           <button
             onClick={() => onChange('')}
             className="w-5 h-5 flex items-center justify-center rounded-md transition-all"
-            style={{ color: '#8FA1B2' }}
+            style={{ color: '#627080' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = '#FDE8D0' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#8FA1B2'; e.currentTarget.style.background = 'transparent' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = 'transparent' }}
           >
             <X className="w-3 h-3" />
           </button>

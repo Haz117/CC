@@ -32,7 +32,7 @@ export default function TablaGenerica({ filas, resolver = {}, primero = [], titu
   const encabezado = (c) => titulos[c] ?? titulo(c)
 
   return (
-    <div className="overflow-x-auto table-card sin-acciones">
+    <div className="overflow-x-auto table-card sin-acciones" tabIndex={0} role="region" aria-label="Tabla del reporte">
       <table className="table-modern">
         <thead>
           <tr>{columnas.map(c => <th key={c}>{encabezado(c)}</th>)}</tr>

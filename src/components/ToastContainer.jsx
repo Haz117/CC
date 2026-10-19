@@ -4,31 +4,31 @@ import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 const cfg = {
   success: {
     Icon: CheckCircle2,
-    bar: '#059669',
+    bar: '#047857',
     iconBg: 'rgba(5,150,105,.1)',
     wash: 'rgba(5,150,105,.04)',
-    iconColor: '#059669',
+    iconColor: '#047857',
   },
   error: {
     Icon: XCircle,
-    bar: '#C97A6D',
+    bar: '#8A4A42',
     iconBg: 'rgba(201,122,109,.12)',
     wash: 'rgba(201,122,109,.04)',
-    iconColor: '#C97A6D',
+    iconColor: '#8A4A42',
   },
   warning: {
     Icon: AlertTriangle,
-    bar: '#d97706',
+    bar: '#92400E',
     iconBg: 'rgba(217,119,6,.1)',
     wash: 'rgba(217,119,6,.04)',
-    iconColor: '#d97706',
+    iconColor: '#92400E',
   },
   info: {
     Icon: Info,
-    bar: '#F97316',
+    bar: '#C2410C',
     iconBg: '#FFF7ED',
     wash: 'rgba(249,115,22,.04)',
-    iconColor: '#F97316',
+    iconColor: '#C2410C',
   },
 }
 
@@ -133,7 +133,7 @@ function ToastItem({ toast, onRemove }) {
         style={{
           flexShrink: 0, width: '24px', height: '24px', borderRadius: '7px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#D4DDE6', background: 'transparent', border: 'none', cursor: 'pointer',
+          color: '#627080', background: 'transparent', border: 'none', cursor: 'pointer',
           transition: 'background .15s, color .15s', position: 'relative', zIndex: 1,
         }}
         onMouseEnter={e => { e.currentTarget.style.background = '#F2F3F5'; e.currentTarget.style.color = '#627080' }}
@@ -167,7 +167,7 @@ export default function ToastContainer() {
   const remove = useCallback(id => setToasts(prev => prev.filter(t => t.id !== id)), [])
 
   return (
-    <div style={{
+    <div role="region" aria-label="Avisos" aria-live="polite" style={{
       position: 'fixed', top: '20px', right: '20px', zIndex: 200,
       display: 'flex', flexDirection: 'column', gap: '10px',
       pointerEvents: 'none',

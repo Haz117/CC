@@ -7,12 +7,15 @@ import {
 import CambiarContrasena from './CambiarContrasena'
 import { useAuth } from '../auth/contexto'
 import { tituloDe, etiquetaRol } from '../lib/navegacion'
+import { useTituloVisible } from '../lib/tituloEnPantalla'
 import { iniciales } from '../utils/fmt'
 
+const ATAJO = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'
+
 const notifStyle = {
-  error: { bg: 'rgba(201,122,109,.12)', icon: '#C97A6D', dot: '#C97A6D' },
-  aviso: { bg: 'rgba(217,119,6,.09)',   icon: '#d97706', dot: '#d97706' },
-  info:  { bg: 'rgba(249,115,22,.07)',  icon: '#F97316', dot: '#F97316' },
+  error: { bg: 'rgba(201,122,109,.12)', icon: '#8A4A42', dot: '#8A4A42' },
+  aviso: { bg: 'rgba(217,119,6,.09)',   icon: '#92400E', dot: '#92400E' },
+  info:  { bg: 'rgba(249,115,22,.07)',  icon: '#C2410C', dot: '#C2410C' },
 }
 
 /* ═══════════════════════════════════════════════════════════ */
@@ -31,6 +34,9 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
   const rol       = etiquetaRol(perfil.rol)
   const initials  = iniciales(perfil.nombre)
   const pageTitle = tituloDe(location.pathname)
+  // El nombre de la página sale aquí solo cuando el título grande ya se desplazó fuera de la vista
+  const tituloVisible = useTituloVisible()
+  const tituloArriba = { opacity: tituloVisible ? 0 : 1, transition: 'opacity .2s' }
   const closeAll  = () => { setNotifOpen(false); setProfileOpen(false) }
 
   // Las pantallas abiertas escuchan este evento y vuelven a consultar sus datos.
@@ -60,14 +66,14 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
 
       {/* Título de página en móvil — junto al menú y recortado si no cabe (centrado se encimaba con los iconos) */}
       {pageTitle && (
-        <span className="flex-1 min-w-0 truncate text-sm font-bold sm:hidden" style={{ color: '#263442' }}>
+        <span className="flex-1 min-w-0 truncate text-sm font-bold sm:hidden" style={{ color: '#263442', ...tituloArriba }} aria-hidden={tituloVisible || undefined}>
           {pageTitle}
         </span>
       )}
 
       {/* Page title (desktop) */}
       {pageTitle && (
-        <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
+        <div className="hidden lg:flex items-center gap-2 flex-shrink-0" style={tituloArriba} aria-hidden={tituloVisible || undefined}>
           <div className="w-px h-4" style={{ background: '#D4DDE6' }} />
           <span className="text-sm font-bold" style={{ color: '#263442' }}>{pageTitle}</span>
         </div>
@@ -77,19 +83,19 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
       <div className="flex-1 max-w-sm relative hidden sm:block">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-          style={{ color: '#8FA1B2' }}
+          style={{ color: '#627080' }}
         />
         <button
           onClick={onOpenPalette}
           className="header-search-input w-full text-left flex items-center"
-          style={{ paddingLeft: '2.25rem', cursor: 'text', color: '#8FA1B2', userSelect: 'none' }}
+          style={{ paddingLeft: '2.25rem', cursor: 'text', color: '#627080', userSelect: 'none' }}
         >
-          Buscar páginas y accesos...
+          Buscar páginas y accesos…
           <span
             className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
-            style={{ background: '#FFF7ED', color: '#F97316', border: '1px solid #FDBA74' }}
+            style={{ background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDBA74' }}
           >
-            ⌘K
+            {ATAJO}
           </span>
         </button>
       </div>
@@ -111,28 +117,28 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
         <div className="relative">
           <button
             onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false) }}
-            aria-label="Notificaciones"
             aria-expanded={notifOpen}
             aria-haspopup="true"
             className="relative p-2 rounded-xl transition-all duration-200"
             style={hasErrors
-              ? { color: '#C97A6D', background: 'rgba(201,122,109,.08)' }
-              : { color: '#8FA1B2' }
+              ? { color: '#8A4A42', background: 'rgba(201,122,109,.08)' }
+              : { color: '#627080' }
             }
             onMouseEnter={e => {
               e.currentTarget.style.background = hasErrors ? 'rgba(201,122,109,.16)' : '#FFF7ED'
-              e.currentTarget.style.color = hasErrors ? '#C97A6D' : '#C2410C'
+              e.currentTarget.style.color = hasErrors ? '#8A4A42' : '#C2410C'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.background = hasErrors ? 'rgba(201,122,109,.08)' : 'transparent'
-              e.currentTarget.style.color = hasErrors ? '#C97A6D' : '#8FA1B2'
+              e.currentTarget.style.color = hasErrors ? '#8A4A42' : '#627080'
             }}
           >
-            <Bell className={`w-5 h-5 ${hasErrors ? 'animate-breathe' : ''}`} />
+            <span className="sr-only">Notificaciones</span>
+            <Bell className="w-5 h-5" aria-hidden="true" />
             {avisos.length > 0 && (
               <span
-                className={`absolute top-0.5 right-0.5 min-w-[17px] h-[17px] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 animate-badge-pop ${hasErrors ? 'red-badge-pulse' : ''}`}
-                style={{ background: hasErrors ? '#C97A6D' : '#F97316' }}
+                className={`absolute top-0.5 right-0.5 min-w-[17px] h-[17px] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 animate-badge-pop`}
+                style={{ background: hasErrors ? '#8A4A42' : '#C2410C' }}
               >
                 {avisos.length}
               </span>
@@ -152,7 +158,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                   {hasErrors && <span className="red-dot" />}
                   <div>
                     <p className="font-bold text-sm" style={{ color: '#263442' }}>Avisos</p>
-                    <p className="text-xs" style={{ color: hasErrors ? '#C97A6D' : '#627080' }}>
+                    <p className="text-xs" style={{ color: hasErrors ? '#8A4A42' : '#627080' }}>
                       {hasErrors
                         ? `${errorCount} requiere${errorCount > 1 ? 'n' : ''} atención`
                         : 'Se actualizan en vivo con las cajas'}
@@ -205,11 +211,11 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
         <div className="relative">
           <button
             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false) }}
-            aria-label="Menú de perfil"
             aria-expanded={profileOpen}
             aria-haspopup="true"
             className="header-profile-btn flex items-center gap-2.5 pl-2 pr-3 py-1.5"
           >
+            <span className="sr-only">Menú de perfil:</span>
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
               style={{ background: '#FFF7ED', color: '#C2410C' }}
@@ -226,7 +232,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
             </div>
             <ChevronDown
               className={`w-3.5 h-3.5 hidden md:block transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
-              style={{ color: '#8FA1B2' }}
+              style={{ color: '#627080' }}
             />
           </button>
 

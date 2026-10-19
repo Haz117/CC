@@ -27,7 +27,7 @@ export const notify = {
   },
 
   stockBajo(producto, sucursal, stock) {
-    notify.send('⚠️ Inventario bajo — Cremerías Admin', {
+    notify.send('Inventario bajo', {
       body: `${producto} en ${sucursal}: solo ${stock} unidades`,
       tag: `stock-${producto}`,
       data: { url: '/inventario' },
@@ -35,7 +35,7 @@ export const notify = {
   },
 
   ventaCompletada(folio, total) {
-    notify.send('✅ Venta completada', {
+    notify.send('Venta completada', {
       body: `${folio} por $${total.toLocaleString('es-MX')}`,
       tag: folio,
       data: { url: '/ventas' },
@@ -43,7 +43,7 @@ export const notify = {
   },
 
   rutaFinalizada(ruta, distribuidor) {
-    notify.send('🚛 Ruta finalizada', {
+    notify.send('Ruta finalizada', {
       body: `${ruta} completada por ${distribuidor}`,
       tag: `ruta-${ruta}`,
       data: { url: '/rutas' },

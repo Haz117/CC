@@ -11,16 +11,16 @@ export function Kpis({ items }) {
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: c.mal ? 'rgba(201,122,109,.1)' : 'rgba(5,150,105,.1)' }}>
               {c.mal
-                ? <ArrowDownRight className="w-3.5 h-3.5" style={{ color: '#C97A6D' }} />
-                : <ArrowUpRight className="w-3.5 h-3.5" style={{ color: '#059669' }} />
+                ? <ArrowDownRight className="w-3.5 h-3.5" style={{ color: '#8A4A42' }} />
+                : <ArrowUpRight className="w-3.5 h-3.5" style={{ color: '#047857' }} />
               }
             </div>
           </div>
-          <p className="text-xl font-black mb-2" style={{ color: '#263442' }}>{c.value}</p>
+          <p className="text-xl font-bold mb-2" style={{ color: '#263442' }}>{c.value}</p>
           <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full"
             style={c.mal
-              ? { color: '#C97A6D', background: 'rgba(201,122,109,.1)' }
-              : { color: '#059669', background: 'rgba(5,150,105,.1)' }
+              ? { color: '#8A4A42', background: 'rgba(201,122,109,.1)' }
+              : { color: '#047857', background: 'rgba(5,150,105,.1)' }
             }
           >{c.nota}</span>
         </div>

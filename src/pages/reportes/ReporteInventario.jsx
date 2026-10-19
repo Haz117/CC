@@ -12,6 +12,7 @@ import { armarInventario, NIVEL, esBajo } from '../../lib/calculos'
 import { cantidad } from '../../utils/fmt'
 import { PAGE_SIZE, tooltipStyle, tick } from './constantes'
 import { Kpis, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── INVENTARIO ──────────────────────────────────────────── */
 export default function ReporteInventario({ filtro, nombreCorto }) {
@@ -49,6 +50,7 @@ export default function ReporteInventario({ filtro, nombreCorto }) {
       ]} />
       <ChartCard title="Existencia actual contra el mínimo" subtitle="Los 10 productos más cerca o más abajo de su mínimo, en la sucursal donde peor están">
         {grafica.length === 0 ? <SinDatos>No hay mínimos configurados</SinDatos> : (
+          <Grafica titulo="Existencia contra mínimo" resumen={`Existencia contra mínimo. ${grafica.map(g => `${g.clave}: ${cantidad(g.existencia)} de ${cantidad(g.minimo)} de mínimo`).join('; ')}.`}>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={grafica} barCategoryGap="30%">
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
@@ -62,15 +64,16 @@ export default function ReporteInventario({ filtro, nombreCorto }) {
                 contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="existencia" fill="#F97316" name="Existencia" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="existencia" fill="#C2410C" name="Existencia" radius={[4, 4, 0, 0]} />
               <Bar dataKey="minimo" fill="#FDE8D0" name="Mínimo" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Detalle de inventario" exportLabel="Exportar CSV"
         onExport={() => downloadCSV(productos.map(p => ({ clave: p.clave, producto: p.nombre, categoria: p.categoria, unidad: p.unidad, existencia: p.existencia, minimo: p.minimo ?? '', maximo: p.maximo ?? '', estado: p.nivel.label })), 'reporte_inventario')}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Producto', 'Categoría', 'Existencia', 'Mínimo', 'Máximo', 'Estado'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>

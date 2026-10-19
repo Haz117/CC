@@ -25,7 +25,8 @@ import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
 import { listarTurnosAbiertos, listarCortes } from '../api/cajas'
 import { movimientosDeTurno, signoMovimiento } from '../lib/calculos'
-import { pesos, fecha, hora, fechaHora, diaCorto, fmtDec } from '../utils/fmt'
+import { pesos, fecha, hora, fechaHora, diaCorto, fmtDec, rangoCorto } from '../utils/fmt'
+import Grafica from '../components/Grafica'
 
 const PER_PAGE = 8
 const MAX_CORTES = 200
@@ -33,10 +34,10 @@ const MAX_CORTES = 200
 // Diferencia del corte = contado − esperado: negativa es faltante, positiva es sobrante.
 function diferenciaDe(centavos) {
   if (centavos == null) return { label: 'Sin corte', color: 'gray', tono: '#627080' }
-  if (centavos === 0)   return { label: 'Sin diferencia', color: 'green', tono: '#059669' }
+  if (centavos === 0)   return { label: 'Sin diferencia', color: 'green', tono: '#047857' }
   return centavos < 0
-    ? { label: `Faltante ${pesos(-centavos)}`, color: 'red',   tono: '#C97A6D' }
-    : { label: `Sobrante ${pesos(centavos)}`,  color: 'amber', tono: '#d97706' }
+    ? { label: `Faltante ${pesos(-centavos)}`, color: 'red',   tono: '#8A4A42' }
+    : { label: `Sobrante ${pesos(centavos)}`,  color: 'amber', tono: '#92400E' }
 }
 
 function tiempoAbierta(desde) {
@@ -73,13 +74,13 @@ function DetalleTurno({ turno, onClose }) {
 
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
           <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #FDE8D0' }}>
-            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: '#627080' }}>{abierto ? 'Efectivo del turno' : 'Corte de caja'}</p>
+            <p className="text-[13px] font-semibold" style={{ color: '#627080' }}>{abierto ? 'Efectivo del turno' : 'Corte de caja'}</p>
           </div>
           <div>
             {[
               { label: 'Fondo inicial',     value: pesos(turno.fondo_inicial_centavos), color: '#627080', icon: DollarSign },
-              { label: 'Entradas (+)',      value: `+${pesos(turno.entradas)}`,         color: '#F97316', icon: ArrowUpCircle },
-              { label: 'Retiros (−)',       value: `-${pesos(turno.retiros)}`,          color: '#C97A6D', icon: ArrowDownCircle },
+              { label: 'Entradas (+)',      value: `+${pesos(turno.entradas)}`,         color: '#C2410C', icon: ArrowUpCircle },
+              { label: 'Retiros (−)',       value: `-${pesos(turno.retiros)}`,          color: '#8A4A42', icon: ArrowDownCircle },
               !abierto && { label: 'Efectivo esperado', value: pesos(turno.efectivo_esperado_centavos), color: '#263442', icon: TrendingUp },
               !abierto && { label: 'Efectivo contado',  value: pesos(turno.efectivo_contado_centavos),  color: '#263442', icon: Scissors },
             ].filter(Boolean).map(item => (
@@ -94,7 +95,7 @@ function DetalleTurno({ turno, onClose }) {
             {!abierto && (
               <div className="flex items-center justify-between px-4 py-3.5" style={{ background: turno.diferencia_centavos ? `${dif.tono}14` : 'rgba(5,150,105,.08)' }}>
                 <span className="text-sm font-bold" style={{ color: '#263442' }}>Diferencia</span>
-                <span className="text-base font-black" style={{ color: dif.tono }}>{dif.label}</span>
+                <span className="text-base font-bold" style={{ color: dif.tono }}>{dif.label}</span>
               </div>
             )}
           </div>
@@ -102,14 +103,14 @@ function DetalleTurno({ turno, onClose }) {
 
         {abierto && (
           <div className="rounded-xl px-4 py-3 flex items-center gap-2" style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}>
-            <Info className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
+            <Info className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} />
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>El corte se registra en la caja al cerrar el turno; aquí aparece en cuanto se sincroniza.</p>
           </div>
         )}
 
         {movimientos.length > 0 && (
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#627080' }}>Movimientos de efectivo</p>
+            <p className="text-[13px] font-semibold mb-2" style={{ color: '#627080' }}>Movimientos de efectivo</p>
             <div className="space-y-1.5">
               {movimientos.map((m, i) => {
                 const retiro = signoMovimiento(m) < 0
@@ -119,7 +120,7 @@ function DetalleTurno({ turno, onClose }) {
                       <p className="text-xs font-semibold truncate" style={{ color: '#263442' }}>{m.concepto || (retiro ? 'Retiro' : 'Entrada')}</p>
                       <p className="text-[10px]" style={{ color: '#627080' }}>{hora(m.fecha)}</p>
                     </div>
-                    <span className="text-sm font-bold flex-shrink-0" style={{ color: retiro ? '#C97A6D' : '#F97316' }}>
+                    <span className="text-sm font-bold flex-shrink-0" style={{ color: retiro ? '#8A4A42' : '#C2410C' }}>
                       {retiro ? '-' : '+'}{pesos(m.monto_centavos)}
                     </span>
                   </div>
@@ -131,7 +132,7 @@ function DetalleTurno({ turno, onClose }) {
 
         {turno.notas_cierre && (
           <div className="rounded-xl px-4 py-3 flex items-start gap-2" style={{ background: '#F2F3F5' }}>
-            <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#8FA1B2' }} />
+            <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#627080' }} />
             <p className="text-xs" style={{ color: '#627080' }}><strong>Notas del cierre:</strong> {turno.notas_cierre}</p>
           </div>
         )}
@@ -153,7 +154,7 @@ export default function Cajas() {
   const [search, setSearch] = usePersistedState('cajas-search', '')
   const debouncedSearch = useDebounce(search)
   const periodo = usePeriodo('semana')
-  const { dateTo, desde, hasta } = periodo
+  const { dateFrom, dateTo, desde, hasta } = periodo
   const [sucursalId, setSucursalId] = useState('')
   const [page, setPage] = useState(1)
   const [detalle, setDetalle] = useState(null)
@@ -221,13 +222,16 @@ export default function Cajas() {
   return (
     <div className="space-y-6">
 
-      <PageHeader
-        breadcrumb="Cajas"
-        title="Control de Cajas"
-        subtitle={sinDatos ? 'Turnos abiertos y cortes del periodo' : `${modelo.abiertas.length} abierta${modelo.abiertas.length !== 1 ? 's' : ''} ahora · ${modelo.cortes.length} corte${modelo.cortes.length !== 1 ? 's' : ''} en el periodo`}
-      >
+      <PageHeader breadcrumb="Cajas" title="Control de Cajas">
         <EnVivo actualizando={abiertas.actualizando || cortes.actualizando} />
       </PageHeader>
+
+      {/* ══ Filtros: arriba de todo lo que cambian ════════════════ */}
+      <div className="barra-filtros">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar caja, cajero o sucursal…" resultCount={modelo.cortes.length + modelo.abiertas.length} className="barra-filtros-busqueda" />
+        <FiltroPeriodo periodo={periodo} />
+        <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas />
+      </div>
 
       <KpiBar estado={estadoKpi} items={[
         { icon: Monitor, label: 'Abiertas ahora', value: modelo.abiertas.length, good: modelo.abiertas.length > 0, sub: 'turnos en operación' },
@@ -238,26 +242,10 @@ export default function Cajas() {
 
       <AvisoError error={abiertas.error || cortes.error} onReintentar={() => { abiertas.recargar(); cortes.recargar() }} />
 
-      {/* ══ Filtros ═══════════════════════════════════════════════ */}
-      <div className="card overflow-hidden">
-        <div className="data-toolbar">
-          <div className="data-toolbar-row">
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <SearchInput value={search} onChange={setSearch} placeholder="Buscar caja, cajero o sucursal..." resultCount={modelo.cortes.length + modelo.abiertas.length} />
-            </div>
-            <div className="filter-group">
-              <FiltroPeriodo periodo={periodo} />
-              <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas />
-            </div>
-          </div>
-        </div>
-        <div className="section-head">
-          <div className="flex items-center gap-2">
-            <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="section-head-text"><strong>Abiertas ahora</strong></span>
-            {abiertas.datos !== undefined && <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{modelo.abiertas.length} abierta{modelo.abiertas.length !== 1 ? 's' : ''}</span>}
-          </div>
-        </div>
+      {/* ══ Cajas abiertas: son de este momento, el periodo no las cambia ══ */}
+      <div className="titulo-seccion">
+        <h2>Abiertas ahora</h2>
+        {abiertas.datos !== undefined && <p>{modelo.abiertas.length} en operación · no dependen del periodo</p>}
       </div>
 
       {/* ══ Cajas abiertas ════════════════════════════════════════ */}
@@ -267,9 +255,6 @@ export default function Cajas() {
             <div key={c.id} className="card p-5 flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 200)}ms` }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
-                    <Monitor className="w-5 h-5" style={{ color: '#F97316' }} />
-                  </div>
                   <div className="min-w-0">
                     <p className="font-bold leading-tight truncate" style={{ color: '#263442' }}>{c.cajaNombre}</p>
                     <p className="text-xs truncate" style={{ color: '#627080' }}>{c.sucursalNombre}</p>
@@ -279,19 +264,19 @@ export default function Cajas() {
               </div>
 
               <div>
-                <p style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.09em', color: '#627080', marginBottom: '2px' }}>Fondo inicial</p>
-                <p className="font-black leading-none" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.55rem)', color: '#C2410C', letterSpacing: '-.03em' }}>
+                <p style={{ fontSize: '.8125rem', fontWeight: 500, color: '#627080', marginBottom: '2px' }}>Fondo inicial</p>
+                <p className="font-bold leading-none" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.55rem)', color: '#C2410C', letterSpacing: '-.02em' }}>
                   {pesos(c.fondo_inicial_centavos)}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-1.5">
                 {[
-                  { label: 'Entradas', value: `+${pesos(c.entradas)}`, color: '#F97316', bg: '#FFF7ED' },
-                  { label: 'Retiros',  value: `-${pesos(c.retiros)}`,  color: '#C97A6D', bg: 'rgba(201,122,109,.08)' },
+                  { label: 'Entradas', value: `+${pesos(c.entradas)}`, color: '#C2410C', bg: '#FFF7ED' },
+                  { label: 'Retiros',  value: `-${pesos(c.retiros)}`,  color: '#8A4A42', bg: 'rgba(201,122,109,.08)' },
                 ].map(item => (
                   <div key={item.label} className="rounded-lg px-2 py-1.5" style={{ background: item.bg }}>
-                    <p style={{ fontSize: '.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: '#627080' }}>{item.label}</p>
+                    <p style={{ fontSize: '.75rem', fontWeight: 500, color: '#627080' }}>{item.label}</p>
                     <p className="font-bold truncate" style={{ fontSize: '.75rem', color: item.color, marginTop: '1px' }}>{item.value}</p>
                   </div>
                 ))}
@@ -299,11 +284,11 @@ export default function Cajas() {
 
               <div className="flex items-center gap-4 text-xs" style={{ borderTop: '1px solid #FFF8F0', paddingTop: '10px' }}>
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <User className="w-3 h-3 flex-shrink-0" style={{ color: '#FED7AA' }} />
+                  <User className="w-3 h-3 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
                   <span className="truncate" style={{ color: '#627080' }}>{c.cajeroNombre}</span>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0" title={`Abierta desde ${fechaHora(c.abierto_en)}`}>
-                  <Clock className="w-3 h-3" style={{ color: '#FED7AA' }} />
+                  <Clock className="w-3 h-3" style={{ color: '#627080' }} aria-hidden="true" />
                   <span style={{ color: '#627080' }}>{hora(c.abierto_en)} · {tiempoAbierta(c.abierto_en)}</span>
                 </div>
               </div>
@@ -325,6 +310,7 @@ export default function Cajas() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           <div className="card p-5 lg:col-span-3">
             <TituloTarjeta icon={TrendingUp} titulo="Diferencia por corte">últimos {grafica.length}</TituloTarjeta>
+            <Grafica titulo="Diferencia por corte" datos={grafica} etiqueta="etiqueta" valor="diferencia">
             <ResponsiveContainer width="100%" height={148}>
               <BarChart data={grafica} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#FDE8D0" />
@@ -332,19 +318,20 @@ export default function Cajas() {
                 <ReferenceLine y={0} stroke="#D4DDE6" />
                 <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmtDec} />} />
                 <Bar dataKey="diferencia" radius={[4, 4, 4, 4]} minPointSize={3}>
-                  {grafica.map(g => <Cell key={g.id} fill={g.diferencia < 0 ? '#C97A6D' : g.diferencia > 0 ? '#d97706' : '#059669'} />)}
+                  {grafica.map(g => <Cell key={g.id} fill={g.diferencia < 0 ? '#8A4A42' : g.diferencia > 0 ? '#92400E' : '#047857'} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            </Grafica>
           </div>
 
           <div className="card p-5 flex flex-col lg:col-span-2">
             <TituloTarjeta icon={Scissors} titulo="Resultado de los cortes" />
             <div className="flex flex-col gap-3 flex-1 justify-center">
               {[
-                { label: 'Sin diferencia', count: stats.cuadrados, color: '#059669' },
-                { label: 'Con faltante',   count: stats.faltantes, color: '#C97A6D' },
-                { label: 'Con sobrante',   count: stats.sobrantes, color: '#d97706' },
+                { label: 'Sin diferencia', count: stats.cuadrados, color: '#047857' },
+                { label: 'Con faltante',   count: stats.faltantes, color: '#8A4A42' },
+                { label: 'Con sobrante',   count: stats.sobrantes, color: '#92400E' },
               ].map(s => {
                 const pct = Math.round(s.count / modelo.cortes.length * 100)
                 return <FilaDesglose key={s.label} cuenta={s.count} etiqueta={s.label} derecha={`${pct}%`} pct={pct} color={s.color} />
@@ -359,10 +346,9 @@ export default function Cajas() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2 flex-wrap">
-              <Scissors className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
               <span className="section-head-text"><strong>Cortes de caja</strong></span>
-              <span style={{ fontSize: '.7rem', color: '#627080' }}>{fecha(desde)} – {fecha(dateTo + 'T12:00')}</span>
-              {conDiferencia > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{conDiferencia} con diferencia</span>}
+              <span style={{ fontSize: '.75rem', color: '#627080' }}>{rangoCorto(dateFrom, dateTo)}</span>
+              {conDiferencia > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{conDiferencia} con diferencia</span>}
             </div>
           </div>
           {totalCortes > MAX_CORTES && (
@@ -370,7 +356,7 @@ export default function Cajas() {
               El periodo tiene {totalCortes} cortes; se muestran los {MAX_CORTES} más recientes. Acorta el rango para verlos todos.
             </p>
           )}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de cortes de caja">
             <table className="table-modern">
               <thead>
                 <tr>

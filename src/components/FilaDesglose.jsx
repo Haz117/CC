@@ -3,7 +3,7 @@ export default function FilaDesglose({ cuenta, etiqueta, derecha, pct, color, fo
   return (
     <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: fondo }}>
-        <span className="text-xs font-black" style={{ color }}>{cuenta}</span>
+        <span className="text-xs font-bold" style={{ color }}>{cuenta}</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between mb-1 gap-2">

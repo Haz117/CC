@@ -2,11 +2,8 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#C2410C" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -14,9 +11,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Cremerías" />
     <title>Cremerías Admin</title>
+    <style>
+      /* Arranque: se ve mientras se descarga la app; React lo reemplaza al pintar */
+      .splash-inicial { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #C2410C; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif }
+      .splash-inicial-logo { width: 84px; height: 84px; border-radius: 22px; display: grid; place-items: center; background: #F97316; box-shadow: 0 10px 30px rgba(67,20,7,.28) }
+      .splash-inicial p { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.01em }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="splash-inicial" role="status" aria-label="Cargando Cremerías Admin"><div class="splash-inicial-logo"><svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/></svg></div><p>Cremerías</p></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

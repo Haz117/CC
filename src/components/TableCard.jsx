@@ -8,7 +8,7 @@ export default function TableCard({ title, onExport, exportLabel = 'Exportar PDF
         {onExport && (
           <button
             className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors"
-            style={{ color: '#F97316', background: '#FFF7ED' }}
+            style={{ color: '#C2410C', background: '#FFF7ED' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,.15)'}
             onMouseLeave={e => e.currentTarget.style.background = '#FFF7ED'}
             onClick={onExport}

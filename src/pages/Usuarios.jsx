@@ -5,6 +5,7 @@ import { SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
+import Segmentado from '../components/Segmentado'
 import FilaDesglose from '../components/FilaDesglose'
 import TituloTarjeta from '../components/TituloTarjeta'
 import KpiBar from '../components/KpiBar'
@@ -26,16 +27,17 @@ import { ROLES, etiquetaRol } from '../lib/navegacion'
 import { listarUsuarios, vincularUsuario } from '../api/organizacion'
 import { iniciales } from '../utils/fmt'
 import { esCorreo } from '../utils/validar'
+import Grafica from '../components/Grafica'
 
 const PER_PAGE = 8
 
 const roleColor = { ADMINISTRADOR: 'purple', SUPERVISOR: 'blue', CAJERO: 'teal' }
 const avatarBg = {
   ADMINISTRADOR: { bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
-  SUPERVISOR:    { bg: '#FFF7ED',              color: '#F97316' },
-  CAJERO:        { bg: 'rgba(5,150,105,.1)',   color: '#059669' },
+  SUPERVISOR:    { bg: '#FFF7ED',              color: '#C2410C' },
+  CAJERO:        { bg: 'rgba(5,150,105,.1)',   color: '#047857' },
 }
-const avatarDe = (u) => (u.activo ? avatarBg[u.rol] ?? avatarBg.CAJERO : { bg: 'rgba(201,122,109,.12)', color: '#C97A6D' })
+const avatarDe = (u) => (u.activo ? avatarBg[u.rol] ?? avatarBg.CAJERO : { bg: 'rgba(201,122,109,.12)', color: '#8A4A42' })
 
 /* ── Ligar una persona con su cuenta de Auth (solo administrador) ── */
 function VincularCuenta({ usuario, onClose, onListo }) {
@@ -67,7 +69,7 @@ function VincularCuenta({ usuario, onClose, onListo }) {
             <>Escribe aquí ese mismo correo para ligar la cuenta con {usuario.nombre.split(' ')[0]}.</>,
           ].map((paso, i) => (
             <li key={i} className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0" style={{ background: '#FFF7ED', color: '#F97316' }}>{i + 1}</span>
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: '#FFF7ED', color: '#C2410C' }}>{i + 1}</span>
               <p className="text-sm" style={{ color: '#627080' }}>{paso}</p>
             </li>
           ))}
@@ -146,11 +148,7 @@ export default function Usuarios() {
   return (
     <div className="space-y-6">
 
-      <PageHeader
-        breadcrumb="Usuarios"
-        title="Usuarios"
-        subtitle={sinDatos ? 'Personas que operan las cajas y la app web' : `${data.length} personas · ${stats.activos} activas · ${stats.vinculados} con acceso a la app web`}
-      />
+      <PageHeader breadcrumb="Usuarios" title="Usuarios" />
 
       <KpiBar estado={estadoKpi} items={[
         { icon: Users, label: 'Total usuarios', value: data.length,       sub: 'todas las sucursales' },
@@ -166,6 +164,7 @@ export default function Usuarios() {
       {!sinDatos && <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <div className="card p-5 lg:col-span-3">
           <TituloTarjeta icon={TrendingUp} titulo="Distribución por rol" />
+          <Grafica titulo="Usuarios por rol" datos={ROLES.map(r => ({ n: etiquetaRol(r), v: stats.porRol[r] }))} etiqueta="n" valor="v" unidad="cantidad">
           <ResponsiveContainer width="100%" height={230}>
             <BarChart data={ROLES.map(r => ({ rol: r, name: etiquetaRol(r), count: stats.porRol[r] }))} maxBarSize={40} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="#FDE8D0" />
@@ -174,28 +173,29 @@ export default function Usuarios() {
               <Bar dataKey="count" radius={[5, 5, 0, 0]}>
                 {ROLES.map(r => {
                   const ratio = stats.porRol[r] / maxRol
-                  return <Cell key={r} fill={ratio >= 0.8 ? '#059669' : ratio >= 0.4 ? '#F97316' : '#FDBA74'} />
+                  return <Cell key={r} fill={ratio >= 0.8 ? '#047857' : ratio >= 0.4 ? '#C2410C' : '#FDBA74'} />
                 })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         </div>
 
         <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
           <TituloTarjeta icon={Link2} titulo="Acceso a la app web" className="mb-1" />
           {[
-            { label: 'Cuenta vinculada', count: stats.vinculados,  color: '#059669' },
+            { label: 'Cuenta vinculada', count: stats.vinculados,  color: '#047857' },
             { label: 'Sin vincular',     count: stats.sinVincular, color: '#627080', fondo: '#F2F3F5' },
           ].map(s => {
             const pct = stats.activos ? Math.round(s.count / stats.activos * 100) : 0
             return <FilaDesglose key={s.label} cuenta={s.count} etiqueta={s.label} derecha={`${pct}%`} pct={pct} color={s.color} fondo={s.fondo} />
           })}
           <div className="mt-2 rounded-xl p-3" style={{ background: '#FFF7ED' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: '#627080' }}>Usuarios activos por sucursal</p>
+            <p className="text-xs font-semibold mb-2" style={{ color: '#627080' }}>Usuarios activos por sucursal</p>
             {stats.porSucursal.map(([id, n]) => (
               <div key={id ?? 'sin'} className="flex justify-between items-center py-0.5">
                 <span className="text-xs" style={{ color: '#627080' }}>{nombreCorto(id)}</span>
-                <span className="text-xs font-bold" style={{ color: '#F97316' }}>{n}</span>
+                <span className="text-xs font-bold" style={{ color: '#C2410C' }}>{n}</span>
               </div>
             ))}
           </div>
@@ -208,24 +208,22 @@ export default function Usuarios() {
         <div className="data-toolbar">
           <div className="data-toolbar-row">
             <div style={{ flex: 1, minWidth: 200 }}>
-              <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o usuario..." resultCount={filtered.length} />
+              <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o usuario…" resultCount={filtered.length} />
             </div>
-            <div className="filter-bar" role="group" aria-label="Rol">
-              {['Todos', ...ROLES].map(r => (
-                <button key={r} type="button" onClick={() => setFilterRol(r)} aria-pressed={filterRol === r} className={`chip ${filterRol === r ? 'active' : ''}`}>
-                  {r === 'Todos' ? `Todos (${data.length})` : `${etiquetaRol(r)} (${stats.porRol[r]})`}
-                </button>
-              ))}
-            </div>
+            <Segmentado
+              opciones={['Todos', ...ROLES].map(r => ({ valor: r, texto: r === 'Todos' ? 'Todos' : etiquetaRol(r), cuenta: r === 'Todos' ? data.length : stats.porRol[r] }))}
+              value={filterRol}
+              onChange={setFilterRol}
+              etiqueta="Rol"
+            />
             <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} />
           </div>
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#7c3aed' }} />
             <span className="section-head-text"><strong>Usuarios del sistema</strong></span>
             <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} usuario{filtered.length !== 1 ? 's' : ''}</span>
-            {stats.inactivos > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{stats.inactivos} inactivos</span>}
+            {stats.inactivos > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{stats.inactivos} inactivo{stats.inactivos !== 1 ? 's' : ''}</span>}
           </div>
           <span className="hidden md:inline text-xs" style={{ color: '#627080' }}>Las altas y bajas se hacen desde la caja del almacén</span>
         </div>
@@ -242,7 +240,7 @@ export default function Usuarios() {
                       {u.activo ? iniciales(u.nombre) : <UserX className="w-3.5 h-3.5" />}
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#A05A52' }}>{u.nombre}</span>
+                      <span className="block text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#8A4A42' }}>{u.nombre}</span>
                       <span className="block text-xs truncate" style={{ color: '#627080' }}>{u.sucursal} · {u.usuario ?? (u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta web')}</span>
                     </span>
                     <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} />
@@ -258,7 +256,7 @@ export default function Usuarios() {
           })}
         </ul>
 
-        <div className="hidden sm:block overflow-x-auto">
+        <div className="hidden sm:block overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de usuarios">
           <table className="table-modern">
             <thead>
               <tr>
@@ -281,7 +279,7 @@ export default function Usuarios() {
                           {u.activo ? iniciales(u.nombre) : <UserX className="w-3.5 h-3.5" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#A05A52' }}>{u.nombre}</p>
+                          <p className="text-sm font-semibold truncate" style={{ color: u.activo ? '#263442' : '#8A4A42' }}>{u.nombre}</p>
                           <p className="text-xs truncate" style={{ color: '#627080' }}>{u.usuario ?? (u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta web')}</p>
                         </div>
                       </div>
@@ -326,7 +324,7 @@ export default function Usuarios() {
         return (
           <Modal title="Perfil de usuario" onClose={() => setSelectedUser(null)}>
             <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0" style={{ background: av.bg, color: av.color }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0" style={{ background: av.bg, color: av.color }}>
                 {u.activo ? iniciales(u.nombre) : <UserX className="w-6 h-6" />}
               </div>
               <div>
@@ -340,16 +338,16 @@ export default function Usuarios() {
 
             <div className="px-6 py-5 grid grid-cols-1 gap-3">
               <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />
+                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} />
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>Sucursal</p>
+                  <p className="text-xs font-semibold" style={{ color: '#627080' }}>Sucursal</p>
                   <p className="text-sm font-semibold" style={{ color: '#263442' }}>{nombreSucursal(u.sucursal_id)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#F2F3F5' }}>
-                {u.vinculado ? <Mail className="w-4 h-4 flex-shrink-0" style={{ color: '#059669' }} /> : <Unlink className="w-4 h-4 flex-shrink-0" style={{ color: '#8FA1B2' }} />}
+                {u.vinculado ? <Mail className="w-4 h-4 flex-shrink-0" style={{ color: '#047857' }} /> : <Unlink className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} />}
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>Acceso a la app web</p>
+                  <p className="text-xs font-semibold" style={{ color: '#627080' }}>Acceso a la app web</p>
                   <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>
                     {u.vinculado ? 'Cuenta vinculada' : 'Sin cuenta vinculada: solo entra en la caja'}
                   </p>

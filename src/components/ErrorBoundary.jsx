@@ -15,7 +15,7 @@ export default class ErrorBoundary extends Component {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 16 }}>
           <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(201,122,109,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 24, color: '#C97A6D' }}>!</span>
+            <span style={{ fontSize: 24, color: '#8A4A42' }}>!</span>
           </div>
           <p style={{ color: '#263442', fontWeight: 700, fontSize: '1rem' }}>Error al cargar la página</p>
           <p style={{ color: '#627080', fontSize: '.875rem' }}>Verifica tu conexión e intenta de nuevo</p>

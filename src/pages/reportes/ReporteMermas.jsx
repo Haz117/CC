@@ -11,6 +11,7 @@ import { listarMermas } from '../../api/inventario'
 import { pesos, cantidad, fecha, hora, fmtDec } from '../../utils/fmt'
 import { PAGE_SIZE, tooltipStyle, ejeMiles, tick, celdaTotal } from './constantes'
 import { Kpis, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── MERMAS ──────────────────────────────────────────────── */
 export default function ReporteMermas({ filtro, nombreCorto }) {
@@ -52,20 +53,22 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
       ]} />
       <ChartCard title="Costo de las mermas por motivo" subtitle={`Total: ${pesos(costo)} · ${filas.length} merma${filas.length !== 1 ? 's' : ''}`}>
         {motivos.length === 0 ? <SinDatos>Sin mermas en este periodo</SinDatos> : (
+          <Grafica titulo="Costo de la merma por motivo" datos={motivos} etiqueta="motivo" valor="costo">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={motivos} barCategoryGap="35%" maxBarSize={56}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="motivo" tick={tick} axisLine={false} tickLine={false} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
               <Tooltip formatter={v => [fmtDec(v), 'Costo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
-              <Bar dataKey="costo" fill="#C97A6D" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="costo" fill="#8A4A42" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Historial de mermas" exportLabel="Exportar CSV"
         onExport={() => downloadCSV(filas.map(m => ({ folio: m.folio, fecha: `${fecha(m.fecha)} ${hora(m.fecha)}`, producto: m.productos?.nombre ?? '', cantidad: m.cantidad, unidad: m.productos?.unidad ?? '', motivo: m.motivo ?? '', sucursal: nombreCorto(m.sucursal_id), costo: ((m.costo_centavos ?? 0) / 100).toFixed(2) })), 'reporte_mermas')}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Folio', 'Fecha', 'Producto', 'Cantidad', 'Motivo', 'Sucursal', 'Costo'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>
@@ -77,14 +80,14 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
                   <td style={{ color: '#627080' }}>{cantidad(m.cantidad, m.productos?.unidad)}</td>
                   <td className="text-xs" style={{ color: '#627080' }}>{m.motivo ?? '—'}</td>
                   <td><span className="tag tag-gray">{nombreCorto(m.sucursal_id)}</span></td>
-                  <td className="font-bold" style={{ color: '#C97A6D' }}>{pesos(m.costo_centavos)}</td>
+                  <td className="font-bold" style={{ color: '#8A4A42' }}>{pesos(m.costo_centavos)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr style={{ background: 'rgba(201,122,109,.06)', borderTop: '1px solid rgba(201,122,109,.2)' }}>
                 <td className={celdaTotal} style={{ color: '#263442' }} colSpan={6}>Costo total de mermas</td>
-                <td className={celdaTotal} style={{ color: '#C97A6D' }}>{pesos(costo)}</td>
+                <td className={celdaTotal} style={{ color: '#8A4A42' }}>{pesos(costo)}</td>
               </tr>
             </tfoot>
           </table>

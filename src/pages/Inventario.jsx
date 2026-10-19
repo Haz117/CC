@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Package, Search, AlertTriangle, AlertCircle, LayoutGrid, List, TrendingUp, Download, Eye, Truck, Barcode } from 'lucide-react'
+import { Package, Search, AlertTriangle, AlertCircle, LayoutGrid, List, TrendingUp, Download, Eye, Truck, Barcode, Tags } from 'lucide-react'
 import { downloadCSV } from '../utils/csv'
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
@@ -16,6 +16,9 @@ import AlertBanner from '../components/AlertBanner'
 import AvisoError from '../components/AvisoError'
 import InfoCell from '../components/InfoCell'
 import SelectorSucursal from '../components/SelectorSucursal'
+import Selector from '../components/Selector'
+import Segmentado from '../components/Segmentado'
+import Interruptor from '../components/Interruptor'
 import TablaGenerica from '../components/TablaGenerica'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useDebounce } from '../hooks/useDebounce'
@@ -25,18 +28,19 @@ import { useSucursales } from '../hooks/useSucursales'
 import { listarProductos, listarExistencias, listarLimites, listarOrdenesPendientes } from '../api/inventario'
 import { armarInventario, NIVEL, esBajo } from '../lib/calculos'
 import { cantidad } from '../utils/fmt'
+import Grafica from '../components/Grafica'
 
 const PER_PAGE = 10
 const PER_PAGE_GRID = 12
 const MAX_ORDENES = 30
-const COLORES = ['#F97316', '#059669', '#d97706', '#7c3aed', '#0d9488', '#C2410C']
+const COLORES = ['#C2410C', '#047857', '#92400E', '#7c3aed', '#0d9488', '#C2410C']
 
 // La etiqueta, el ícono y el borde avisan de la sucursal que peor está (`nivel`);
 // la cifra y su barra son la suma de las sucursales a la vista y se colorean por ese total (`nivelTotal`).
 const bajo      = (p) => esBajo(p.nivel)
 const accent    = (p) => p.nivel === NIVEL.CRITICO ? 'card-accent-red' : p.nivel === NIVEL.BAJO ? 'card-accent-amber' : 'card-accent-blue'
 const fondo     = (p) => p.nivel === NIVEL.CRITICO ? 'rgba(201,122,109,.12)' : p.nivel === NIVEL.BAJO ? 'rgba(217,119,6,.1)' : '#FFF7ED'
-const tono      = (nivel) => esBajo(nivel) ? nivel.tono : '#F97316'
+const tono      = (nivel) => esBajo(nivel) ? nivel.tono : '#C2410C'
 const tonoTotal = (p) => esBajo(p.nivelTotal) ? p.nivelTotal.tono : '#263442'
 const fill      = (p) => p.nivelTotal === NIVEL.CRITICO ? 'progress-fill-red' : p.nivelTotal === NIVEL.BAJO ? 'progress-fill-amber' : 'progress-fill-green'
 // El color de la categoría viene del catálogo; si no es un color válido se usa la paleta.
@@ -55,7 +59,7 @@ function DetalleProducto({ producto: p, nombreSucursal, onClose }) {
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#627080' }}>Existencia por sucursal</p>
+          <p className="text-[13px] font-semibold mb-2" style={{ color: '#627080' }}>Existencia por sucursal</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
             {p.porSucursal.map(s => (
               <div key={s.sucursal_id} className="flex items-center justify-between gap-3 px-4 py-2.5" style={{ borderBottom: '1px solid #FDE8D0' }}>
@@ -81,7 +85,7 @@ function DetalleProducto({ producto: p, nombreSucursal, onClose }) {
 
         {presentaciones.length > 0 && (
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#627080' }}>Presentaciones</p>
+            <p className="text-[13px] font-semibold mb-2" style={{ color: '#627080' }}>Presentaciones</p>
             <div className="space-y-1.5">
               {presentaciones.map(x => (
                 <div key={x.id} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: '#F2F3F5' }}>
@@ -93,7 +97,7 @@ function DetalleProducto({ producto: p, nombreSucursal, onClose }) {
                   </div>
                   {x.codigo_barras && (
                     <span className="flex items-center gap-1.5 text-xs font-mono flex-shrink-0" style={{ color: '#627080' }}>
-                      <Barcode className="w-3.5 h-3.5" style={{ color: '#8FA1B2' }} /> {x.codigo_barras}
+                      <Barcode className="w-3.5 h-3.5" style={{ color: '#627080' }} /> {x.codigo_barras}
                     </span>
                   )}
                 </div>
@@ -200,15 +204,15 @@ export default function Inventario() {
     <div className="data-toolbar">
       <div className="data-toolbar-row">
         <div style={{ flex: 1, minWidth: 200 }}>
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o clave..." resultCount={filtered.length} />
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o clave…" resultCount={filtered.length} />
         </div>
-        <div className="filter-bar">
-          <button onClick={() => setCat('Todos')} className={`chip ${cat === 'Todos' ? 'active' : ''}`}>Todos</button>
-          {categorias.map(c => (
-            <button key={c.nombre} onClick={() => setCat(c.nombre)} className={`chip ${cat === c.nombre ? 'active' : ''}`}>{c.nombre}</button>
-          ))}
-        </div>
-        <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} />
+        <Selector
+          value={cat}
+          onChange={setCat}
+          opciones={[{ valor: 'Todos', texto: 'Todas las categorías' }, ...categorias.map(c => ({ valor: c.nombre, texto: c.nombre }))]}
+          etiqueta="Categoría"
+          icono={Tags}
+        />
       </div>
       <div className="data-toolbar-footer">
         <div className="toolbar-summary">
@@ -216,13 +220,9 @@ export default function Inventario() {
           <span className="sep">·</span>
           <span>{alcance}</span>
         </div>
-        <button
-          onClick={() => setSoloBajos(v => !v)}
-          className={`chip ${soloBajos ? 'active' : ''}`}
-          style={soloBajos ? { background: 'rgba(201,122,109,.15)', color: '#A05A52', borderColor: 'rgba(201,122,109,.35)', boxShadow: 'none' } : {}}
-        >
-          <AlertTriangle className="w-3.5 h-3.5" /> Solo bajo mínimo ({bajos.length})
-        </button>
+        <Interruptor activo={soloBajos} onChange={setSoloBajos}>
+          Solo bajo mínimo <span className="interruptor-cuenta">{bajos.length}</span>
+        </Interruptor>
       </div>
     </div>
   )
@@ -230,31 +230,22 @@ export default function Inventario() {
   return (
     <div className="space-y-6">
 
-      <PageHeader
-        breadcrumb="Inventario"
-        title="Inventario"
-        subtitle={sinDatos ? `Existencias · ${alcance}` : `${productos.length} producto${productos.length !== 1 ? 's activos' : ' activo'} · ${bajos.length} bajo mínimo · ${alcance}`}
-      >
+      <PageHeader breadcrumb="Inventario" title="Inventario">
         <button onClick={handleExportCSV} className="btn-secondary" disabled={filtered.length === 0}>
           <Download className="w-4 h-4" /> Exportar CSV
         </button>
-        <div className="flex rounded-xl border overflow-hidden" style={{ borderColor: '#FDBA74' }}>
-          <button
-            onClick={() => setViewMode('grid')}
-            className="px-3 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5"
-            style={viewMode === 'grid' ? { background: '#F97316', color: '#fff' } : { background: '#F2F3F5', color: '#627080' }}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" /> Grid
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className="px-3 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5"
-            style={viewMode === 'list' ? { background: '#F97316', color: '#fff', borderLeft: '1px solid #FDBA74' } : { background: '#F2F3F5', color: '#627080', borderLeft: '1px solid #FDBA74' }}
-          >
-            <List className="w-3.5 h-3.5" /> Lista
-          </button>
-        </div>
+        <Segmentado
+          opciones={[{ valor: 'grid', texto: 'Tarjetas', icono: LayoutGrid }, { valor: 'list', texto: 'Lista', icono: List }]}
+          value={viewMode}
+          onChange={setViewMode}
+          etiqueta="Vista"
+        />
       </PageHeader>
+
+      {/* La sucursal cambia toda la pantalla (indicadores, gráficas y productos): va arriba */}
+      <div className="barra-filtros">
+        <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} />
+      </div>
 
       <KpiBar estado={estadoKpi} items={[
         { icon: Package, label: 'Productos', value: productos.length,                          sub: 'activos en catálogo' },
@@ -273,11 +264,12 @@ export default function Inventario() {
             {masBajos.length === 0 ? (
               <p className="text-xs text-center py-14" style={{ color: '#627080' }}>No hay mínimos configurados para estas sucursales</p>
             ) : (
+              <Grafica titulo="Productos más bajos, en porcentaje de su mínimo" datos={masBajos} etiqueta="nombre" valor="pct" unidad="porcentaje">
               <ResponsiveContainer width="100%" height={148}>
                 <BarChart data={masBajos.map(p => ({ ...p, barra: Math.min(p.pct, 300) }))} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke="#FDE8D0" />
                   <XAxis dataKey="clave" tick={{ fontSize: 9, fill: '#627080' }} axisLine={false} tickLine={false} minTickGap={6} />
-                  <ReferenceLine y={100} stroke="#059669" strokeDasharray="5 3" label={{ value: 'Mínimo', position: 'insideBottomLeft', fontSize: 9, fill: '#059669', fontWeight: 700 }} />
+                  <ReferenceLine y={100} stroke="#059669" strokeDasharray="5 3" label={{ value: 'Mínimo', position: 'insideBottomLeft', fontSize: 9, fill: '#047857', fontWeight: 700 }} />
                   <Tooltip
                     cursor={{ fill: '#FFF7ED' }}
                     content={({ active, payload }) => active && payload?.length ? (
@@ -293,6 +285,7 @@ export default function Inventario() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </Grafica>
             )}
           </div>
 
@@ -300,7 +293,7 @@ export default function Inventario() {
             <TituloTarjeta icon={Package} titulo="Por categoría" className="mb-1" />
             {categorias.slice(0, 6).map(c => {
               const pct = Math.round(c.count / productos.length * 100)
-              const color = c.bajos ? '#C97A6D' : c.color
+              const color = c.bajos ? '#8A4A42' : c.color
               return <FilaDesglose key={c.nombre} cuenta={c.count} etiqueta={c.nombre} derecha={c.bajos > 0 ? `${c.bajos} bajo mínimo` : null} pct={pct} color={color} />
             })}
           </div>
@@ -321,9 +314,8 @@ export default function Inventario() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
               <span className="section-head-text"><strong>Reabastecimiento pendiente</strong></span>
-              <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{ordenes.length} pedido{ordenes.length !== 1 ? 's' : ''}</span>
+              <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{ordenes.length} pedido{ordenes.length !== 1 ? 's' : ''}</span>
             </div>
             <span className="hidden sm:inline text-xs" style={{ color: '#627080' }}>Los genera la base cuando un producto baja del mínimo</span>
           </div>
@@ -383,7 +375,7 @@ export default function Inventario() {
               <div className="flex items-center justify-between gap-2">
                 <span className="tag tag-orange">{p.categoria}</span>
                 {p.porSucursal.length > 1 && p.bajos > 0 && (
-                  <span className="text-[10px] font-bold" style={{ color: '#C97A6D' }}>bajo en {p.bajos} suc.</span>
+                  <span className="text-[10px] font-bold" style={{ color: '#8A4A42' }}>bajo en {p.bajos} suc.</span>
                 )}
               </div>
             </button>
@@ -404,13 +396,12 @@ export default function Inventario() {
           {toolbar}
           <div className="section-head">
             <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
               <span className="section-head-text"><strong>Existencias</strong></span>
               <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} producto{filtered.length !== 1 ? 's' : ''}</span>
-              {bajos.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{bajos.length} bajo mínimo</span>}
+              {bajos.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{bajos.length} bajo mínimo</span>}
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de productos">
             <table className="table-modern">
               <thead>
                 <tr>
@@ -428,9 +419,6 @@ export default function Inventario() {
                   <tr key={p.id}>
                     <td>
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: fondo(p) }}>
-                          <Package className="w-4 h-4" style={{ color: tono(p.nivel) }} />
-                        </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{p.nombre}</p>
                           <p className="text-xs font-mono truncate" style={{ color: '#627080' }}>{p.clave}</p>
@@ -444,7 +432,7 @@ export default function Inventario() {
                     <td>
                       <Badge label={p.nivel.label} color={p.nivel.color} />
                       {p.porSucursal.length > 1 && p.bajos > 0 && (
-                        <p className="text-[10px] font-bold mt-1" style={{ color: '#C97A6D' }}>en {p.bajos} sucursal{p.bajos !== 1 ? 'es' : ''}</p>
+                        <p className="text-[10px] font-bold mt-1" style={{ color: '#8A4A42' }}>en {p.bajos} sucursal{p.bajos !== 1 ? 'es' : ''}</p>
                       )}
                     </td>
                     <td>
