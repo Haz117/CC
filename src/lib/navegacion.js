@@ -15,7 +15,7 @@ export const esAdmin = (perfil) => perfil?.rol === ROL.ADMIN
 /* Pantallas de la app. La web es de consulta y solo para el administrador, que ve todas las
    sucursales y el almacén. `demo: true` marca los módulos que todavía no tienen tablas en la base. */
 const TODAS = [
-  { path: '/dashboard',      label: 'Panel Principal', corto: 'Panel',   icon: LayoutDashboard, grupo: null },
+  { path: '/dashboard',      label: 'Panel principal', corto: 'Panel',   icon: LayoutDashboard, grupo: null },
   { path: '/sucursales',     label: 'Sucursales',                        icon: Building2,       grupo: 'Operaciones' },
   { path: '/cajas',          label: 'Cajas',                             icon: Monitor,         grupo: 'Operaciones' },
   { path: '/ventas',         label: 'Ventas',                            icon: ShoppingCart,    grupo: 'Operaciones' },

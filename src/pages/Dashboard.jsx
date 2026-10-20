@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { DollarSign, AlertTriangle, LayoutGrid, Receipt, ChevronRight, Monitor, Target, XCircle } from 'lucide-react'
+import { Banknote, Truck, CalendarDays, Receipt, Monitor, Target, XCircle } from 'lucide-react'
 import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
 import EnVivo from '../components/EnVivo'
@@ -15,17 +15,34 @@ import { listarTurnosAbiertos } from '../api/cajas'
 import { listarOrdenesPendientes } from '../api/inventario'
 import { listarMetas } from '../api/organizacion'
 import { resumenVentas, ventasPorDia, ventasPorSucursal, esCancelada } from '../lib/calculos'
-import { pesos, pesosCorto, hora, fmtDec, inicioDelDia, inicioDelMes, sumarDias, mesLargo, diaLocal } from '../utils/fmt'
+import { pesos, pesosCorto, pesosEje, plural, hora, fmtDec, inicioDelDia, inicioDelMes, sumarDias, diaLargo, mesNombre, diaLocal } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 
 const UN_DIA = 24 * 60 * 60 * 1000
 
-const enlace = { fontSize: 12, fontWeight: 700, color: '#C2410C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }
+const enlace = { fontSize: '0.8125rem', fontWeight: 600, color: '#C2410C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, padding: '2px 0' }
 const tarjeta = { display: 'flex', flexDirection: 'column', minWidth: 0 }
 const filaLista = { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 6px', borderRadius: 10 }
 
+// Encabezado de cada tarjeta: ícono, título, una nota opcional y, a la derecha, el enlace a su pantalla.
+// Las cuatro tarjetas usan el mismo; antes cada una tenía su propio botón (con borde, ancho o de texto).
+function Encabezado({ icon: Icon, titulo, nota, accion, onAccion }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+      <div style={{ minWidth: 0 }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9375rem', fontWeight: 600, color: '#263442' }}>
+          <Icon size={16} color="#C2410C" strokeWidth={2.1} aria-hidden="true" style={{ flexShrink: 0 }} />
+          {titulo}
+        </h2>
+        {nota && <p style={{ fontSize: '0.75rem', color: '#627080', marginTop: 3 }}>{nota}</p>}
+      </div>
+      {accion && <button onClick={onAccion} style={enlace}>{accion}</button>}
+    </div>
+  )
+}
+
 function Vacio({ children }) {
-  return <p style={{ fontSize: 12, color: '#627080', padding: '18px 6px', textAlign: 'center' }}>{children}</p>
+  return <p style={{ fontSize: '0.75rem', color: '#627080', padding: '18px 6px', textAlign: 'center' }}>{children}</p>
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -94,11 +111,15 @@ export default function Dashboard() {
   const titulo = useEnfocarTitulo()
   const ir = (path) => () => navigate(path)
 
+  // La nota de cada indicador lleva un dato, no repite la etiqueta
+  const primeraAbierta = abiertas.reduce((min, t) => (!min || t.abierto_en < min ? t.abierto_en : min), null)
+  const sucursalesPorSurtir = new Set(ordenes.map(o => o.sucursal_id)).size
   const kpis = [
-    { Icon: DollarSign,    label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'ventas completadas' : `${r.delta >= 0 ? '+' : ''}${r.delta}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#C2410C', path: '/ventas' },
-    { Icon: Receipt,       label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#2F8CEB', path: '/ventas' },
-    { Icon: LayoutGrid,    label: 'Cajas abiertas', value: abiertas.length,           sub: abiertas.length ? 'turnos en operación' : 'ninguna en este momento', iconColor: '#047857', path: '/cajas' },
-    { Icon: AlertTriangle, label: 'Bajo mínimo',    value: ordenes.length,            sub: ordenes.length ? 'por reabastecer' : 'inventario en orden', alert: ordenes.length > 0, iconColor: '#8A4A42', path: '/inventario' },
+    { Icon: Banknote, label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'sin contar canceladas' : `${r.delta >= 0 ? '+' : '−'}${Math.abs(r.delta)}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#C2410C', path: '/ventas' },
+    { Icon: Receipt,  label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#C2410C', path: '/ventas' },
+    { Icon: Monitor,  label: 'Cajas abiertas', value: abiertas.length,           sub: primeraAbierta ? `la primera desde las ${hora(primeraAbierta)}` : 'ninguna en este momento', iconColor: '#047857', path: '/cajas' },
+    // Son pedidos, no productos: en Inventario "Bajo mínimo" cuenta productos y daría otra cifra
+    { Icon: Truck,    label: 'Por reabastecer', value: ordenes.length,           sub: ordenes.length ? `pedidos en ${plural(sucursalesPorSurtir, 'sucursal', 'sucursales')}` : 'inventario en orden', alert: ordenes.length > 0, iconColor: ordenes.length ? '#8A4A42' : '#C2410C', path: '/inventario' },
   ]
 
   return (
@@ -107,11 +128,11 @@ export default function Dashboard() {
       {/* ══ HERO DEL PANEL (claro) ════════════════════════════ */}
       <div className="panel-hero">
         <div className="min-w-0">
-          <p className="panel-hero-crumb">Panel principal · {mesLargo(hoy)}</p>
+          <p className="panel-hero-crumb">{diaLargo(hoy)}</p>
           <h1 ref={titulo} className="panel-hero-title">{saludo}, {nombre}</h1>
-          <p className="panel-hero-sub">Resumen de hoy — todas las sucursales</p>
+          <p className="panel-hero-sub">Resumen de hoy en todas las sucursales</p>
           <div className="panel-hero-tags">
-            <EnVivo />
+            <EnVivo error={error} />
             {r.hoy.canceladas > 0 && !sinDatos && (
               <button onClick={ir('/ventas')} className="cancel-chip-light">
                 <XCircle size={12} /> {r.hoy.canceladas} cancelada{r.hoy.canceladas > 1 ? 's' : ''} hoy
@@ -121,7 +142,7 @@ export default function Dashboard() {
         </div>
         {/* Cifra del mes: no se repite en los indicadores (esos son de hoy) */}
         <div className="panel-hero-metric">
-          <p className="panel-hero-metric-label">Ventas del mes · todas</p>
+          <p className="panel-hero-metric-label">Ventas de {mesNombre(hoy)}</p>
           <p className="panel-hero-metric-value">{sinDatos ? '—' : pesosCorto(r.mesVendido)}</p>
           <p className="panel-hero-metric-sub">
             {sinDatos
@@ -156,27 +177,26 @@ export default function Dashboard() {
 
         {/* Ventas de los últimos 7 días */}
         <div className="card p-5" style={tarjeta}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, gap: 8, flexWrap: 'wrap' }}>
-            <div>
-              <p style={{ fontSize: 13, fontWeight: 800, color: '#263442' }}>Ventas de los últimos 7 días</p>
-              <p style={{ fontSize: 11, color: '#627080', marginTop: 2 }}>
-                Total: <strong style={{ color: '#263442' }}>{sinDatos ? '—' : pesos(r.semana.reduce((s, d) => s + d.centavos, 0))}</strong> · solo ventas completadas
-              </p>
-            </div>
-            <button onClick={ir('/ventas')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 8, border: '1.5px solid #D4DDE6', background: '#fff', color: '#263442', cursor: 'pointer', fontFamily: 'inherit' }}>
-              Ver ventas
-            </button>
-          </div>
+          <Encabezado
+            icon={CalendarDays}
+            titulo="Ventas de los últimos 7 días"
+            nota={<>Total: <strong style={{ color: '#263442' }}>{sinDatos ? '—' : pesos(r.semana.reduce((s, d) => s + d.centavos, 0))}</strong> · sin contar canceladas</>}
+            accion="Ver ventas"
+            onAccion={ir('/ventas')}
+          />
           {/* La gráfica ocupa el alto que le deje la tarjeta de al lado */}
           <div style={{ flex: 1, minHeight: 200, position: 'relative' }}>
-            <div style={{ position: 'absolute', inset: 0 }}>
+            {/* Una semana sin ventas no se dibuja como gráfica vacía con un eje de $0 a $4 */}
+            {!cargando && (sinDatos || r.semana.every(d => !d.centavos))
+              ? <Vacio>{sinDatos ? 'No se pudieron cargar las ventas.' : 'Sin ventas en los últimos 7 días.'}</Vacio>
+              : <div style={{ position: 'absolute', inset: 0 }}>
               <Grafica titulo="Ventas de los últimos 7 días" datos={r.semana} etiqueta="etiqueta" valor="total">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={r.semana} barCategoryGap="32%" margin={{ top: 8, left: 0, right: 4, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 0" stroke="#FDE8D0" vertical={false} />
                   <XAxis dataKey="etiqueta" tick={{ fontSize: 10, fill: '#627080', fontWeight: 600 }} axisLine={false} tickLine={false} />
                   {/* Eje con montos para leer la gráfica sin pasar el mouse */}
-                  <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickFormatter={v => (v >= 1000 ? `$${Math.round(v / 100) / 10}k` : `$${v}`)} />
+                  <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickFormatter={pesosEje} />
                   <Tooltip content={props => <ChartTooltip {...props} format={fmtDec} />} cursor={{ fill: 'rgba(249,115,22,.06)' }} />
                   <Bar dataKey="total" radius={[7, 7, 2, 2]}>
                     {r.semana.map(d => <Cell key={d.dia} fill={d.dia === diaLocal(hoy) ? '#C2410C' : '#FDBA74'} />)}
@@ -184,19 +204,13 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
               </Grafica>
-            </div>
+            </div>}
           </div>
         </div>
 
         {/* Últimas ventas */}
         <div className="card p-5" style={tarjeta}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div>
-              <p style={{ fontSize: 13, fontWeight: 800, color: '#263442' }}>Últimas ventas</p>
-              <p style={{ fontSize: 10, color: '#627080', marginTop: 2 }}>Las cajas suben sus ventas cada 10 segundos</p>
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 7, border: '1.5px solid #D4DDE6', background: '#fff', color: '#263442' }}>Hoy</span>
-          </div>
+          <Encabezado icon={Receipt} titulo="Últimas ventas de hoy" nota="Las cajas suben sus ventas cada 10 segundos" accion="Ver todas" onAccion={ir('/ventas')} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {ultimas.map((v, i) => {
@@ -209,12 +223,12 @@ export default function Dashboard() {
                       ? <XCircle size={17} color="#8A4A42" aria-hidden="true" style={{ flexShrink: 0 }} />
                       : <Receipt size={17} color="#627080" aria-hidden="true" style={{ flexShrink: 0 }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p className="truncate" style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{v.folio}</p>
-                      <p className="truncate" style={{ fontSize: 10, color: '#627080' }}>
+                      <p className="truncate" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#263442' }}>{v.folio}</p>
+                      <p className="truncate" style={{ fontSize: '0.6875rem', color: '#627080' }}>
                         {hora(v.fecha)} · {v.cajero?.nombre_completo ?? nombreCorto(v.sucursal_id)}{cancelada ? ' · cancelada' : ''}
                       </p>
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: cancelada ? '#8A4A42' : '#263442', textDecoration: cancelada ? 'line-through' : 'none', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.8125rem', fontWeight: 800, color: cancelada ? '#8A4A42' : '#263442', textDecoration: cancelada ? 'line-through' : 'none', flexShrink: 0 }}>
                       {pesos(v.total_centavos)}
                     </span>
                   </div>
@@ -223,15 +237,6 @@ export default function Dashboard() {
             })}
             {!cargando && ultimas.length === 0 && <Vacio>{sinDatos ? 'No se pudieron cargar las ventas.' : 'Todavía no hay ventas hoy.'}</Vacio>}
           </div>
-
-          <button
-            onClick={ir('/ventas')}
-            style={{ width: '100%', marginTop: 12, padding: '9px', borderRadius: 10, border: '1.5px solid #D4DDE6', background: '#fff', color: '#627080', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.borderColor = '#FDBA74'; e.currentTarget.style.color = '#C2410C' }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#D4DDE6'; e.currentTarget.style.color = '#627080' }}
-          >
-            Ver todas las ventas <ChevronRight size={14} />
-          </button>
         </div>
       </div>
 
@@ -239,21 +244,15 @@ export default function Dashboard() {
 
         {/* Meta del mes */}
         <div className="card p-5" style={tarjeta}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Target size={15} color="#C2410C" />
-              <p style={{ fontSize: 13, fontWeight: 800, color: '#263442' }}>Meta de {mesLargo(hoy)}</p>
-            </div>
-            <button onClick={ir('/sucursales')} style={enlace}>Ver sucursales</button>
-          </div>
+          <Encabezado icon={Target} titulo={`Meta de ${mesNombre(hoy)}`} nota="La línea gris marca el avance esperado a hoy" accion="Ver sucursales" onAccion={ir('/sucursales')} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, justifyContent: 'space-around' }}>
             {r.metas.map(m => {
               const color = m.avance >= esperado ? '#047857' : m.avance >= esperado * 0.8 ? '#92400E' : '#8A4A42'
               return (
                 <div key={m.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{nombreCorto(m.id)}</span>
-                    <span style={{ fontSize: 11, color: '#627080' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#263442' }}>{nombreCorto(m.id)}</span>
+                    <span style={{ fontSize: '0.6875rem', color: '#627080' }}>
                       {pesosCorto(m.vendido)} de {pesosCorto(m.meta)} · <strong style={{ color }}>{m.avance}%</strong>
                     </span>
                   </div>
@@ -271,23 +270,18 @@ export default function Dashboard() {
 
         {/* Cajas abiertas */}
         <div className="card p-5" style={tarjeta}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <p style={{ fontSize: 13, fontWeight: 800, color: '#263442' }}>Cajas abiertas ahora</p>
-            <button onClick={ir('/cajas')} style={enlace}>Ver cajas</button>
-          </div>
+          <Encabezado icon={Monitor} titulo="Cajas abiertas ahora" accion="Ver cajas" onAccion={ir('/cajas')} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {abiertas.slice(0, 6).map((t, i) => (
               <div key={t.id}>
                 {i > 0 && <div style={{ height: 1, background: '#FDE8D0', margin: '0 4px' }} />}
                 <div style={filaLista}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, background: 'rgba(5,150,105,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Monitor size={15} color="#059669" />
-                  </div>
+                  <Monitor size={17} color="#627080" aria-hidden="true" style={{ flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p className="truncate" style={{ fontSize: 12, fontWeight: 700, color: '#263442' }}>{t.caja?.nombre ?? 'Caja'} · {nombreCorto(t.sucursal_id)}</p>
-                    <p className="truncate" style={{ fontSize: 10, color: '#627080' }}>{t.cajero?.nombre_completo ?? '—'}</p>
+                    <p className="truncate" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#263442' }}>{t.caja?.nombre ?? 'Caja'} · {nombreCorto(t.sucursal_id)}</p>
+                    <p className="truncate" style={{ fontSize: '0.6875rem', color: '#627080' }}>{t.cajero?.nombre_completo ?? '—'}</p>
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#047857', flexShrink: 0 }}>desde {hora(t.abierto_en)}</span>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#627080', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>desde {hora(t.abierto_en)}</span>
                 </div>
               </div>
             ))}

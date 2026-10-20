@@ -8,6 +8,16 @@ import { listarConfiguracion } from '../../api/sistema'
 import { TABLAS_EN_VIVO } from '../../lib/tiempoReal'
 import { Dato } from './piezas'
 
+// Las tablas que se escuchan en vivo, con el nombre que les da la gente
+const NOMBRE_TABLA = {
+  ventas: 'ventas',
+  turnos_caja: 'turnos de caja',
+  ordenes_reabastecimiento: 'pedidos de reabastecimiento',
+  bloqueos_acceso: 'bloqueos de acceso',
+}
+const enVivo = TABLAS_EN_VIVO.map(t => NOMBRE_TABLA[t] ?? t.replace(/_/g, ' '))
+const listaEnVivo = enVivo.length > 1 ? `${enVivo.slice(0, -1).join(', ')} y ${enVivo.at(-1)}` : enVivo.join('')
+
 /* ── Sistema: conexión y configuracion_general (solo lectura) ── */
 export default function Sistema() {
   const { modoDemo } = useAuth()
@@ -26,7 +36,7 @@ export default function Sistema() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Dato icon={Database} label="Origen de los datos">{origen}</Dato>
           <Dato icon={Eye} label="Modo">Solo consulta: la web no registra ventas ni inventario</Dato>
-          <Dato icon={Radio} label="Se actualizan en vivo">{TABLAS_EN_VIVO.join(' · ')}</Dato>
+          <Dato icon={Radio} label="Se actualizan en vivo">{listaEnVivo.charAt(0).toUpperCase() + listaEnVivo.slice(1)}</Dato>
           <Dato icon={Shield} label="Seguridad">La base filtra por sucursal según el usuario</Dato>
         </div>
       </div>
@@ -44,7 +54,7 @@ export default function Sistema() {
         {cargando
           ? <div className="px-6 pb-6"><SkeletonTableRows rows={3} /></div>
           : datos?.length > 0
-            ? <TablaGenerica filas={datos} primero={['clave', 'valor']} />
+            ? <TablaGenerica filas={datos} primero={['clave', 'valor']} resolver={{ clave: c => <span className="folio">{c}</span> }} />
             : !error && <p className="px-6 pb-6 text-sm" style={{ color: '#627080' }}>No hay parámetros capturados.</p>}
       </div>
     </div>

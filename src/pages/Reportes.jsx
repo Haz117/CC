@@ -6,7 +6,7 @@ import FiltroPeriodo from '../components/FiltroPeriodo'
 import Segmentado from '../components/Segmentado'
 import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
-import { rangoCorto } from '../utils/fmt'
+import { rangoCorto, fechaHora } from '../utils/fmt'
 import ReporteVentas from './reportes/ReporteVentas'
 import ReportePagos from './reportes/ReportePagos'
 import ReporteCortes from './reportes/ReporteCortes'
@@ -84,8 +84,13 @@ export default function Reportes() {
         ))}
       </div>
 
+      {/* En papel no van los controles: el subtítulo dice el periodo y esta línea, la sucursal y cuándo se imprimió */}
+      <p className="solo-impresion text-xs" style={{ color: '#4A5664' }}>
+        {sucursalId ? nombreSucursal(sucursalId) : 'Todas las sucursales'} · impreso el {fechaHora(new Date().toISOString())}
+      </p>
+
       {/* Filters */}
-      <div className="card overflow-hidden mb-6">
+      <div className="card overflow-hidden mb-6 no-imprimir">
         <div className="data-toolbar">
           <div className="data-toolbar-row">
             {tipo.conFechas ? (

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Monitor, DollarSign, ArrowUpCircle, ArrowDownCircle, Eye, Scissors, TrendingUp, User, Clock, Search, Info, StickyNote, AlertTriangle } from 'lucide-react'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
-import { SkeletonCardGrid, SkeletonTableRows } from '../components/Skeleton'
+import { Monitor, DollarSign, ArrowUpCircle, ArrowDownCircle, Eye, Scissors, TrendingUp, Scale, Users, ChevronRight, Info, StickyNote, AlertTriangle } from 'lucide-react'
+import { SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
+import Estado from '../components/Estado'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
 import FilaDesglose from '../components/FilaDesglose'
@@ -12,7 +12,6 @@ import Pagination from '../components/Pagination'
 import Modal from '../components/Modal'
 import EmptyState from '../components/EmptyState'
 import InfoCell from '../components/InfoCell'
-import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
 import EnVivo from '../components/EnVivo'
 import SelectorSucursal from '../components/SelectorSucursal'
@@ -24,9 +23,8 @@ import { useConsulta } from '../hooks/useConsulta'
 import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
 import { listarTurnosAbiertos, listarCortes } from '../api/cajas'
-import { movimientosDeTurno, signoMovimiento } from '../lib/calculos'
-import { pesos, fecha, hora, fechaHora, diaCorto, fmtDec, rangoCorto } from '../utils/fmt'
-import Grafica from '../components/Grafica'
+import { movimientosDeTurno, signoMovimiento, diferenciasPorCajero } from '../lib/calculos'
+import { pesos, fecha, hora, fechaHora, diaCorto, rangoCorto, horario, plural } from '../utils/fmt'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PER_PAGE = 8
@@ -40,6 +38,9 @@ function diferenciaDe(centavos) {
     ? { label: `Faltante ${pesos(-centavos)}`, color: 'red',   tono: '#8A4A42' }
     : { label: `Sobrante ${pesos(centavos)}`,  color: 'amber', tono: '#92400E' }
 }
+
+// "+$150.00", "−$2,000.00" o "$0.00": el signo solo cuando hubo movimiento.
+const conSigno = (centavos, signo) => `${centavos ? signo : ''}${pesos(centavos)}`
 
 function tiempoAbierta(desde) {
   const minutos = Math.max(0, Math.floor((Date.now() - new Date(desde).getTime()) / 60000))
@@ -75,13 +76,13 @@ function DetalleTurno({ turno, onClose }) {
 
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
           <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #FDE8D0' }}>
-            <p className="text-[13px] font-semibold" style={{ color: '#627080' }}>{abierto ? 'Efectivo del turno' : 'Corte de caja'}</p>
+            <p className="text-[0.8125rem] font-semibold" style={{ color: '#627080' }}>{abierto ? 'Efectivo del turno' : 'Corte de caja'}</p>
           </div>
           <div>
             {[
               { label: 'Fondo inicial',     value: pesos(turno.fondo_inicial_centavos), color: '#627080', icon: DollarSign },
-              { label: 'Entradas (+)',      value: `+${pesos(turno.entradas)}`,         color: '#C2410C', icon: ArrowUpCircle },
-              { label: 'Retiros (−)',       value: `-${pesos(turno.retiros)}`,          color: '#8A4A42', icon: ArrowDownCircle },
+              { label: 'Entradas (+)',      value: conSigno(turno.entradas, '+'),       color: turno.entradas ? '#C2410C' : '#627080', icon: ArrowUpCircle },
+              { label: 'Retiros (−)',       value: conSigno(turno.retiros, '−'),        color: turno.retiros ? '#8A4A42' : '#627080', icon: ArrowDownCircle },
               !abierto && { label: 'Efectivo esperado', value: pesos(turno.efectivo_esperado_centavos), color: '#263442', icon: TrendingUp },
               !abierto && { label: 'Efectivo contado',  value: pesos(turno.efectivo_contado_centavos),  color: '#263442', icon: Scissors },
             ].filter(Boolean).map(item => (
@@ -111,7 +112,7 @@ function DetalleTurno({ turno, onClose }) {
 
         {movimientos.length > 0 && (
           <div>
-            <p className="text-[13px] font-semibold mb-2" style={{ color: '#627080' }}>Movimientos de efectivo</p>
+            <p className="text-[0.8125rem] font-semibold mb-2" style={{ color: '#627080' }}>Movimientos de efectivo</p>
             <div className="space-y-1.5">
               {movimientos.map((m, i) => {
                 const retiro = signoMovimiento(m) < 0
@@ -119,10 +120,10 @@ function DetalleTurno({ turno, onClose }) {
                   <div key={`${m.fecha}-${i}`} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2" style={{ background: '#F2F3F5' }}>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold truncate" style={{ color: '#263442' }}>{m.concepto || (retiro ? 'Retiro' : 'Entrada')}</p>
-                      <p className="text-[10px]" style={{ color: '#627080' }}>{hora(m.fecha)}</p>
+                      <p className="text-xs" style={{ color: '#627080' }}>{hora(m.fecha)}</p>
                     </div>
                     <span className="text-sm font-bold flex-shrink-0" style={{ color: retiro ? '#8A4A42' : '#C2410C' }}>
-                      {retiro ? '-' : '+'}{pesos(m.monto_centavos)}
+                      {retiro ? '−' : '+'}{pesos(m.monto_centavos)}
                     </span>
                   </div>
                 )
@@ -191,22 +192,21 @@ export default function Cajas() {
   }, [abiertas.datos, cortes.datos, debouncedSearch, nombreCorto, nombreSucursal])
 
   const stats = useMemo(() => {
-    let faltantes = 0, sobrantes = 0, neta = 0
+    let faltantes = 0, sobrantes = 0, neta = 0, contado = 0
     for (const c of modelo.cortes) {
       const d = c.diferencia_centavos ?? 0
       neta += d
+      contado += c.efectivo_contado_centavos ?? 0
       if (d < 0) faltantes++
       else if (d > 0) sobrantes++
     }
-    return { faltantes, sobrantes, neta, cuadrados: modelo.cortes.length - faltantes - sobrantes }
-  }, [modelo.cortes])
+    // La caja que lleva más tiempo abierta
+    const primeraAbierta = modelo.abiertas.reduce((min, t) => (!min || t.abierto_en < min ? t.abierto_en : min), null)
+    return { faltantes, sobrantes, neta, contado, primeraAbierta, cuadrados: modelo.cortes.length - faltantes - sobrantes }
+  }, [modelo.cortes, modelo.abiertas])
 
-  // Últimos cortes, del más antiguo al más reciente, para la gráfica
-  const grafica = useMemo(() => modelo.cortes.slice(0, 14).reverse().map(c => ({
-    id: c.id,
-    etiqueta: `${diaCorto(c.cerrado_en)} · ${c.cajaNombre}`,
-    diferencia: (c.diferencia_centavos ?? 0) / 100,
-  })), [modelo.cortes])
+  // Quién cuadra y quién no: los cortes del periodo por cajero, primero quien más faltante acumula
+  const porCajero = useMemo(() => diferenciasPorCajero(modelo.cortes, c => c.cajeroNombre), [modelo.cortes])
 
   const paginados = useMemo(() => modelo.cortes.slice((page - 1) * PER_PAGE, page * PER_PAGE), [modelo.cortes, page])
 
@@ -223,8 +223,8 @@ export default function Cajas() {
   return (
     <div className="space-y-6">
 
-      <PageHeader breadcrumb="Cajas" title="Control de Cajas">
-        <EnVivo actualizando={abiertas.actualizando || cortes.actualizando} />
+      <PageHeader breadcrumb="Cajas" title="Cajas">
+        <EnVivo actualizando={abiertas.actualizando || cortes.actualizando} error={abiertas.error || cortes.error} />
       </PageHeader>
 
       {/* ══ Filtros: arriba de todo lo que cambian ════════════════ */}
@@ -235,74 +235,90 @@ export default function Cajas() {
       </div>
 
       <KpiBar estado={estadoKpi} items={[
-        { icon: Monitor, label: 'Abiertas ahora', value: modelo.abiertas.length, good: modelo.abiertas.length > 0, sub: 'turnos en operación' },
-        { icon: Scissors, label: 'Cortes', value: modelo.cortes.length,                                     sub: 'turnos cerrados' },
-        { icon: AlertTriangle, label: 'Con diferencia', value: conDiferencia, alert: conDiferencia > 0,                  sub: `${stats.faltantes} faltante${stats.faltantes !== 1 ? 's' : ''} · ${stats.sobrantes} sobrante${stats.sobrantes !== 1 ? 's' : ''}` },
-        { icon: TrendingUp, label: 'Diferencia neta', value: `${stats.neta < 0 ? '-' : ''}${pesos(Math.abs(stats.neta))}`, alert: stats.neta < 0, good: stats.neta === 0 && modelo.cortes.length > 0, sub: 'contado − esperado' },
+        { icon: Monitor, label: 'Abiertas ahora', value: modelo.abiertas.length, good: modelo.abiertas.length > 0, sub: stats.primeraAbierta ? `la primera desde las ${hora(stats.primeraAbierta)}` : 'ninguna en este momento' },
+        { icon: Scissors, label: 'Cortes', value: modelo.cortes.length,                                     sub: modelo.cortes.length ? `${pesos(stats.contado)} contados` : 'ninguno en el periodo' },
+        { icon: AlertTriangle, label: 'Con diferencia', value: conDiferencia, alert: conDiferencia > 0,                  sub: `${plural(stats.faltantes, 'faltante')} · ${plural(stats.sobrantes, 'sobrante')}` },
+        { icon: Scale, label: 'Diferencia neta', value: `${stats.neta < 0 ? '−' : ''}${pesos(Math.abs(stats.neta))}`, alert: stats.neta < 0, good: stats.neta === 0 && modelo.cortes.length > 0, sub: 'contado − esperado' },
       ]} />
 
       <AvisoError error={abiertas.error || cortes.error} onReintentar={() => { abiertas.recargar(); cortes.recargar() }} />
 
-      {/* ══ Cajas abiertas: son de este momento, el periodo no las cambia ══ */}
-      <div className="titulo-seccion">
-        <h2><Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />Abiertas ahora</h2>
-        {abiertas.datos !== undefined && <p>{modelo.abiertas.length} en operación · no dependen del periodo</p>}
-      </div>
-
-      {/* ══ Cajas abiertas ════════════════════════════════════════ */}
-      {abiertas.cargando ? <SkeletonCardGrid count={3} /> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-          {modelo.abiertas.map((c, i) => (
-            <div key={c.id} className="card p-5 flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 200)}ms` }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Monitor className="w-5 h-5 flex-shrink-0" style={{ color: '#C2410C' }} strokeWidth={1.9} aria-hidden="true" />
-                  <div className="min-w-0">
-                    <p className="font-bold leading-tight truncate" style={{ color: '#263442' }}>{c.cajaNombre}</p>
-                    <p className="text-xs truncate" style={{ color: '#627080' }}>{c.sucursalNombre}</p>
-                  </div>
-                </div>
-                <Badge label="Abierta" color="green" />
-              </div>
-
-              <div>
-                <p style={{ fontSize: '.8125rem', fontWeight: 500, color: '#627080', marginBottom: '2px' }}>Fondo inicial</p>
-                <p className="font-bold leading-none" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.55rem)', color: '#C2410C', letterSpacing: '-.02em' }}>
-                  {pesos(c.fondo_inicial_centavos)}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { label: 'Entradas', value: `+${pesos(c.entradas)}`, color: '#C2410C', bg: '#FFF7ED' },
-                  { label: 'Retiros',  value: `-${pesos(c.retiros)}`,  color: '#8A4A42', bg: 'rgba(201,122,109,.08)' },
-                ].map(item => (
-                  <div key={item.label} className="rounded-lg px-2 py-1.5" style={{ background: item.bg }}>
-                    <p style={{ fontSize: '.75rem', fontWeight: 500, color: '#627080' }}>{item.label}</p>
-                    <p className="font-bold truncate" style={{ fontSize: '.75rem', color: item.color, marginTop: '1px' }}>{item.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-4 text-xs" style={{ borderTop: '1px solid #FFF8F0', paddingTop: '10px' }}>
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <User className="w-3 h-3 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
-                  <span className="truncate" style={{ color: '#627080' }}>{c.cajeroNombre}</span>
-                </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0" title={`Abierta desde ${fechaHora(c.abierto_en)}`}>
-                  <Clock className="w-3 h-3" style={{ color: '#627080' }} aria-hidden="true" />
-                  <span style={{ color: '#627080' }}>{hora(c.abierto_en)} · {tiempoAbierta(c.abierto_en)}</span>
-                </div>
-              </div>
-
-              <button onClick={() => setDetalle(c)} className="btn-soft-blue py-2 text-xs font-medium rounded-xl flex items-center justify-center gap-1 mt-auto">
-                <Eye className="w-3.5 h-3.5" /> Ver detalle
-              </button>
+      {/* ══ Cajas abiertas: son de este momento, el periodo no las cambia.
+           Tabla compacta como la de cortes; antes era una tarjeta grande por caja que repetía el mismo fondo ══ */}
+      {abiertas.cargando ? <SkeletonTableRows rows={3} /> : (
+        <div className="card overflow-hidden">
+          <div className="section-head">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+              <span className="section-head-text"><strong>Abiertas ahora</strong></span>
+              {abiertas.datos !== undefined && <span style={{ fontSize: '.75rem', color: '#627080' }}>{plural(modelo.abiertas.length, 'caja')} · no dependen del periodo</span>}
             </div>
-          ))}
+          </div>
+
+          {/* Móvil: un renglón por caja; al tocarlo se abre su turno */}
+          <ul className="sm:hidden lista-movil">
+            {modelo.abiertas.map(c => (
+              <li key={c.id}>
+                <button type="button" onClick={() => setDetalle(c)} className="lista-movil-fila" aria-label={`Ver turno de ${c.cajaNombre}, ${c.sucursal}`}>
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{c.cajaNombre} · {c.sucursal}</span>
+                    <span className="text-sm font-semibold flex-shrink-0" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{pesos(c.fondo_inicial_centavos)}</span>
+                  </span>
+                  <span className="flex items-center justify-between gap-3 mt-1">
+                    <span className="text-xs truncate" style={{ color: '#627080' }}>{c.cajeroNombre} · desde {hora(c.abierto_en)}, {tiempoAbierta(c.abierto_en)}</span>
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} aria-hidden="true" />
+                  </span>
+                  {(c.entradas > 0 || c.retiros > 0) && (
+                    <span className="block text-xs mt-1" style={{ color: '#627080' }}>
+                      {[c.entradas > 0 && `entradas ${conSigno(c.entradas, '+')}`, c.retiros > 0 && `retiros ${conSigno(c.retiros, '−')}`].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden sm:block overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de cajas abiertas">
+            <table className="table-modern">
+              <thead>
+                <tr>
+                  <th>Caja</th>
+                  <th>Cajero</th>
+                  <th>Abierta desde</th>
+                  <th>Fondo</th>
+                  <th className="hidden lg:table-cell">Entradas</th>
+                  <th className="hidden lg:table-cell">Retiros</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {modelo.abiertas.map(c => (
+                  <tr key={c.id}>
+                    <td>
+                      <p className="text-sm font-semibold" style={{ color: '#263442' }}>{c.cajaNombre}</p>
+                      <p className="text-xs" style={{ color: '#627080' }}>{c.sucursal}</p>
+                    </td>
+                    <td><span className="text-sm" style={{ color: '#627080' }}>{c.cajeroNombre}</span></td>
+                    <td className="whitespace-nowrap" title={`Abierta desde ${fechaHora(c.abierto_en)}`}>
+                      <p className="text-xs font-medium" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{hora(c.abierto_en)}</p>
+                      <p className="text-xs" style={{ color: '#627080' }}>{tiempoAbierta(c.abierto_en)}</p>
+                    </td>
+                    <td><span className="text-sm font-semibold" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{pesos(c.fondo_inicial_centavos)}</span></td>
+                    <td className="hidden lg:table-cell"><span className="text-sm" style={{ color: c.entradas ? '#C2410C' : '#627080', fontVariantNumeric: 'tabular-nums' }}>{conSigno(c.entradas, '+')}</span></td>
+                    <td className="hidden lg:table-cell"><span className="text-sm" style={{ color: c.retiros ? '#8A4A42' : '#627080', fontVariantNumeric: 'tabular-nums' }}>{conSigno(c.retiros, '−')}</span></td>
+                    <td>
+                      <button onClick={() => setDetalle(c)} className="action-btn" title="Ver turno" aria-label={`Ver turno de ${c.cajaNombre}, ${c.sucursal}`}>
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {modelo.abiertas.length === 0 && abiertas.datos !== undefined && (
-            <EmptyState icon={Monitor} title="Ninguna caja abierta" subtitle="Cuando una caja abra turno aparecerá aquí al momento." className="col-span-full" />
+            <EmptyState icon={Monitor} title="Ninguna caja abierta" subtitle="Cuando una caja abra turno aparecerá aquí al momento." />
           )}
         </div>
       )}
@@ -311,20 +327,30 @@ export default function Cajas() {
       {modelo.cortes.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           <div className="card p-5 lg:col-span-3">
-            <TituloTarjeta icon={TrendingUp} titulo="Diferencia por corte">últimos {grafica.length}</TituloTarjeta>
-            <Grafica titulo="Diferencia por corte" datos={grafica} etiqueta="etiqueta" valor="diferencia">
-            <ResponsiveContainer width="100%" height={148}>
-              <BarChart data={grafica} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="#FDE8D0" />
-                <XAxis dataKey="etiqueta" tick={false} axisLine={false} tickLine={false} height={4} />
-                <ReferenceLine y={0} stroke="#D4DDE6" />
-                <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmtDec} />} />
-                <Bar dataKey="diferencia" radius={[4, 4, 4, 4]} minPointSize={3}>
-                  {grafica.map(g => <Cell key={g.id} fill={g.diferencia < 0 ? '#8A4A42' : g.diferencia > 0 ? '#92400E' : '#047857'} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            </Grafica>
+            <TituloTarjeta icon={Users} titulo="Diferencia por cajero">{plural(modelo.cortes.length, 'corte')} del periodo</TituloTarjeta>
+            <ul className="lista-cajeros">
+              {porCajero.slice(0, 6).map(x => {
+                const detalle = [
+                  plural(x.cortes, 'corte'),
+                  x.faltantes > 0 && `${x.faltantes} con faltante`,
+                  x.sobrantes > 0 && `${x.sobrantes} con sobrante`,
+                ].filter(Boolean).join(' · ')
+                return (
+                  <li key={x.nombre}>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold truncate" style={{ color: '#263442' }}>{x.nombre}</span>
+                      <span className="block text-xs" style={{ color: '#627080' }}>{detalle}</span>
+                    </span>
+                    <span className="text-sm font-semibold flex-shrink-0" style={{ color: diferenciaDe(x.neta).tono, fontVariantNumeric: 'tabular-nums' }}>
+                      {x.neta === 0 ? 'Cuadra' : `${x.neta < 0 ? '−' : '+'}${pesos(Math.abs(x.neta))}`}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+            {porCajero.length > 6 && (
+              <p className="text-xs mt-2" style={{ color: '#627080' }}>Y {plural(porCajero.length - 6, 'cajero')} más; búscalos en la tabla de cortes.</p>
+            )}
           </div>
 
           <div className="card p-5 flex flex-col lg:col-span-2">
@@ -336,7 +362,7 @@ export default function Cajas() {
                 { label: 'Con sobrante',   count: stats.sobrantes, color: '#92400E' },
               ].map(s => {
                 const pct = Math.round(s.count / modelo.cortes.length * 100)
-                return <FilaDesglose key={s.label} cuenta={s.count} etiqueta={s.label} derecha={`${pct}%`} pct={pct} color={s.color} />
+                return <FilaDesglose key={s.label} etiqueta={s.label} cuenta={plural(s.count, 'corte')} derecha={`${pct}%`} pct={pct} color={s.color} />
               })}
             </div>
           </div>
@@ -359,14 +385,34 @@ export default function Cajas() {
               El periodo tiene {totalCortes} cortes; se muestran los {MAX_CORTES} más recientes. Acorta el rango para verlos todos.
             </p>
           )}
-          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de cortes de caja">
+          {/* Móvil: un renglón por corte, igual que las cajas abiertas */}
+          <ul className="sm:hidden lista-movil">
+            {paginados.map(c => {
+              const dif = diferenciaDe(c.diferencia_centavos)
+              return (
+                <li key={c.id}>
+                  <button type="button" onClick={() => setDetalle(c)} className="lista-movil-fila" aria-label={`Ver corte de ${c.cajaNombre}, ${c.sucursal}`}
+                    style={c.diferencia_centavos < 0 ? { background: 'rgba(201,122,109,.04)' } : undefined}>
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{c.cajaNombre} · {c.sucursal}</span>
+                      <Estado label={dif.label} color={dif.color} normal={c.diferencia_centavos === 0} />
+                    </span>
+                    <span className="flex items-center justify-between gap-3 mt-1">
+                      <span className="text-xs truncate" style={{ color: '#627080' }}>{c.cajeroNombre} · {horario(c.abierto_en, c.cerrado_en)}, {diaCorto(c.cerrado_en)}</span>
+                      <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} aria-hidden="true" />
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <div className="hidden sm:block overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de cortes de caja">
             <table className="table-modern">
               <thead>
                 <tr>
                   <th>Caja</th>
                   <th className="hidden lg:table-cell">Cajero</th>
-                  <th className="hidden md:table-cell">Apertura</th>
-                  <th>Cierre</th>
+                  <th>Turno</th>
                   <th className="hidden md:table-cell">Esperado</th>
                   <th className="hidden md:table-cell">Contado</th>
                   <th>Diferencia</th>
@@ -383,14 +429,13 @@ export default function Cajas() {
                         <p className="text-xs" style={{ color: '#627080' }}>{c.sucursal}</p>
                       </td>
                       <td className="hidden lg:table-cell"><span className="text-sm" style={{ color: '#627080' }}>{c.cajeroNombre}</span></td>
-                      <td className="hidden md:table-cell"><span className="text-xs" style={{ color: '#627080' }}>{diaCorto(c.abierto_en)} {hora(c.abierto_en)}</span></td>
                       <td className="whitespace-nowrap">
-                        <p className="text-xs font-medium" style={{ color: '#263442' }}>{hora(c.cerrado_en)}</p>
+                        <p className="text-xs font-medium" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{horario(c.abierto_en, c.cerrado_en)}</p>
                         <p className="text-xs" style={{ color: '#627080' }}>{fecha(c.cerrado_en)}</p>
                       </td>
                       <td className="hidden md:table-cell"><span className="text-sm" style={{ color: '#627080' }}>{pesos(c.efectivo_esperado_centavos)}</span></td>
                       <td className="hidden md:table-cell"><span className="text-sm font-semibold" style={{ color: '#263442' }}>{pesos(c.efectivo_contado_centavos)}</span></td>
-                      <td><Badge label={dif.label} color={dif.color} /></td>
+                      <td><Estado label={dif.label} color={dif.color} normal={c.diferencia_centavos === 0} /></td>
                       <td>
                         <button onClick={() => setDetalle(c)} className="action-btn" title="Ver corte" aria-label={`Ver corte de ${c.cajaNombre}`}>
                           <Eye className="w-4 h-4" />
@@ -403,7 +448,7 @@ export default function Cajas() {
             </table>
           </div>
           {modelo.cortes.length === 0 && cortes.datos !== undefined && (
-            <EmptyState icon={Search} title="Sin cortes en este periodo" subtitle="Prueba con un rango de fechas más amplio." />
+            <EmptyState icon={Scissors} title="Sin cortes en este periodo" subtitle="Prueba con un rango de fechas más amplio." />
           )}
           <Pagination total={modelo.cortes.length} page={page} perPage={PER_PAGE} onChange={setPage} />
         </div>

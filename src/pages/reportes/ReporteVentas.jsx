@@ -7,8 +7,9 @@ import AvisoError from '../../components/AvisoError'
 import { downloadCSV } from '../../utils/csv'
 import { useConsulta } from '../../hooks/useConsulta'
 import { listarVentasResumen } from '../../api/ventas'
-import { resumenVentas, ventasPorDia, ventasPorSucursal } from '../../lib/calculos'
-import { pesos, diaCorto, fmtDec, mesLargo, diaLocal, inicioDelDia, sumarDias } from '../../utils/fmt'
+import { Banknote, ShoppingCart, Wallet, XCircle } from 'lucide-react'
+import { resumenVentas, ventasPorDia, ventasPorSucursal, esCompletada } from '../../lib/calculos'
+import { pesos, diaCorto, fmtDec, mesLargo, diaLocal, inicioDelDia, sumarDias, plural } from '../../utils/fmt'
 import { COLORS, tooltipStyle, ejeMiles, tick, totalRow, celdaTotal } from './constantes'
 import { Kpis, Parcial, SinDatos } from './piezas'
 import Grafica from '../../components/Grafica'
@@ -38,7 +39,11 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
     const porSucursal = [...ventasPorSucursal(filas).values()]
       .map(s => ({ ...s, nombre: nombreCorto(s.sucursal_id) }))
       .sort((a, b) => b.centavos - a.centavos)
-    return { resumen: resumenVentas(filas), porSucursal, dias: ventasPorDia(filas, filtro.primerDia, filtro.ultimoDia) }
+    const dias = ventasPorDia(filas, filtro.primerDia, filtro.ultimoDia)
+    // Para las notas de los indicadores: el mejor día y el ticket más alto
+    const mejorDia = dias.reduce((m, d) => (d.centavos > (m?.centavos ?? 0) ? d : m), null)
+    const maximo = filas.filter(esCompletada).reduce((m, v) => Math.max(m, v.total_centavos), 0)
+    return { resumen: resumenVentas(filas), porSucursal, dias, mejorDia, maximo }
   }, [ventas, nombreCorto, filtro.primerDia, filtro.ultimoDia])
 
   if (q.cargando) return <SkeletonReport />
@@ -54,10 +59,10 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
       <AvisoError error={q.error} onReintentar={q.recargar} className="mb-6" />
       <Parcial consulta={q.datos} />
       <Kpis items={[
-        { label: 'Ventas del periodo', value: pesos(resumen.vendido),        nota: 'solo completadas' },
-        { label: 'Tickets',            value: resumen.completadas,           nota: 'ventas completadas' },
-        { label: 'Ticket promedio',    value: pesos(resumen.ticketPromedio), nota: 'por venta' },
-        { label: 'Canceladas',         value: resumen.canceladas,            nota: resumen.canceladas ? pesos(resumen.cancelado) : 'sin cancelaciones', mal: resumen.canceladas > 0 },
+        { icon: Banknote,     label: 'Ventas del periodo', value: pesos(resumen.vendido), nota: r.mejorDia && r.dias.length > 1 ? `el mejor día, ${r.mejorDia.etiqueta}` : 'sin contar canceladas' },
+        { icon: ShoppingCart, label: 'Tickets',            value: resumen.completadas,    nota: resumen.completadas ? `en ${plural(porSucursal.filter(s => s.tickets).length, 'sucursal', 'sucursales')}` : 'ninguno en el periodo' },
+        { icon: Wallet,       label: 'Ticket promedio',    value: pesos(resumen.ticketPromedio), nota: r.maximo ? `el más alto, ${pesos(r.maximo)}` : 'sin ventas' },
+        { icon: XCircle,      label: 'Canceladas',        value: resumen.canceladas,            nota: resumen.canceladas ? pesos(resumen.cancelado) : 'sin cancelaciones', mal: resumen.canceladas > 0 },
       ]} />
       <ChartCard title={`Ventas por ${groupBy.toLowerCase()}`} subtitle={`Total: ${pesos(resumen.vendido)}`}>
         {serie.every(s => !s.total) ? <SinDatos>Sin ventas en este periodo</SinDatos> : (
@@ -85,21 +90,21 @@ export default function ReporteVentas({ filtro, groupBy, nombreCorto }) {
               {porSucursal.map(s => (
                 <tr key={s.sucursal_id}>
                   <td className="font-semibold" style={{ color: '#263442' }}>{s.nombre}</td>
-                  <td className="font-bold" style={{ color: '#047857' }}>{pesos(s.centavos)}</td>
+                  <td className="font-bold" style={{ color: '#263442' }}>{pesos(s.centavos)}</td>
                   <td style={{ color: '#263442' }}>{s.tickets}</td>
                   <td style={{ color: '#263442' }}>{pesos(s.tickets ? s.centavos / s.tickets : 0)}</td>
                   <td className="font-medium" style={{ color: s.canceladas ? '#8A4A42' : '#627080' }}>{s.canceladas}</td>
-                  <td className="font-bold" style={{ color: '#C2410C' }}>{resumen.vendido ? Math.round(s.centavos / resumen.vendido * 100) : 0}%</td>
+                  <td style={{ color: '#263442' }}>{resumen.vendido ? Math.round(s.centavos / resumen.vendido * 100) : 0}%</td>
                 </tr>
               ))}
             </tbody>
             {porSucursal.length > 0 && <tfoot>
               <tr style={totalRow}>
                 <td className={celdaTotal} style={{ color: '#263442' }}>Total</td>
-                <td className={celdaTotal} style={{ color: '#047857' }}>{pesos(resumen.vendido)}</td>
+                <td className={celdaTotal} style={{ color: '#263442' }}>{pesos(resumen.vendido)}</td>
                 <td className={celdaTotal} style={{ color: '#263442' }}>{resumen.completadas}</td>
                 <td className={celdaTotal} style={{ color: '#263442' }}>{pesos(resumen.ticketPromedio)}</td>
-                <td className={celdaTotal} style={{ color: '#8A4A42' }}>{resumen.canceladas}</td>
+                <td className={celdaTotal} style={{ color: resumen.canceladas ? '#8A4A42' : '#263442' }}>{resumen.canceladas}</td>
                 <td />
               </tr>
             </tfoot>}

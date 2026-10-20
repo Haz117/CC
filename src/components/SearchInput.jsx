@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
 
-export default function SearchInput({ value, onChange, placeholder = 'Buscar...', resultCount, className = '' }) {
+export default function SearchInput({ value, onChange, placeholder = 'Buscar…', resultCount, className = '' }) {
   const inputRef = useRef(null)
 
   useEffect(() => {

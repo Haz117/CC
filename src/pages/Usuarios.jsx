@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Users, UserCheck, Search, Eye, Mail, Building2, TrendingUp, Link2, Unlink, UserX, ChevronRight } from 'lucide-react'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { Users, UserCheck, Search, Eye, Mail, Building2, Link2, Unlink, UserX, ChevronRight } from 'lucide-react'
 import { SkeletonTableRows } from '../components/Skeleton'
 import Badge from '../components/Badge'
+import Estado from '../components/Estado'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
 import Segmentado from '../components/Segmentado'
@@ -14,7 +14,6 @@ import Modal from '../components/Modal'
 import ModalFooter from '../components/ModalFooter'
 import EmptyState from '../components/EmptyState'
 import FormField from '../components/FormField'
-import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
 import SelectorSucursal from '../components/SelectorSucursal'
 import toast from '../utils/toast'
@@ -25,9 +24,8 @@ import { useConsulta } from '../hooks/useConsulta'
 import { useSucursales } from '../hooks/useSucursales'
 import { ROLES, etiquetaRol } from '../lib/navegacion'
 import { listarUsuarios, vincularUsuario } from '../api/organizacion'
-import { iniciales } from '../utils/fmt'
+import { iniciales, plural } from '../utils/fmt'
 import { esCorreo } from '../utils/validar'
-import Grafica from '../components/Grafica'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PER_PAGE = 8
@@ -37,6 +35,11 @@ const avatarBg = {
   ADMINISTRADOR: { bg: 'rgba(124,58,237,.12)', color: '#7c3aed' },
   SUPERVISOR:    { bg: '#FFF7ED',              color: '#C2410C' },
   CAJERO:        { bg: 'rgba(5,150,105,.1)',   color: '#047857' },
+}
+const PLURAL_ROL = {
+  ADMINISTRADOR: ['administrador', 'administradores'],
+  SUPERVISOR:    ['supervisor', 'supervisores'],
+  CAJERO:        ['cajero', 'cajeros'],
 }
 const avatarDe = (u) => (u.activo ? avatarBg[u.rol] ?? avatarBg.CAJERO : { bg: 'rgba(201,122,109,.12)', color: '#8A4A42' })
 
@@ -70,7 +73,7 @@ function VincularCuenta({ usuario, onClose, onListo }) {
             <>Escribe aquí ese mismo correo para ligar la cuenta con {usuario.nombre.split(' ')[0]}.</>,
           ].map((paso, i) => (
             <li key={i} className="flex items-start gap-3">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0" style={{ background: '#FFF7ED', color: '#C2410C' }}>{i + 1}</span>
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0" style={{ background: '#FFF7ED', color: '#C2410C' }}>{i + 1}</span>
               <p className="text-sm" style={{ color: '#627080' }}>{paso}</p>
             </li>
           ))}
@@ -87,7 +90,7 @@ function VincularCuenta({ usuario, onClose, onListo }) {
           />
         </FormField>
       </div>
-      <ModalFooter onCancel={onClose} onConfirm={vincular} disabled={guardando} confirmLabel={guardando ? 'Vinculando...' : 'Vincular cuenta'} />
+      <ModalFooter onCancel={onClose} onConfirm={vincular} disabled={guardando} confirmLabel={guardando ? 'Vinculando…' : 'Vincular cuenta'} />
     </Modal>
   )
 }
@@ -127,12 +130,19 @@ export default function Usuarios() {
     const activos = data.filter(u => u.activo)
     const vinculados = activos.filter(u => u.vinculado).length
     const porRol = Object.fromEntries(ROLES.map(r => [r, data.filter(u => u.rol === r).length]))
+    // Activos por sucursal, con cuántos hay de cada rol
     const porSucursal = new Map()
-    for (const u of activos) porSucursal.set(u.sucursal_id, (porSucursal.get(u.sucursal_id) ?? 0) + 1)
+    for (const u of activos) {
+      const s = porSucursal.get(u.sucursal_id) ?? { id: u.sucursal_id, total: 0, roles: {} }
+      s.total++
+      s.roles[u.rol] = (s.roles[u.rol] ?? 0) + 1
+      porSucursal.set(u.sucursal_id, s)
+    }
     return {
       activos: activos.length, inactivos: data.length - activos.length,
       vinculados, sinVincular: activos.length - vinculados, porRol,
-      porSucursal: [...porSucursal.entries()].sort((a, b) => b[1] - a[1]),
+      conCuenta: activos.filter(u => u.vinculado),
+      porSucursal: [...porSucursal.values()].sort((a, b) => b.total - a.total),
     }
   }, [data])
 
@@ -140,7 +150,8 @@ export default function Usuarios() {
   useEscapeKey(() => { setSelectedUser(null); setPorVincular(null) })
 
   const abrirVincular = (u) => { setSelectedUser(null); setPorVincular(u) }
-  const maxRol = Math.max(1, ...Object.values(stats.porRol))
+  const maxSucursal = Math.max(1, ...stats.porSucursal.map(s => s.total))
+  const rolesDe = (s) => ROLES.filter(r => s.roles[r]).map(r => plural(s.roles[r], ...(PLURAL_ROL[r] ?? [etiquetaRol(r).toLowerCase()]))).join(' · ')
 
   // Mientras llega la primera respuesta, o si falló, no hay cifras que mostrar: un cero se leería como dato real.
   const sinDatos = datos === undefined
@@ -152,9 +163,9 @@ export default function Usuarios() {
       <PageHeader breadcrumb="Usuarios" title="Usuarios" />
 
       <KpiBar estado={estadoKpi} items={[
-        { icon: Users, label: 'Total usuarios', value: data.length,       sub: 'todas las sucursales' },
-        { icon: UserCheck, label: 'Activos', value: stats.activos,     good: true,                 sub: 'pueden operar' },
-        { icon: Link2, label: 'Con acceso web', value: stats.vinculados,                              sub: 'cuenta vinculada' },
+        { icon: Users, label: 'Total usuarios', value: data.length,       sub: `en ${plural(new Set(data.map(u => u.sucursal_id)).size, 'sucursal', 'sucursales')}` },
+        { icon: UserCheck, label: 'Activos', value: stats.activos,                                 sub: 'pueden operar' },
+        { icon: Link2, label: 'Con acceso web', value: stats.vinculados,                              sub: `de ${stats.activos} activos` },
         { icon: Unlink, label: 'Sin vincular', value: stats.sinVincular,                             sub: 'solo entran en la caja' },
         { icon: UserX, label: 'Inactivos', value: stats.inactivos,   alert: stats.inactivos > 0, sub: 'dados de baja' },
       ]} />
@@ -163,43 +174,39 @@ export default function Usuarios() {
 
       {/* ══ Resumen visual ════════════════════════════════════════ */}
       {!sinDatos && <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <div className="card p-5 lg:col-span-3">
-          <TituloTarjeta icon={TrendingUp} titulo="Distribución por rol" />
-          <Grafica titulo="Usuarios por rol" datos={ROLES.map(r => ({ n: etiquetaRol(r), v: stats.porRol[r] }))} etiqueta="n" valor="v" unidad="cantidad">
-          <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={ROLES.map(r => ({ rol: r, name: etiquetaRol(r), count: stats.porRol[r] }))} maxBarSize={40} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={v => `${v} usuario${v !== 1 ? 's' : ''}`} />} />
-              <Bar dataKey="count" radius={[5, 5, 0, 0]}>
-                {ROLES.map(r => {
-                  const ratio = stats.porRol[r] / maxRol
-                  return <Cell key={r} fill={ratio >= 0.8 ? '#047857' : ratio >= 0.4 ? '#C2410C' : '#FDBA74'} />
-                })}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-          </Grafica>
+        {/* Por sucursal y no por rol: los totales por rol ya están en el filtro de la tabla */}
+        <div className="card p-5 flex flex-col gap-3.5 lg:col-span-3">
+          <TituloTarjeta icon={Building2} titulo="Activos por sucursal" className="mb-0.5">{plural(stats.activos, 'usuario')}</TituloTarjeta>
+          {stats.porSucursal.map(s => (
+            <FilaDesglose key={s.id ?? 'sin'} etiqueta={nombreCorto(s.id)} cuenta={rolesDe(s)} derecha={s.total} pct={Math.round(s.total / maxSucursal * 100)} color="#C2410C" />
+          ))}
+          {stats.porSucursal.length === 0 && <p className="text-xs" style={{ color: '#627080' }}>No hay usuarios activos.</p>}
         </div>
 
-        <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
-          <TituloTarjeta icon={Link2} titulo="Acceso a la app web" className="mb-1" />
+        <div className="card p-5 flex flex-col gap-3.5 lg:col-span-2">
+          <TituloTarjeta icon={Link2} titulo="Acceso a la app web" className="mb-0.5" />
           {[
             { label: 'Cuenta vinculada', count: stats.vinculados,  color: '#047857' },
-            { label: 'Sin vincular',     count: stats.sinVincular, color: '#627080', fondo: '#F2F3F5' },
+            { label: 'Sin vincular',     count: stats.sinVincular, color: '#8FA1B2' },
           ].map(s => {
             const pct = stats.activos ? Math.round(s.count / stats.activos * 100) : 0
-            return <FilaDesglose key={s.label} cuenta={s.count} etiqueta={s.label} derecha={`${pct}%`} pct={pct} color={s.color} fondo={s.fondo} />
+            return <FilaDesglose key={s.label} etiqueta={s.label} cuenta={plural(s.count, 'usuario')} derecha={`${pct}%`} pct={pct} color={s.color} />
           })}
-          <div className="mt-2 rounded-xl p-3" style={{ background: '#FFF7ED' }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: '#627080' }}>Usuarios activos por sucursal</p>
-            {stats.porSucursal.map(([id, n]) => (
-              <div key={id ?? 'sin'} className="flex justify-between items-center py-0.5">
-                <span className="text-xs" style={{ color: '#627080' }}>{nombreCorto(id)}</span>
-                <span className="text-xs font-bold" style={{ color: '#C2410C' }}>{n}</span>
-              </div>
-            ))}
-          </div>
+          {/* Quién tiene cuenta para entrar a la web: lo que un administrador revisa de vez en cuando */}
+          {stats.conCuenta.length > 0 && (
+            <div className="mt-1 pt-3" style={{ borderTop: '1px solid #FDE8D0' }}>
+              <p className="text-xs font-semibold mb-1.5" style={{ color: '#627080' }}>Con cuenta vinculada</p>
+              <ul className="lista-cajeros">
+                {stats.conCuenta.slice(0, 5).map(u => (
+                  <li key={u.id} style={{ padding: '6px 0' }}>
+                    <span className="text-[0.8125rem] font-medium truncate" style={{ color: '#263442' }}>{u.nombre}</span>
+                    <span className="text-xs flex-shrink-0" style={{ color: '#627080' }}>{etiquetaRol(u.rol)} · {u.sucursal}</span>
+                  </li>
+                ))}
+              </ul>
+              {stats.conCuenta.length > 5 && <p className="text-xs mt-1" style={{ color: '#627080' }}>Y {stats.conCuenta.length - 5} más en la tabla.</p>}
+            </div>
+          )}
         </div>
       </div>}
 
@@ -247,9 +254,8 @@ export default function Usuarios() {
                     </span>
                     <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} />
                   </span>
-                  <span className="flex items-center gap-2 flex-wrap mt-2.5">
-                    <Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} />
-                    <Badge label={u.vinculado ? 'Vinculada' : 'Sin vincular'} color={u.vinculado ? 'green' : 'gray'} />
+                  <span className="flex items-center gap-2 flex-wrap mt-2 pl-12">
+                    <span className="text-xs" style={{ color: '#627080' }}>{etiquetaRol(u.rol)} · {u.vinculado ? 'con cuenta web' : 'sin cuenta web'}</span>
                     {!u.activo && <Badge label="Inactivo" color="red" />}
                   </span>
                 </button>
@@ -286,12 +292,14 @@ export default function Usuarios() {
                         </div>
                       </div>
                     </td>
-                    <td><Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} /></td>
+                    <td><span className="text-sm" style={{ color: '#263442' }}>{etiquetaRol(u.rol)}</span></td>
                     <td className="hidden md:table-cell"><span className="text-sm" style={{ color: '#627080' }}>{u.sucursal}</span></td>
                     <td>
-                      <Badge label={u.vinculado ? 'Vinculada' : 'Sin vincular'} color={u.vinculado ? 'green' : 'gray'} />
+                      {u.vinculado
+                        ? <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: '#263442' }}><Link2 className="w-3.5 h-3.5" style={{ color: '#047857' }} aria-hidden="true" />Vinculada</span>
+                        : <span className="text-sm" style={{ color: '#627080' }}>Sin vincular</span>}
                     </td>
-                    <td className="hidden lg:table-cell"><Badge label={u.activo ? 'Activo' : 'Inactivo'} color={u.activo ? 'green' : 'red'} /></td>
+                    <td className="hidden lg:table-cell"><Estado label={u.activo ? 'Activo' : 'Inactivo'} color="red" normal={u.activo} /></td>
                     <td>
                       <div className="flex items-center justify-end gap-1">
                         <button className="action-btn" title="Ver" aria-label={`Ver a ${u.nombre}`} onClick={() => setSelectedUser(u)}><Eye className="w-4 h-4" /></button>
@@ -308,7 +316,14 @@ export default function Usuarios() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && !sinDatos && (
+        {/* Sin usuarios en la base: no hay filtro que limpiar */}
+        {sinDatos && !cargando && (
+          <EmptyState icon={Users} title="No se pudieron cargar los usuarios" subtitle="Revisa el aviso de arriba y vuelve a intentar." />
+        )}
+        {data.length === 0 && !sinDatos && (
+          <EmptyState icon={Users} title="Todavía no hay usuarios" subtitle="Las altas se hacen en la caja del almacén; aparecen aquí al sincronizarse." />
+        )}
+        {data.length > 0 && filtered.length === 0 && (
           <EmptyState icon={Search} title="Sin resultados" subtitle="No hay usuarios con ese criterio de búsqueda.">
             <button onClick={() => { setSearch(''); setFilterRol('Todos'); setSucursalId('') }} className="btn-soft-blue mt-3 px-4 py-2 text-xs font-semibold rounded-xl">
               Limpiar filtros
@@ -333,7 +348,7 @@ export default function Usuarios() {
                 <p className="text-lg font-bold leading-tight" style={{ color: '#263442' }}>{u.nombre}</p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge label={etiquetaRol(u.rol)} color={roleColor[u.rol] ?? 'gray'} />
-                  <Badge label={u.activo ? 'Activo' : 'Inactivo'} color={u.activo ? 'green' : 'red'} />
+                  {!u.activo && <Badge label="Inactivo" color="red" />}
                 </div>
               </div>
             </div>

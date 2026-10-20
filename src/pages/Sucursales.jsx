@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Building2, MapPin, Monitor, TrendingUp, LayoutGrid, LayoutList, Search, Target, Warehouse, HandCoins, Store, Users } from 'lucide-react'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { Building2, MapPin, Monitor, Banknote, LayoutGrid, LayoutList, Search, Target, Warehouse, HandCoins, Store, Users } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { SkeletonCardGrid } from '../components/Skeleton'
 import Badge from '../components/Badge'
+import Estado from '../components/Estado'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
 import Segmentado from '../components/Segmentado'
 import TituloTarjeta from '../components/TituloTarjeta'
+import FilaDesglose from '../components/FilaDesglose'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
 import EmptyState from '../components/EmptyState'
@@ -19,7 +21,7 @@ import { listarVentasResumen } from '../api/ventas'
 import { listarTurnosAbiertos } from '../api/cajas'
 import { listarMetas, listarSaldosCredito, listarUsuariosSlim } from '../api/organizacion'
 import { ventasPorSucursal } from '../lib/calculos'
-import { pesos, pesosCorto, inicioDelMes, mesLargo } from '../utils/fmt'
+import { pesos, pesosCorto, pesosEje, inicioDelMes, mesLargo } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 
 const PER_PAGE = 8
@@ -124,6 +126,12 @@ export default function Sucursales() {
 
   const mes = mesLargo()
   const paginadas = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  // No tener sucursales (o no poder cargarlas) no es lo mismo que una búsqueda sin resultados
+  const vacio = error || errorSucursales
+    ? { icon: Store, title: 'No se pudieron cargar las sucursales', subtitle: 'Revisa el aviso de arriba y vuelve a intentar.' }
+    : data.length === 0
+      ? { icon: Store, title: 'Todavía no hay sucursales', subtitle: 'Aparecen aquí en cuanto se dan de alta en la caja del almacén y se sincronizan.' }
+      : { icon: Search, title: 'Sin resultados', subtitle: 'Intenta con otro término o limpia los filtros.' }
 
   // Mientras llega la primera respuesta, o si falló, no hay cifras que mostrar: un cero se leería como dato real.
   const estadoKpi = cargando || cargandoSucursales ? 'cargando' : datos === undefined ? 'error' : null
@@ -144,14 +152,17 @@ export default function Sucursales() {
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
         </div>
       </div>
-      <div className="data-toolbar-footer">
-        <div className="toolbar-summary">
-          <span><b>{filtered.length}</b> sucursal{filtered.length !== 1 ? 'es' : ''}</span>
-          <span className="sep">·</span>
-          <span><b>{stats.activas}</b> activas</span>
+      {/* Con error no hay cifras que resumir: "0 sucursales · $0.00" se leería como dato real */}
+      {!estadoKpi && (
+        <div className="data-toolbar-footer">
+          <div className="toolbar-summary">
+            <span><b>{filtered.length}</b> sucursal{filtered.length !== 1 ? 'es' : ''}</span>
+            <span className="sep">·</span>
+            <span><b>{stats.activas}</b> activas</span>
+          </div>
+          <span className="toolbar-summary">Ventas de {mes}: <b>{pesos(stats.vendido)}</b></span>
         </div>
-        <span className="toolbar-summary">Ventas de {mes}: <b>{pesos(stats.vendido)}</b></span>
-      </div>
+      )}
     </div>
   )
 
@@ -163,7 +174,7 @@ export default function Sucursales() {
       <KpiBar estado={estadoKpi} items={[
         { icon: Building2, label: 'Sucursales', value: data.length,             sub: `${stats.activas} activas` },
         { icon: Monitor, label: 'Cajas abiertas', value: stats.cajas,             good: stats.cajas > 0, sub: 'en este momento' },
-        { icon: TrendingUp, label: 'Ventas del mes', value: pesosCorto(stats.vendido), good: true, sub: mes },
+        { icon: Banknote, label: 'Ventas del mes', value: pesosCorto(stats.vendido), sub: mes },
         { icon: Target, label: 'Avance de meta', value: stats.avance == null ? '—' : `${stats.avance}%`, sub: stats.meta ? `meta ${pesosCorto(stats.meta)}` : 'sin meta este mes' },
         { icon: HandCoins, label: 'Crédito almacén', value: pesosCorto(stats.saldo), alert: stats.saldo > 0, sub: 'saldo por pagar' },
       ]} />
@@ -179,18 +190,22 @@ export default function Sucursales() {
       {/* ══ Resumen visual ════════════════════════════════════════ */}
       {tiendas.length > 1 && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-          <div className="card p-5 lg:col-span-3">
-            <TituloTarjeta icon={TrendingUp} titulo="Ventas del mes por sucursal" />
+          <div className="card p-5 flex flex-col lg:col-span-3">
+            <TituloTarjeta icon={Store} titulo="Ventas del mes por sucursal" />
+            {/* La gráfica ocupa el alto que le deje la tarjeta de al lado */}
+            <div style={{ flex: 1, minHeight: 160, position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: 0 }}>
             <Grafica titulo="Ventas del mes por sucursal" datos={tiendas.map(s => ({ n: nombreCorto(s.id), v: s.vendido / 100 }))} etiqueta="n" valor="v">
-            <ResponsiveContainer width="100%" height={148}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={tiendas.map(s => ({ id: s.id, name: nombreCorto(s.id), ventas: s.vendido / 100, meta: s.meta, avance: s.avance, activa: s.activa }))} maxBarSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#FDE8D0" />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickCount={4} tickFormatter={pesosEje} />
                 <Tooltip
                   cursor={{ fill: '#FFF7ED' }}
                   content={({ active, payload, label }) => active && payload?.length ? (
                     <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
-                      <p style={{ fontSize: 10, color: '#627080', fontWeight: 700 }}>{label}</p>
+                      <p style={{ fontSize: 11, color: '#627080', fontWeight: 700 }}>{label}</p>
                       <p style={{ fontSize: 13, color: '#C2410C', fontWeight: 800 }}>{pesos(payload[0].value * 100)}</p>
                       {payload[0].payload.meta && <p style={{ fontSize: 11, color: '#627080' }}>Meta: {pesos(payload[0].payload.meta)} · {payload[0].payload.avance}%</p>}
                     </div>
@@ -202,20 +217,17 @@ export default function Sucursales() {
               </BarChart>
             </ResponsiveContainer>
             </Grafica>
+            </div>
+            </div>
           </div>
 
-          <div className="card p-5 flex flex-col gap-2.5 lg:col-span-2">
+          <div className="card p-5 flex flex-col gap-3.5 lg:col-span-2">
             <TituloTarjeta icon={Target} titulo="Avance de la meta mensual" className="mb-1" />
             {tiendas.filter(s => s.meta).map(s => {
               const r = ritmoDe(s.avance)
               return (
-                <div key={s.id} className="flex items-center gap-2">
-                  <span className="text-[10px] font-semibold w-16 truncate flex-shrink-0" style={{ color: '#627080' }}>{nombreCorto(s.id)}</span>
-                  <div className="flex-1 h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
-                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${Math.min(100, s.avance)}%`, background: r.color }} />
-                  </div>
-                  <span className="text-[10px] font-bold w-9 text-right flex-shrink-0" style={{ color: r.color }}>{s.avance}%</span>
-                </div>
+                <FilaDesglose key={s.id} etiqueta={nombreCorto(s.id)} cuenta={`meta ${pesosCorto(s.meta)}`}
+                  derecha={`${s.avance}%`} tonoDerecha={r.color} pct={Math.min(100, s.avance)} color={r.color} />
               )
             })}
             {tiendas.every(s => !s.meta) && (
@@ -223,7 +235,7 @@ export default function Sucursales() {
             )}
             <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
               <span className="text-xs" style={{ color: '#627080' }}>Total del mes</span>
-              <span className="text-sm font-bold" style={{ color: '#C2410C' }}>{pesos(stats.vendido)}</span>
+              <span className="text-sm font-bold" style={{ color: '#263442' }}>{pesos(stats.vendido)}</span>
             </div>
           </div>
         </div>
@@ -260,12 +272,10 @@ export default function Sucursales() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <Badge label={s.activa ? 'Activa' : 'Inactiva'} color={s.activa ? 'green' : 'red'} />
-                      {!s.es_almacen && puesto > 0 && tiendas.length > 1 && (
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold"
-                          style={puesto === 1 ? { background: 'rgba(217,119,6,.12)', color: '#92400E' } : { background: '#F2F3F5', color: '#627080' }}>
-                          #{puesto}
-                        </div>
+                      {!s.activa && <Badge label="Inactiva" color="red" />}
+                      {/* El lugar en ventas dicho con palabras, no con un "#2" en un cuadrito */}
+                      {!s.es_almacen && s.activa && s.vendido > 0 && puesto > 0 && tiendas.length > 1 && (
+                        <span className="text-[0.6875rem] font-medium" style={{ color: '#627080' }}>{puesto}.º en ventas</span>
                       )}
                     </div>
                   </div>
@@ -274,12 +284,12 @@ export default function Sucursales() {
                     <dl className="datos-fila">
                       <div><dt><Monitor size={13} aria-hidden="true" />Cajas abiertas</dt><dd>{s.cajas}</dd></div>
                       <div><dt><Users size={13} aria-hidden="true" />Usuarios</dt><dd>{s.usuarios}</dd></div>
-                      <div><dt><TrendingUp size={13} aria-hidden="true" />Ventas del mes</dt><dd>{pesosCorto(s.vendido)}</dd></div>
+                      <div><dt><Banknote size={13} aria-hidden="true" />Ventas del mes</dt><dd>{pesosCorto(s.vendido)}</dd></div>
                     </dl>
 
                     {s.meta ? (
                       <div>
-                        <div className="flex justify-between text-[10px] mb-1.5">
+                        <div className="flex justify-between text-xs mb-1.5">
                           <span className="font-medium" style={{ color: '#627080' }}>Meta del mes · {pesosCorto(s.meta)}</span>
                           <span className="font-bold" style={{ color: r.color }}>{s.avance}%</span>
                         </div>
@@ -288,7 +298,7 @@ export default function Sucursales() {
                         </div>
                       </div>
                     ) : !s.es_almacen && (
-                      <p className="text-[10px]" style={{ color: '#627080' }}>Sin meta capturada para {mes}.</p>
+                      <p className="text-xs" style={{ color: '#627080' }}>Sin meta capturada para {mes}.</p>
                     )}
 
                     {s.es_almacen && (
@@ -313,7 +323,7 @@ export default function Sucursales() {
               )
             })}
             {filtered.length === 0 && (
-              <EmptyState icon={Search} title="Sin resultados" subtitle="Intenta con otro término o limpia los filtros." className="col-span-full" />
+              <EmptyState className="col-span-full" {...vacio} />
             )}
           </div>
           {filtered.length > PER_PAGE && (
@@ -371,7 +381,7 @@ export default function Sucursales() {
                         </td>
                         <td className="hidden lg:table-cell"><span className="text-sm font-medium" style={{ color: '#627080' }}>{s.cajas}</span></td>
                         <td className="hidden lg:table-cell"><span className="text-sm font-medium" style={{ color: '#627080' }}>{s.usuarios}</span></td>
-                        <td><span className="text-sm font-semibold" style={{ color: '#047857' }}>{pesos(s.vendido)}</span></td>
+                        <td><span className="text-sm font-semibold" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{pesos(s.vendido)}</span></td>
                         <td className="hidden md:table-cell">
                           {s.meta
                             ? <span className="text-xs font-bold" style={{ color: r.color }}>{s.avance}% <span className="font-normal" style={{ color: '#627080' }}>de {pesosCorto(s.meta)}</span></span>
@@ -382,7 +392,7 @@ export default function Sucursales() {
                             ? <span className="text-sm font-semibold" style={{ color: s.saldo > 0 ? '#92400E' : '#627080' }}>{pesos(s.saldo)}</span>
                             : sinDatos}
                         </td>
-                        <td><Badge label={s.activa ? 'Activa' : 'Inactiva'} color={s.activa ? 'green' : 'gray'} /></td>
+                        <td><Estado label={s.activa ? 'Activa' : 'Inactiva'} color="red" normal={s.activa} /></td>
                       </tr>
                     )
                   })}
@@ -391,7 +401,7 @@ export default function Sucursales() {
             </div>
 
             {filtered.length === 0 && (
-              <EmptyState icon={Search} title="Sin resultados" subtitle="Intenta con otro término o limpia los filtros." />
+              <EmptyState {...vacio} />
             )}
 
             <Pagination total={filtered.length} page={page} perPage={PER_PAGE} onChange={setPage} />

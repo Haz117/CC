@@ -8,7 +8,8 @@ import CambiarContrasena from './CambiarContrasena'
 import { useAuth } from '../auth/contexto'
 import { tituloDe, etiquetaRol } from '../lib/navegacion'
 import { useTituloVisible } from '../lib/tituloEnPantalla'
-import { iniciales } from '../utils/fmt'
+import { iniciales, plural } from '../utils/fmt'
+import { useMenuDesplegable } from '../hooks/useMenuDesplegable'
 
 const ATAJO = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'
 
@@ -38,6 +39,8 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
   const tituloVisible = useTituloVisible()
   const tituloArriba = { opacity: tituloVisible ? 0 : 1, transition: 'opacity .2s' }
   const closeAll  = () => { setNotifOpen(false); setProfileOpen(false) }
+  const menuAvisos = useMenuDesplegable(notifOpen, closeAll)
+  const menuPerfil = useMenuDesplegable(profileOpen, closeAll)
 
   // Las pantallas abiertas escuchan este evento y vuelven a consultar sus datos.
   const handleRefresh = () => {
@@ -92,8 +95,8 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
         >
           Buscar páginas y accesos…
           <span
-            className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
-            style={{ background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDBA74' }}
+            className="ml-auto text-[0.6875rem] font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0"
+            style={{ background: '#fff', color: '#4A5664', border: '1px solid #D4DDE6' }}
           >
             {ATAJO}
           </span>
@@ -116,6 +119,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
         {/* Notifications — conditional color: keep inline */}
         <div className="relative">
           <button
+            ref={menuAvisos.boton}
             onClick={() => { setNotifOpen(!notifOpen); setProfileOpen(false) }}
             aria-expanded={notifOpen}
             aria-haspopup="true"
@@ -133,10 +137,12 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
               e.currentTarget.style.color = hasErrors ? '#8A4A42' : '#627080'
             }}
           >
-            <span className="sr-only">Notificaciones</span>
+            {/* El número del globo va oculto: se leía "Notificaciones2" */}
+            <span className="sr-only">Notificaciones{avisos.length ? `: ${plural(avisos.length, 'aviso')}` : ''}</span>
             <Bell className="w-5 h-5" aria-hidden="true" />
             {avisos.length > 0 && (
               <span
+                aria-hidden="true"
                 className={`absolute top-0.5 right-0.5 min-w-[17px] h-[17px] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 animate-badge-pop`}
                 style={{ background: hasErrors ? '#8A4A42' : '#C2410C' }}
               >
@@ -149,6 +155,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
             <>
               <div className="fixed inset-0 z-40" onClick={closeAll} />
               <div
+                ref={menuAvisos.menu}
                 role="menu"
                 aria-label="Notificaciones"
                 className="absolute right-0 top-12 w-80 max-sm:fixed max-sm:left-3 max-sm:right-3 max-sm:top-16 max-sm:w-auto rounded-2xl overflow-hidden animate-scale-in z-50"
@@ -182,7 +189,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                         <n.Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: ns.icon }} aria-hidden="true" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs leading-snug font-semibold" style={{ color: '#263442' }}>{n.texto}</p>
-                          <p className="text-[10px] mt-1" style={{ color: '#627080' }}>Ver en {tituloDe(n.path)} →</p>
+                          <p className="text-[0.6875rem] mt-1" style={{ color: '#627080' }}>Ver en {tituloDe(n.path)}</p>
                         </div>
                       </button>
                     )
@@ -205,6 +212,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
         {/* Profile */}
         <div className="relative">
           <button
+            ref={menuPerfil.boton}
             onClick={() => { setProfileOpen(!profileOpen); setNotifOpen(false) }}
             aria-expanded={profileOpen}
             aria-haspopup="true"
@@ -212,7 +220,8 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
           >
             <span className="sr-only">Menú de perfil:</span>
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0"
+              aria-hidden="true"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[0.6875rem] font-bold flex-shrink-0"
               style={{ background: '#FFF7ED', color: '#C2410C' }}
             >
               {initials}
@@ -221,7 +230,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
               <p className="text-xs font-bold leading-tight" style={{ color: '#263442' }}>
                 {perfil.nombre?.split(' ')[0]}
               </p>
-              <p className="text-[10px] leading-tight" style={{ color: '#627080' }}>
+              <p className="text-[0.6875rem] leading-tight" style={{ color: '#627080' }}>
                 {rol}
               </p>
             </div>
@@ -235,6 +244,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
             <>
               <div className="fixed inset-0 z-40" onClick={closeAll} />
               <div
+                ref={menuPerfil.menu}
                 role="menu"
                 aria-label="Menú de perfil"
                 className="absolute right-0 top-12 w-56 rounded-2xl overflow-hidden animate-scale-in z-50"
@@ -264,7 +274,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                     { icon: ClipboardList, label: 'Bitácora de acciones', action: () => { closeAll(); navigate('/configuracion?seccion=bitacora') } },
                   ].map(({ icon: Icon, label, action }) => (
                     <button key={label} role="menuitem" onClick={action} className="header-menu-btn">
-                      <Icon className="w-4 h-4" style={{ color: '#FB923C' }} />
+                      <Icon className="w-4 h-4" style={{ color: '#627080' }} aria-hidden="true" />
                       {label}
                     </button>
                   ))}

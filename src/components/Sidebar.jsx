@@ -97,9 +97,8 @@ export default function Sidebar({ open, onClose, globos = {} }) {
         className="fixed inset-0 z-30 lg:hidden"
         style={{
           background: open ? 'rgba(20,10,6,.5)' : 'transparent',
-          backdropFilter: open ? 'blur(2px)' : 'none',
           pointerEvents: open ? 'auto' : 'none',
-          transition: 'background .25s, backdrop-filter .25s',
+          transition: 'background .25s',
         }}
         onClick={onClose}
       />

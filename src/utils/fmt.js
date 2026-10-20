@@ -6,6 +6,11 @@ export const fmtDec = (n) => new Intl.NumberFormat('es-MX', { style: 'currency',
    Se divide entre 100 solo al mostrar. */
 export const pesos      = (centavos) => fmtDec((Number(centavos) || 0) / 100)
 export const pesosCorto = (centavos) => fmt((Number(centavos) || 0) / 100)
+// Eje de las gráficas (en pesos, no centavos): "$850", "$12.5k", "-$1.2k"
+export const pesosEje   = (v) => `${v < 0 ? '-' : ''}$${Math.abs(v) >= 1000 ? `${Math.round(Math.abs(v) / 100) / 10}k` : Math.abs(v)}`
+
+// "1 corte", "3 cortes"; el plural irregular va como tercer argumento.
+export const plural = (n, uno, varios = `${uno}s`) => `${n} ${n === 1 ? uno : varios}`
 
 /* ── Cantidades ──────────────────────────────────────────────
    numeric(14,3) en la unidad base del producto: piezas, o kilos con 3 decimales (0.250 = 250 g). */
@@ -31,7 +36,22 @@ export const diaCorto  = (iso) => {
 }
 export const hora      = (iso) => iso ? fHora.format(new Date(iso)) : '—'
 export const fechaHora = (iso) => iso ? `${fecha(iso)} · ${hora(iso)}` : '—'
+// Horario de un turno: "08:00 – 20:17" si abrió y cerró el mismo día; si no, con los dos días.
+export const horario = (inicio, fin) => {
+  if (!fin) return `desde ${hora(inicio)}`
+  return diaLocal(inicio) === diaLocal(fin)
+    ? `${hora(inicio)} – ${hora(fin)}`
+    : `${diaCorto(inicio)} ${hora(inicio)} – ${diaCorto(fin)} ${hora(fin)}`
+}
 export const mesLargo  = (d = new Date()) => fMes.format(d)
+const fMesNombre = new Intl.DateTimeFormat('es-MX', { month: 'long' })
+export const mesNombre = (d = new Date()) => fMesNombre.format(d)
+// "Lunes 20 de octubre": el día de la semana con mayúscula porque abre el renglón
+const fDiaLargo = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+export const diaLargo  = (d = new Date()) => {
+  const t = fDiaLargo.format(d).replace(',', '')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
 
 // Cuánto hace de un momento (ms), para "Actualizado justo ahora / hace 3 min / a las 13:05".
 export const haceCuanto = (desde, ahora = Date.now()) => {

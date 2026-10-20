@@ -3,8 +3,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  resumenVentas, metodoDeVenta, pagosPorMetodo, ventasPorDia, ventasPorHora, ventasPorSucursal,
-  movimientosDeTurno, signoMovimiento, nivelDe, esBajo, armarInventario, NIVEL,
+  resumenVentas, metodoDeVenta, pagosPorMetodo, pagosEnElTiempo, ventasPorDia, ventasPorHora, ventasPorSucursal,
+  movimientosDeTurno, signoMovimiento, diferenciasPorCajero, nivelDe, esBajo, armarInventario, NIVEL,
 } from '../src/lib/calculos.js'
 
 // Fechas en hora local, como las ve quien usa la app: así las pruebas no dependen de la zona horaria.
@@ -48,6 +48,24 @@ test('pagosPorMetodo: solo ventas completadas, de mayor a menor', () => {
     { metodo: 'TARJETA', centavos: 5000, pagos: 1 },
     { metodo: 'EFECTIVO', centavos: 1500, pagos: 2 },
   ])
+})
+
+test('pagosEnElTiempo: por día con ceros, o por hora si es un solo día', () => {
+  const pago = (metodo, monto_centavos) => ({ metodo, monto_centavos })
+  const ventas = [
+    venta({ fecha: el(8, 9), venta_pagos: [pago('TARJETA', 1000), pago('EFECTIVO', 250)] }),
+    venta({ fecha: el(10, 11), venta_pagos: [pago('EFECTIVO', 500)] }),
+    venta({ fecha: el(10, 12), estado: 'CANCELADA', venta_pagos: [pago('EFECTIVO', 9999)] }),
+  ]
+  const r = pagosEnElTiempo(ventas, '2026-10-08', '2026-10-10')
+  assert.deepEqual(r.metodos, ['EFECTIVO', 'TARJETA'])
+  assert.equal(r.porHora, false)
+  assert.deepEqual(r.filas.map(f => [f.EFECTIVO, f.TARJETA]), [[2.5, 10], [0, 0], [5, 0]])
+
+  const h = pagosEnElTiempo(ventas.filter(v => v.fecha >= el(10, 0)), '2026-10-10', '2026-10-10')
+  assert.equal(h.porHora, true)
+  assert.deepEqual(h.filas.map(f => f.etiqueta), ['11:00'])
+  assert.deepEqual(pagosEnElTiempo([], '2026-10-10', '2026-10-10').filas, [])
 })
 
 test('ventasPorDia: un renglón por día local, con los días sin venta en cero', () => {
@@ -99,6 +117,18 @@ test('movimientosDeTurno: separa entradas de retiros', () => {
   assert.deepEqual(movimientosDeTurno({}), { entradas: 0, retiros: 0 })
   assert.equal(signoMovimiento({ tipo: 'RETIRO' }), -1)
   assert.equal(signoMovimiento({ tipo: 'ENTRADA' }), 1)
+})
+
+test('diferenciasPorCajero: primero quien más faltante acumula', () => {
+  const corte = (nombre, diferencia_centavos) => ({ cajero: { nombre_completo: nombre }, diferencia_centavos })
+  const r = diferenciasPorCajero([
+    corte('Ana', 0), corte('Luis', -1250), corte('Ana', 300), corte('Luis', 200), corte('Rosa', null), corte('Rosa', -50),
+  ])
+  assert.deepEqual(r.map(x => x.nombre), ['Luis', 'Rosa', 'Ana'])
+  assert.deepEqual(r[0], { nombre: 'Luis', cortes: 2, faltantes: 1, sobrantes: 1, neta: -1050 })
+  assert.deepEqual(r[2], { nombre: 'Ana', cortes: 2, faltantes: 0, sobrantes: 1, neta: 300 })
+  assert.equal(r[1].cortes, 2) // un corte sin diferencia registrada cuenta como corte, sin sumar
+  assert.deepEqual(diferenciasPorCajero([]), [])
 })
 
 test('nivelDe: bajo el mínimo es Bajo; a la mitad o menos, Crítico', () => {

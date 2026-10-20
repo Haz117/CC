@@ -1,7 +1,7 @@
 // Pruebas del formato de dinero y cantidades, y de los rangos de fechas que se mandan a la base.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto } from '../src/utils/fmt.js'
+import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto, pesosEje, plural, horario, diaLargo, mesNombre } from '../src/utils/fmt.js'
 
 test('pesos: la base guarda centavos enteros', () => {
   assert.equal(pesos(1250), '$12.50')
@@ -92,4 +92,31 @@ test('rangoPreset: los atajos de los filtros terminan hoy (salvo "ayer")', () =>
   const [hace90, finTrimestre] = rangoPreset('trimestre')
   assert.equal(hace90, diaLocal(sumarDias(new Date(), -89)))
   assert.equal(finTrimestre, hoy)
+})
+
+test('pesosEje: montos cortos para el eje de las gráficas', () => {
+  assert.equal(pesosEje(0), '$0')
+  assert.equal(pesosEje(850), '$850')
+  assert.equal(pesosEje(12500), '$12.5k')
+  assert.equal(pesosEje(-1250), '-$1.3k')
+})
+
+test('plural: singular solo con uno', () => {
+  assert.equal(plural(1, 'corte'), '1 corte')
+  assert.equal(plural(0, 'corte'), '0 cortes')
+  assert.equal(plural(3, 'faltante'), '3 faltantes')
+  assert.equal(plural(2, 'sucursal', 'sucursales'), '2 sucursales')
+})
+
+test('horario: un solo día muestra solo las horas', () => {
+  const el = (dia, h, m = 0) => new Date(2026, 9, dia, h, m).toISOString()
+  assert.equal(horario(el(19, 8), el(19, 20, 17)), '08:00 – 20:17')
+  assert.equal(horario(el(19, 22), el(20, 6, 10)), '19 oct 22:00 – 20 oct 06:10')
+  assert.equal(horario(el(19, 7, 45), null), 'desde 07:45')
+})
+
+test('diaLargo y mesNombre: para el encabezado del panel', () => {
+  assert.equal(diaLargo(new Date(2026, 9, 20)), 'Martes 20 de octubre')
+  assert.equal(diaLargo(new Date(2026, 0, 1)), 'Jueves 1 de enero')
+  assert.equal(mesNombre(new Date(2026, 9, 20)), 'octubre')
 })

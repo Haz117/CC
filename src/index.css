@@ -91,7 +91,7 @@ body {
   background: #fff;
   color: #C2410C;
   font-weight: 700;
-  font-size: 14px;
+  font-size: .875rem;
   font-family: inherit;
   text-decoration: none;
   border-radius: 0 0 10px 0;
@@ -130,7 +130,8 @@ body {
   border:none; cursor:pointer; font-family:inherit;
   transition:background .15s;
 }
-.btn-soft-blue:hover { background:#FDBA74 }
+/* Al pasar el ratón el fondo se oscurece y la letra también, para no bajar de 4.5:1 */
+.btn-soft-blue:hover { background:#FED7AA; color:#9A3412 }
 
 .btn-soft-red {
   color:#8A4A42; background:rgba(201,122,109,.1);
@@ -157,16 +158,11 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
   transition: box-shadow .22s ease, transform .22s ease;
 }
-.card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,.08), 0 12px 32px rgba(0,0,0,.08);
-  transform: translateY(-2px);
-}
+/* Las tarjetas no se levantan ni brillan al pasar el ratón: solo las que se pueden tocar cambian, y apenas */
+.card:hover { box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06) }
 
 .card-glow { transition: box-shadow .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1) }
-.card-glow:hover {
-  box-shadow: 0 8px 24px rgba(249,115,22,.18), 0 16px 40px rgba(249,115,22,.1);
-  transform: translateY(-4px);
-}
+button.card-glow:hover { box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 6px 20px rgba(0,0,0,.08) }
 
 /* ═══════════════════════════════════════════════════════
    SKELETON
@@ -235,15 +231,12 @@ body {
   color:#fff;
   background:#C2410C;
   border-radius:11px; border:none; cursor:pointer;
-  box-shadow: 0 4px 16px rgba(249,115,22,.32), 0 1px 4px rgba(249,115,22,.16);
-  transition: all .2s ease;
+  /* Sin halo naranja ni salto al pasar el ratón: el botón solo se oscurece */
+  box-shadow: 0 1px 2px rgba(67,20,7,.12);
+  transition: background .15s ease;
   font-family: inherit;
 }
-.btn-primary:hover {
-  background:#9A3412;
-  box-shadow: 0 4px 14px rgba(249,115,22,.4), 0 2px 6px rgba(249,115,22,.18);
-  transform: translateY(-1px);
-}
+.btn-primary:hover { background:#9A3412 }
 .btn-primary:active  { transform:translateY(0) }
 .btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none }
 
@@ -252,14 +245,9 @@ body {
   padding:10px 18px; font-size:.875rem; font-weight:700;
   color:#C2410C; background:#fff;
   border:1.5px solid #D4DDE6; border-radius:11px; cursor:pointer;
-  box-shadow: 0 2px 8px rgba(194,65,12,.07);
-  transition: all .2s ease; font-family:inherit;
+  transition: background .15s ease, border-color .15s ease; font-family:inherit;
 }
-.btn-secondary:hover {
-  background:#FFF7ED; border-color:#FED7AA; color:#C2410C;
-  box-shadow:0 4px 14px rgba(249,115,22,.14);
-  transform: translateY(-1px);
-}
+.btn-secondary:hover { background:#FFF7ED; border-color:#FED7AA; color:#C2410C }
 
 .btn-ghost {
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
@@ -313,8 +301,8 @@ body {
 ═══════════════════════════════════════════════════════ */
 .modal-overlay {
   position:fixed; inset:0; z-index:50;
-  background:rgba(10,24,48,.5);
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  /* Fondo oscurecido sin desenfoque, como las ventanas del sistema */
+  background:rgba(15,23,42,.45);
   display:flex; align-items:center; justify-content:center;
   padding:1rem; animation:fadeIn .18s ease-out both;
 }
@@ -444,6 +432,10 @@ body {
 /* ═══════════════════════════════════════════════════════
    TABLE MODERN
 ═══════════════════════════════════════════════════════ */
+/* Una tabla sin renglones no se dibuja: solo queda el aviso de abajo (antes salían los encabezados solos) */
+.table-modern:has(> tbody:empty) { display: none }
+.btn-secondary:disabled { opacity: .5; cursor: not-allowed }
+
 .table-modern {
   width: 100%; border-collapse: separate; border-spacing: 0;
 }
@@ -578,8 +570,8 @@ body {
 .acceso-marca-centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; }
 .acceso-marca-logo { margin-bottom: 6px; border-radius: 22%; box-shadow: 0 12px 34px rgba(67,20,7,.3); }
 .acceso-marca-nombre { font-weight: 700; font-size: 1.75rem; letter-spacing: -.01em; line-height: 1.1; }
-.acceso-marca-rol { font-size: 15px; color: #fff; max-width: 22em; line-height: 1.45; }
-.acceso-marca-pie { font-size: 12px; color: #fff; }
+.acceso-marca-rol { font-size: 0.9375rem; color: #fff; max-width: 22em; line-height: 1.45; }
+.acceso-marca-pie { font-size: 0.75rem; color: #fff; }
 
 /* ── Columna del formulario (derecha) ── */
 .acceso-form { flex: 1 1 54%; display: flex; flex-direction: column; min-width: 0; }
@@ -589,7 +581,7 @@ body {
 }
 .acceso-barra-movil { display: none; height: 4px; flex-shrink: 0; background: linear-gradient(to right,#C2410C,#C2410C,#FB923C); }
 .acceso-logo-movil { display: none; align-items: center; gap: 14px; margin-bottom: 44px; }
-.acceso-pie-movil { text-align: center; font-size: 11px; color: #627080; padding: 0 0 28px; }
+.acceso-pie-movil { text-align: center; font-size: 0.6875rem; color: #627080; padding: 0 0 28px; }
 
 /* En móvil y tablet angosta: se oculta el panel de marca, queda solo el formulario */
 @media (max-width: 900px) {
@@ -701,26 +693,15 @@ body {
   .xl\:pl-72 { padding-left: 0 !important; }
   .card { box-shadow: none !important; border: 1px solid #D4DDE6 !important; break-inside: avoid; }
   .data-toolbar { background: #fff !important; }
+  .solo-impresion { display: block !important; }
   * { animation: none !important; transition: none !important; }
 }
+.solo-impresion { display: none }
 
 /* ═══════════════════════════════════════════════════════
    ROUND F — PREMIUM UX/UI
 ═══════════════════════════════════════════════════════ */
 
-/* ── Table row stagger entry ── */
-@keyframes rowEntry { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
-.table-modern.animate-rows tbody tr { animation: rowEntry .28s cubic-bezier(.16,1,.3,1) both }
-.table-modern.animate-rows tbody tr:nth-child(1)  { animation-delay:  20ms }
-.table-modern.animate-rows tbody tr:nth-child(2)  { animation-delay:  50ms }
-.table-modern.animate-rows tbody tr:nth-child(3)  { animation-delay:  80ms }
-.table-modern.animate-rows tbody tr:nth-child(4)  { animation-delay: 110ms }
-.table-modern.animate-rows tbody tr:nth-child(5)  { animation-delay: 140ms }
-.table-modern.animate-rows tbody tr:nth-child(6)  { animation-delay: 170ms }
-.table-modern.animate-rows tbody tr:nth-child(7)  { animation-delay: 200ms }
-.table-modern.animate-rows tbody tr:nth-child(8)  { animation-delay: 230ms }
-.table-modern.animate-rows tbody tr:nth-child(9)  { animation-delay: 260ms }
-.table-modern.animate-rows tbody tr:nth-child(10) { animation-delay: 290ms }
 
 /* ── Table row hover ── */
 .table-modern tbody tr:hover td {
@@ -757,11 +738,7 @@ body {
 .card-glow:hover::before { opacity: 0 }
 
 /* ── chip.active depth ── */
-.chip.active {
-  box-shadow: 0 4px 14px rgba(249,115,22,.38), inset 0 1px 0 rgba(255,255,255,.22) !important;
-  transform: translateY(-1px);
-}
-.chip.active:hover { transform: translateY(-1px) }
+
 
 /* ── input pre-focus hover state ── */
 .input-field:hover:not(:focus) {
@@ -773,18 +750,10 @@ body {
   background: #fdfdfd;
 }
 
-/* ── action-btn micro-lift ── */
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(249,115,22,.15);
-}
-.action-btn:active { transform: translateY(0); box-shadow: none }
-.action-btn.danger:hover {
-  box-shadow: 0 2px 8px rgba(201,122,109,.2);
-}
+
 
 /* ── btn-primary active press ── */
-.btn-primary:active { transform: translateY(1px) !important; box-shadow: 0 2px 6px rgba(249,115,22,.2) !important }
+.btn-primary:active { background: #7C2D12 }
 
 
 /* ── kbd shortcut styling ── */
@@ -806,18 +775,17 @@ kbd {
   0%,100% { opacity: .55; transform: scale(1) }
   50%     { opacity: .15; transform: scale(1.18) }
 }
-.confirm-icon-ring {
-  animation: confirmRing 2s ease-in-out infinite;
-}
+/* El anillo de la ventana de confirmación queda quieto: nada late en la app */
+.confirm-icon-ring { animation: none }
 
-/* ── table-modern animate-rows (ensure stagger works even without class) ── */
+/* Renglones: solo el cambio de fondo al pasar el ratón */
 .table-modern tbody tr {
   transition: background .14s, opacity .15s;
 }
 
-/* ── modal card more dramatic entrance ── */
+/* Las ventanas aparecen con un fundido corto, sin rebote */
 .modal-card {
-  animation: scaleIn .28s cubic-bezier(.34,1.18,.64,1) both !important;
+  animation: scaleIn .16s ease-out both !important;
 }
 
 /* ── page hero stat pill in hero-actions ── */
@@ -837,9 +805,9 @@ kbd {
   box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
   animation: fadeIn .4s ease-out both;
 }
-.panel-hero-crumb { font-size: 13px; font-weight: 500; color: #627080; margin-bottom: 4px; }
+.panel-hero-crumb { font-size: 0.8125rem; font-weight: 500; color: #627080; margin-bottom: 4px; }
 .panel-hero-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; letter-spacing: -.02em; line-height: 1; color: #263442; }
-.panel-hero-sub { font-size: 14px; color: #627080; margin-top: 8px; }
+.panel-hero-sub { font-size: 0.875rem; color: #627080; margin-top: 8px; }
 .panel-hero-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 /* Cuándo llegaron los últimos datos (EnVivo): texto sobrio, sin píldora ni punto verde */
 .sincronia {
@@ -852,6 +820,7 @@ kbd {
 .sincronia:focus-visible { outline: 2px solid #C2410C; outline-offset: 2px; border-radius: 6px }
 .sincronia.sin-red { color: #8A4A42; cursor: default }
 .sincronia.sin-red .sincronia-icono { color: #8A4A42 }
+.sincronia.con-error, .sincronia.con-error .sincronia-icono { color: #8A4A42 }
 @media (hover: hover) {
   .sincronia:not(.sin-red):hover, .sincronia:not(.sin-red):hover .sincronia-icono { color: #C2410C }
 }
@@ -867,9 +836,9 @@ kbd {
   background: #FFF7ED; border: 1px solid #FDE8D0;
   border-radius: 16px; padding: 14px 22px; min-width: 190px;
 }
-.panel-hero-metric-label { font-size: 13px; font-weight: 500; color: #627080; }
+.panel-hero-metric-label { font-size: 0.8125rem; font-weight: 500; color: #627080; }
 .panel-hero-metric-value { font-size: 1.95rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; color: #C2410C; margin-top: 9px; }
-.panel-hero-metric-sub { font-size: 12px; color: #627080; margin-top: 8px; }
+.panel-hero-metric-sub { font-size: 0.75rem; color: #627080; margin-top: 8px; }
 @media (max-width: 640px) {
   .panel-hero { padding: 20px; }
   .panel-hero-metric { width: 100%; text-align: left; }
@@ -1147,6 +1116,14 @@ input[type="checkbox"], input[type="radio"] {
 }
 .lista-movil-fila:active { background: #FFF7ED }
 
+/* ── Renglones nombre + dato a la derecha (diferencia por cajero) ── */
+.lista-cajeros { list-style: none }
+.lista-cajeros > li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0;
+}
+.lista-cajeros > li + li { border-top: 1px solid #FDE8D0 }
+
 /* ── Inline summary bar inside toolbar ── */
 .toolbar-summary {
   font-size: .72rem; font-weight: 600; color: #627080;
@@ -1277,9 +1254,11 @@ input[type="checkbox"], input[type="radio"] {
 .kpi-cell-label {
   display: flex; align-items: center; gap: 7px;
   font-size: .8125rem; font-weight: 500; color: #5B6673;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* Con letra grande la etiqueta pasa a otro renglón en vez de cortarse ("Cajas abierta…") */
+  line-height: 1.3;
 }
-.kpi-cell-sub { font-size: .75rem; font-weight: 500; color: #627080; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* La nota de abajo puede pasar a otro renglón: cortarla con "…" escondía justo el dato ("+70% vs ayer a esta h…") */
+.kpi-cell-sub { font-size: .75rem; font-weight: 500; color: #627080; text-wrap: pretty; }
 /* Tableta: rejilla de 12 para que ningún indicador quede solo. 3 o 6 van de tres en tres;
    4 van 2 + 2 (o los cuatro en un renglón desde 641 px) y 5 van 3 + 2. */
 @media (min-width: 481px) and (max-width: 899px) {
@@ -1413,11 +1392,7 @@ nav[aria-label="Navegación principal"] {
 ═══════════════════════════════════════════════════════ */
 
 /* Button ripple / press feedback */
-.btn-primary:active,
-.btn-secondary:active {
-  transform: scale(.97) translateY(1px);
-  transition: transform .08s ease;
-}
+
 
 /* Icon buttons: subtle scale on press */
 .header-icon-btn:active,
