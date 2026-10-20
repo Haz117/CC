@@ -110,7 +110,7 @@ export default function CommandPalette({ open, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
+        <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #E8EBEF' }}>
           <Search className="w-5 h-5 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
           <input
             ref={inputRef}
@@ -132,7 +132,7 @@ export default function CommandPalette({ open, onClose }) {
             aria-label="Cerrar paleta de comandos"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
             style={{ background: '#F2F3F5', color: '#627080' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#FDE8D0' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#E8EBEF' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#F2F3F5' }}
           >
             <X className="w-3.5 h-3.5" />

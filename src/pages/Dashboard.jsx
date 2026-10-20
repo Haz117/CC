@@ -31,7 +31,7 @@ function Encabezado({ icon: Icon, titulo, nota, accion, onAccion }) {
     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
       <div style={{ minWidth: 0 }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9375rem', fontWeight: 600, color: '#263442' }}>
-          <Icon size={16} color="#C2410C" strokeWidth={2.1} aria-hidden="true" style={{ flexShrink: 0 }} />
+          <Icon size={16} color="#627080" strokeWidth={2.1} aria-hidden="true" style={{ flexShrink: 0 }} />
           {titulo}
         </h2>
         {nota && <p style={{ fontSize: '0.75rem', color: '#627080', marginTop: 3 }}>{nota}</p>}
@@ -115,11 +115,11 @@ export default function Dashboard() {
   const primeraAbierta = abiertas.reduce((min, t) => (!min || t.abierto_en < min ? t.abierto_en : min), null)
   const sucursalesPorSurtir = new Set(ordenes.map(o => o.sucursal_id)).size
   const kpis = [
-    { Icon: Banknote, label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'sin contar canceladas' : `${r.delta >= 0 ? '+' : '−'}${Math.abs(r.delta)}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#C2410C', path: '/ventas' },
-    { Icon: Receipt,  label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#C2410C', path: '/ventas' },
+    { Icon: Banknote, label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'sin contar canceladas' : `${r.delta >= 0 ? '+' : '−'}${Math.abs(r.delta)}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#627080', path: '/ventas' },
+    { Icon: Receipt,  label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#627080', path: '/ventas' },
     { Icon: Monitor,  label: 'Cajas abiertas', value: abiertas.length,           sub: primeraAbierta ? `la primera desde las ${hora(primeraAbierta)}` : 'ninguna en este momento', iconColor: '#047857', path: '/cajas' },
     // Son pedidos, no productos: en Inventario "Bajo mínimo" cuenta productos y daría otra cifra
-    { Icon: Truck,    label: 'Por reabastecer', value: ordenes.length,           sub: ordenes.length ? `pedidos en ${plural(sucursalesPorSurtir, 'sucursal', 'sucursales')}` : 'inventario en orden', alert: ordenes.length > 0, iconColor: ordenes.length ? '#8A4A42' : '#C2410C', path: '/inventario' },
+    { Icon: Truck,    label: 'Por reabastecer', value: ordenes.length,           sub: ordenes.length ? `pedidos en ${plural(sucursalesPorSurtir, 'sucursal', 'sucursales')}` : 'inventario en orden', alert: ordenes.length > 0, iconColor: ordenes.length ? '#8A4A42' : '#627080', path: '/inventario' },
   ]
 
   return (
@@ -193,7 +193,7 @@ export default function Dashboard() {
               <Grafica titulo="Ventas de los últimos 7 días" datos={r.semana} etiqueta="etiqueta" valor="total">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={r.semana} barCategoryGap="32%" margin={{ top: 8, left: 0, right: 4, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 0" stroke="#FDE8D0" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 0" stroke="#E8EBEF" vertical={false} />
                   <XAxis dataKey="etiqueta" tick={{ fontSize: 10, fill: '#627080', fontWeight: 600 }} axisLine={false} tickLine={false} />
                   {/* Eje con montos para leer la gráfica sin pasar el mouse */}
                   <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickFormatter={pesosEje} />
@@ -217,7 +217,7 @@ export default function Dashboard() {
               const cancelada = esCancelada(v)
               return (
                 <div key={v.id}>
-                  {i > 0 && <div style={{ height: 1, background: '#FDE8D0', margin: '0 4px' }} />}
+                  {i > 0 && <div style={{ height: 1, background: '#E8EBEF', margin: '0 4px' }} />}
                   <div style={filaLista}>
                     {cancelada
                       ? <XCircle size={17} color="#8A4A42" aria-hidden="true" style={{ flexShrink: 0 }} />
@@ -274,7 +274,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {abiertas.slice(0, 6).map((t, i) => (
               <div key={t.id}>
-                {i > 0 && <div style={{ height: 1, background: '#FDE8D0', margin: '0 4px' }} />}
+                {i > 0 && <div style={{ height: 1, background: '#E8EBEF', margin: '0 4px' }} />}
                 <div style={filaLista}>
                   <Monitor size={17} color="#627080" aria-hidden="true" style={{ flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>

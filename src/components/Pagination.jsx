@@ -20,14 +20,14 @@ export default function Pagination({ total, page, perPage, onChange }) {
   const btnBase = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: 32, height: 32, borderRadius: 10,
-    border: '1px solid #FDE8D0', background: 'transparent',
+    border: '1px solid #E8EBEF', background: 'transparent',
     cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
   }
 
   return (
     <div
       className="flex items-center justify-between px-5 py-3"
-      style={{ borderTop: '1px solid #FDE8D0', background: '#FFFBF7' }}
+      style={{ borderTop: '1px solid #E8EBEF', background: '#fff' }}
     >
       <p className="text-xs font-medium" style={{ color: '#627080' }}>
         {start}–{end}{' '}
@@ -42,8 +42,8 @@ export default function Pagination({ total, page, perPage, onChange }) {
           onClick={() => onChange(page - 1)}
           aria-label="Página anterior"
           style={{ ...btnBase, opacity: page === 1 ? .35 : 1, color: '#627080' }}
-          onMouseEnter={e => { if (page > 1) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' }}
+          onMouseEnter={e => { if (page > 1) { e.currentTarget.style.background = '#F2F3F5'; e.currentTarget.style.color = '#263442'; e.currentTarget.style.borderColor = '#D4DDE6' } }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#E8EBEF' }}
         >
           <ChevronLeft size={15} aria-hidden="true" />
         </button>
@@ -61,12 +61,12 @@ export default function Pagination({ total, page, perPage, onChange }) {
                   ...btnBase,
                   fontSize: '.75rem', fontWeight: p === page ? 800 : 500,
                   ...(p === page
-                    ? { background: '#C2410C', color: '#fff', borderColor: '#C2410C', boxShadow: '0 2px 8px rgba(249,115,22,.28)' }
+                    ? { background: '#C2410C', color: '#fff', borderColor: '#C2410C' }
                     : { color: '#627080' }
                   ),
                 }}
-                onMouseEnter={e => { if (p !== page) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
-                onMouseLeave={e => { if (p !== page) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' } }}
+                onMouseEnter={e => { if (p !== page) { e.currentTarget.style.background = '#F2F3F5'; e.currentTarget.style.color = '#263442'; e.currentTarget.style.borderColor = '#D4DDE6' } }}
+                onMouseLeave={e => { if (p !== page) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#E8EBEF' } }}
               >
                 {p}
               </button>
@@ -78,8 +78,8 @@ export default function Pagination({ total, page, perPage, onChange }) {
           onClick={() => onChange(page + 1)}
           aria-label="Página siguiente"
           style={{ ...btnBase, opacity: page === totalPages ? .35 : 1, color: '#627080' }}
-          onMouseEnter={e => { if (page < totalPages) { e.currentTarget.style.background = '#FFF7ED'; e.currentTarget.style.color = '#C2410C'; e.currentTarget.style.borderColor = '#FDBA74' } }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#FDE8D0' }}
+          onMouseEnter={e => { if (page < totalPages) { e.currentTarget.style.background = '#F2F3F5'; e.currentTarget.style.color = '#263442'; e.currentTarget.style.borderColor = '#D4DDE6' } }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#627080'; e.currentTarget.style.borderColor = '#E8EBEF' }}
         >
           <ChevronRight size={15} aria-hidden="true" />
         </button>

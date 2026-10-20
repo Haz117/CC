@@ -44,7 +44,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Buscar…'
             onClick={() => onChange('')}
             className="w-5 h-5 flex items-center justify-center rounded-md transition-all"
             style={{ color: '#627080' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = '#FDE8D0' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = '#E8EBEF' }}
             onMouseLeave={e => { e.currentTarget.style.color = '#627080'; e.currentTarget.style.background = 'transparent' }}
           >
             <X className="w-3 h-3" />

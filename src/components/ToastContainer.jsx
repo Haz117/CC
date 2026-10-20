@@ -71,7 +71,7 @@ function ToastItem({ toast, onRemove }) {
         background: '#fff',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(38,52,66,.14), 0 2px 8px rgba(38,52,66,.06)',
-        border: '1px solid #FDE8D0',
+        border: '1px solid #E8EBEF',
         borderTop: `2.5px solid ${c.bar}`,
         padding: '14px 14px 14px 16px',
         width: '360px',

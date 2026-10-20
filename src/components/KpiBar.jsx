@@ -8,7 +8,7 @@ export default function KpiBar({ items = [], estado = null }) {
   return (
     <div className="grid animate-fade-in kpi-bar" style={{ marginBottom: '1.5rem' }}>
       {items.map((item, i) => {
-        const color = estado ? '#627080' : item.alert ? '#8A4A42' : item.good ? '#047857' : '#C2410C'
+        const color = estado ? '#627080' : item.alert ? '#8A4A42' : item.good ? '#047857' : '#627080'
         const valueColor = estado ? '#627080' : item.alert ? '#8A4A42' : item.good ? '#047857' : '#263442'
         const Icon = item.icon
         return (

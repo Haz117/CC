@@ -198,13 +198,13 @@ export default function Sucursales() {
             <Grafica titulo="Ventas del mes por sucursal" datos={tiendas.map(s => ({ n: nombreCorto(s.id), v: s.vendido / 100 }))} etiqueta="n" valor="v">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={tiendas.map(s => ({ id: s.id, name: nombreCorto(s.id), ventas: s.vendido / 100, meta: s.meta, avance: s.avance, activa: s.activa }))} maxBarSize={32} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="#FDE8D0" />
+                <CartesianGrid vertical={false} stroke="#E8EBEF" />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickCount={4} tickFormatter={pesosEje} />
                 <Tooltip
                   cursor={{ fill: '#FFF7ED' }}
                   content={({ active, payload, label }) => active && payload?.length ? (
-                    <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
+                    <div style={{ background: '#fff', border: '1px solid #E8EBEF', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
                       <p style={{ fontSize: 11, color: '#627080', fontWeight: 700 }}>{label}</p>
                       <p style={{ fontSize: 13, color: '#C2410C', fontWeight: 800 }}>{pesos(payload[0].value * 100)}</p>
                       {payload[0].payload.meta && <p style={{ fontSize: 11, color: '#627080' }}>Meta: {pesos(payload[0].payload.meta)} · {payload[0].payload.avance}%</p>}
@@ -212,7 +212,7 @@ export default function Sucursales() {
                   ) : null}
                 />
                 <Bar dataKey="ventas" radius={[5, 5, 0, 0]}>
-                  {tiendas.map(s => <Cell key={s.id} fill={!s.activa ? '#FDE8D0' : s.meta ? ritmoDe(s.avance).color : '#C2410C'} />)}
+                  {tiendas.map(s => <Cell key={s.id} fill={!s.activa ? '#E8EBEF' : s.meta ? ritmoDe(s.avance).color : '#C2410C'} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -233,7 +233,7 @@ export default function Sucursales() {
             {tiendas.every(s => !s.meta) && (
               <p className="text-xs" style={{ color: '#627080' }}>No hay metas capturadas para {mes}.</p>
             )}
-            <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
+            <div className="mt-auto pt-3 flex items-center justify-between" style={{ borderTop: '1px solid #E8EBEF' }}>
               <span className="text-xs" style={{ color: '#627080' }}>Total del mes</span>
               <span className="text-sm font-bold" style={{ color: '#263442' }}>{pesos(stats.vendido)}</span>
             </div>
@@ -260,8 +260,8 @@ export default function Sucursales() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       {s.es_almacen
-                        ? <Warehouse className="w-5 h-5 flex-shrink-0" style={{ color: '#C2410C' }} strokeWidth={1.9} aria-hidden="true" />
-                        : <Store className="w-5 h-5 flex-shrink-0" style={{ color: s.activa ? '#C2410C' : '#8A4A42' }} strokeWidth={1.9} aria-hidden="true" />}
+                        ? <Warehouse className="w-5 h-5 flex-shrink-0" style={{ color: '#627080' }} strokeWidth={1.9} aria-hidden="true" />
+                        : <Store className="w-5 h-5 flex-shrink-0" style={{ color: s.activa ? '#627080' : '#8A4A42' }} strokeWidth={1.9} aria-hidden="true" />}
                       <div className="min-w-0">
                         <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: '#263442' }}>{s.nombre}</p>
                         {s.direccion && (
@@ -302,14 +302,14 @@ export default function Sucursales() {
                     )}
 
                     {s.es_almacen && (
-                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#FFF8F0' }}>
-                        <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} />
+                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#E8EBEF' }}>
+                        <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
                         <span className="text-xs" style={{ color: '#627080' }}>Almacén central: surte a las sucursales</span>
                       </div>
                     )}
 
                     {s.saldo != null && (
-                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#FFF8F0' }}>
+                      <div className="flex items-center gap-2.5 border-t pt-3 mt-auto" style={{ borderColor: '#E8EBEF' }}>
                         <HandCoins className="w-4 h-4 flex-shrink-0" style={{ color: s.saldo > 0 ? '#92400E' : '#047857' }} />
                         <span className="text-xs" style={{ color: '#627080' }}>
                           {s.saldo > 0
@@ -340,7 +340,7 @@ export default function Sucursales() {
 
             <div className="section-head">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+                <Building2 className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
                 <span className="section-head-text"><strong>Sucursales</strong></span>
                 <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} encontrada{filtered.length !== 1 ? 's' : ''}</span>
                 {stats.inactivas > 0 && (
@@ -371,8 +371,8 @@ export default function Sucursales() {
                         <td>
                           <div className="flex items-center gap-3 min-w-0">
                             {s.es_almacen
-                              ? <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
-                              : <Store className="w-4 h-4 flex-shrink-0" style={{ color: s.activa ? '#C2410C' : '#8A4A42' }} aria-hidden="true" />}
+                              ? <Warehouse className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
+                              : <Store className="w-4 h-4 flex-shrink-0" style={{ color: s.activa ? '#627080' : '#8A4A42' }} aria-hidden="true" />}
                             <div className="min-w-0">
                               <p className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{s.nombre}</p>
                               <p className="text-xs truncate" style={{ color: '#627080' }}>{s.es_almacen ? 'Almacén central' : s.direccion}</p>

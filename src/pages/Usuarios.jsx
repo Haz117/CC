@@ -194,7 +194,7 @@ export default function Usuarios() {
           })}
           {/* Quién tiene cuenta para entrar a la web: lo que un administrador revisa de vez en cuando */}
           {stats.conCuenta.length > 0 && (
-            <div className="mt-1 pt-3" style={{ borderTop: '1px solid #FDE8D0' }}>
+            <div className="mt-1 pt-3" style={{ borderTop: '1px solid #E8EBEF' }}>
               <p className="text-xs font-semibold mb-1.5" style={{ color: '#627080' }}>Con cuenta vinculada</p>
               <ul className="lista-cajeros">
                 {stats.conCuenta.slice(0, 5).map(u => (
@@ -229,7 +229,7 @@ export default function Usuarios() {
         </div>
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+            <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
             <span className="section-head-text"><strong>Usuarios del sistema</strong></span>
             <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} usuario{filtered.length !== 1 ? 's' : ''}</span>
             {stats.inactivos > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{stats.inactivos} inactivo{stats.inactivos !== 1 ? 's' : ''}</span>}
@@ -340,7 +340,7 @@ export default function Usuarios() {
         const av = avatarDe(u)
         return (
           <Modal title="Perfil de usuario" onClose={() => setSelectedUser(null)}>
-            <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
+            <div className="px-6 pt-6 pb-5 flex items-center gap-4" style={{ borderBottom: '1px solid #E8EBEF' }}>
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0" style={{ background: av.bg, color: av.color }}>
                 {u.activo ? iniciales(u.nombre) : <UserX className="w-6 h-6" />}
               </div>

@@ -22,7 +22,7 @@ function iconoDe(categoria = '', nombre = '') {
   return Package
 }
 
-export default function IconoProducto({ categoria, nombre, size = 18, color = '#C2410C', ...props }) {
+export default function IconoProducto({ categoria, nombre, size = 18, color = '#627080', ...props }) {
   const Icono = iconoDe(categoria, nombre)
   return <Icono size={size} color={color} strokeWidth={1.9} aria-hidden="true" {...props} />
 }
