@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { HandCoins, Store, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import Estado from '../../components/Estado'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { SkeletonReport } from '../../components/Skeleton'
 import ChartCard from '../../components/ChartCard'
@@ -10,6 +12,7 @@ import { listarSaldosCredito } from '../../api/organizacion'
 import { pesos, fmtDec } from '../../utils/fmt'
 import { tooltipStyle, ejeMiles, tick, totalRow, celdaTotal } from './constantes'
 import { Kpis, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── CRÉDITO CON EL ALMACÉN ──────────────────────────────── */
 export default function ReporteCredito({ filtro, nombreSucursal, nombreCorto }) {
@@ -28,22 +31,24 @@ export default function ReporteCredito({ filtro, nombreSucursal, nombreCorto }) 
     <>
       <AvisoError error={q.error} onReintentar={q.recargar} className="mb-6" />
       <Kpis items={[
-        { label: 'Saldo total',           value: pesos(total),                                      nota: 'lo que se debe al almacén', mal: total > 0 },
-        { label: 'Sucursales con adeudo', value: conAdeudo.length,                                  nota: `de ${saldos.length} con crédito`, mal: conAdeudo.length > 0 },
-        { label: 'Mayor adeudo',          value: conAdeudo[0] ? pesos(conAdeudo[0].saldo_centavos) : '—', nota: conAdeudo[0] ? nombreCorto(conAdeudo[0].sucursal_id) : 'sin adeudos' },
-        { label: 'Al corriente',          value: saldos.length - conAdeudo.length,                  nota: 'sin saldo pendiente' },
+        { icon: HandCoins, label: 'Saldo total',           value: pesos(total),                                      nota: 'lo que se debe al almacén', mal: total > 0 },
+        { icon: Store, label: 'Sucursales con adeudo', value: conAdeudo.length,                                  nota: `de ${saldos.length} con crédito`, mal: conAdeudo.length > 0 },
+        { icon: AlertTriangle, label: 'Mayor adeudo',          value: conAdeudo[0] ? pesos(conAdeudo[0].saldo_centavos) : '—', nota: conAdeudo[0] ? nombreCorto(conAdeudo[0].sucursal_id) : 'sin adeudos' },
+        { icon: CheckCircle2, label: 'Al corriente',          value: saldos.length - conAdeudo.length,                  nota: 'sin saldo pendiente' },
       ]} />
       <ChartCard title="Saldo de crédito por sucursal" subtitle="Cargos menos abonos de los surtidos a crédito">
         {saldos.length === 0 ? <SinDatos>Sin movimientos de crédito</SinDatos> : (
+          <Grafica titulo="Saldo de crédito por sucursal" datos={saldos.map(s => ({ n: nombreCorto(s.sucursal_id), v: s.saldo_centavos / 100 }))} etiqueta="n" valor="v">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={saldos.map(s => ({ id: s.sucursal_id, name: nombreCorto(s.sucursal_id), saldo: s.saldo_centavos / 100 }))} barCategoryGap="35%" maxBarSize={56}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="name" tick={tick} axisLine={false} tickLine={false} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <Tooltip formatter={v => [fmtDec(v), 'Saldo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Saldo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="saldo" fill="#d97706" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Saldo por sucursal" exportLabel="Exportar CSV"
@@ -54,12 +59,9 @@ export default function ReporteCredito({ filtro, nombreSucursal, nombreCorto }) 
             {saldos.map(s => (
               <tr key={s.sucursal_id}>
                 <td className="font-semibold" style={{ color: '#263442' }}>{nombreSucursal(s.sucursal_id)}</td>
-                <td className="font-bold" style={{ color: s.saldo_centavos > 0 ? '#d97706' : '#627080' }}>{pesos(s.saldo_centavos)}</td>
+                <td className="font-bold" style={{ color: s.saldo_centavos > 0 ? '#92400E' : '#627080' }}>{pesos(s.saldo_centavos)}</td>
                 <td>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                    style={s.saldo_centavos > 0 ? { color: '#d97706', background: 'rgba(217,119,6,.1)' } : { color: '#059669', background: 'rgba(5,150,105,.1)' }}>
-                    {s.saldo_centavos > 0 ? 'Con adeudo' : 'Al corriente'}
-                  </span>
+                  <Estado label={s.saldo_centavos > 0 ? 'Con adeudo' : 'Al corriente'} color="amber" normal={s.saldo_centavos <= 0} />
                 </td>
               </tr>
             ))}
@@ -67,7 +69,7 @@ export default function ReporteCredito({ filtro, nombreSucursal, nombreCorto }) 
           <tfoot>
             <tr style={totalRow}>
               <td className={celdaTotal} style={{ color: '#263442' }}>Total por pagar</td>
-              <td className={celdaTotal} style={{ color: '#F97316' }}>{pesos(total)}</td>
+              <td className={celdaTotal} style={{ color: '#263442' }}>{pesos(total)}</td>
               <td />
             </tr>
           </tfoot>

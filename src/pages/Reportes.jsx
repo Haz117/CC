@@ -1,23 +1,25 @@
-import { useState, useMemo } from 'react'
-import { TrendingUp, Wallet, Scissors, Package, Trash2, HandCoins, X } from 'lucide-react'
+import { useMemo } from 'react'
+import { TrendingUp, Wallet, Scissors, Package, Trash2, HandCoins, X, Printer } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import SelectorSucursal from '../components/SelectorSucursal'
 import FiltroPeriodo from '../components/FiltroPeriodo'
+import Segmentado from '../components/Segmentado'
 import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
-import { fecha } from '../utils/fmt'
+import { rangoCorto, fechaHora } from '../utils/fmt'
 import ReporteVentas from './reportes/ReporteVentas'
 import ReportePagos from './reportes/ReportePagos'
 import ReporteCortes from './reportes/ReporteCortes'
 import ReporteInventario from './reportes/ReporteInventario'
 import ReporteMermas from './reportes/ReporteMermas'
 import ReporteCredito from './reportes/ReporteCredito'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PRESETS = [['hoy', 'Hoy'], ['semana', 'Esta semana'], ['mes', 'Este mes'], ['trimestre', 'Últimos 90 días']]
 
 const TIPOS = [
   { id: 'ventas',     label: 'Ventas',          desc: 'Por día y por sucursal',       icon: TrendingUp, Reporte: ReporteVentas,     conFechas: true },
-  { id: 'pagos',      label: 'Métodos de pago', desc: 'Efectivo, tarjeta y transfer.', icon: Wallet,     Reporte: ReportePagos,      conFechas: true },
+  { id: 'pagos',      label: 'Métodos de pago', desc: 'Efectivo, tarjeta y transferencia', icon: Wallet,     Reporte: ReportePagos,      conFechas: true },
   { id: 'cortes',     label: 'Cortes de caja',  desc: 'Esperado, contado, diferencia', icon: Scissors,   Reporte: ReporteCortes,     conFechas: true },
   { id: 'inventario', label: 'Inventario',      desc: 'Existencias contra el mínimo', icon: Package,    Reporte: ReporteInventario, conFechas: false },
   { id: 'mermas',     label: 'Mermas',          desc: 'Producto perdido o dañado',    icon: Trash2,     Reporte: ReporteMermas,     conFechas: true },
@@ -27,11 +29,11 @@ const TIPOS = [
 export default function Reportes() {
   const { sucursales, nombreCorto, nombreSucursal } = useSucursales()
 
-  const periodo = usePeriodo('semana')
+  const periodo = usePeriodo('semana', 'reportes')
   const { dateFrom, dateTo, desde, hasta } = periodo
-  const [groupBy,   setGroupBy]   = useState('Día')
-  const [active,    setActive]    = useState('ventas')
-  const [sucursalId, setSucursalId] = useState('')
+  const [groupBy,   setGroupBy]   = useEstadoSesion('reportes:agrupar', 'Día')
+  const [active,    setActive]    = useEstadoSesion('reportes:tipo', 'ventas')
+  const [sucursalId, setSucursalId] = useEstadoSesion('reportes:sucursal', '')
 
   const tipo = TIPOS.find(t => t.id === active)
   const filtro = useMemo(
@@ -40,39 +42,55 @@ export default function Reportes() {
   )
   const conFiltros = periodo.preset !== 'semana' || sucursalId !== ''
 
+  // Flechas izquierda/derecha entre pestañas, como en cualquier lista de pestañas
+  const moverPestana = (e) => {
+    const paso = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (!paso) return
+    e.preventDefault()
+    const i = TIPOS.findIndex(t => t.id === active)
+    const siguiente = TIPOS[(i + paso + TIPOS.length) % TIPOS.length]
+    setActive(siguiente.id)
+    document.getElementById(`pestana-${siguiente.id}`)?.focus()
+  }
+
   return (
     <div className="space-y-6">
 
-      <PageHeader breadcrumb="Reportes" title="Reportes y Analítica"
-        subtitle={`${tipo.label}${tipo.conFechas ? ` · ${fecha(desde)} – ${fecha(dateTo + 'T12:00')}` : ' · al día de hoy'}`} />
+      <PageHeader title="Reportes"
+        subtitle={`${tipo.desc}${tipo.conFechas ? ` · ${rangoCorto(dateFrom, dateTo)}` : ' · al día de hoy'}`}>
+        {/* Imprime solo el reporte: el menú, la barra de arriba y este botón no salen en papel */}
+        <button type="button" className="btn-secondary no-imprimir" onClick={() => window.print()}>
+          <Printer className="w-4 h-4" aria-hidden="true" /> Imprimir
+        </button>
+      </PageHeader>
 
-      {/* Report type selector */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        {TIPOS.map((t, i) => {
-          const isAct = active === t.id
-          return (
-            <button
-              key={t.id}
-              onClick={() => setActive(t.id)}
-              className="p-4 rounded-2xl border text-left transition-all animate-fade-in-up flex flex-col items-start"
-              style={{ animationDelay: `${Math.min(i * 55, 200)}ms`, ...(isAct
-                ? { background: '#FFF7ED', border: '1px solid #F97316', boxShadow: '0 2px 12px rgba(249,115,22,.15)', color: '#C2410C' }
-                : { background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 1px 3px rgba(38,52,66,.06)' }
-              ) }}
-            >
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: isAct ? 'rgba(249,115,22,.15)' : '#FFF7ED' }}>
-                <t.icon className="w-4 h-4" style={{ color: '#F97316' }} />
-              </div>
-              <p className="text-xs font-bold leading-tight" style={{ color: isAct ? '#C2410C' : '#263442' }}>{t.label}</p>
-              <p className="text-[10px] mt-1 leading-tight" style={{ color: '#627080' }}>{t.desc}</p>
-            </button>
-          )
-        })}
+      {/* Tipo de reporte: pestañas de texto (con flechas se pasa de una a otra) */}
+      <div className="pestanas-reporte" role="tablist" aria-label="Tipo de reporte" onKeyDown={moverPestana}>
+        {TIPOS.map(t => (
+          <button
+            key={t.id}
+            id={`pestana-${t.id}`}
+            type="button"
+            role="tab"
+            aria-selected={active === t.id}
+            aria-controls="reporte-activo"
+            tabIndex={active === t.id ? 0 : -1}
+            onClick={() => setActive(t.id)}
+            className="pestana-reporte"
+          >
+            <t.icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+            {t.label}
+          </button>
+        ))}
       </div>
 
+      {/* En papel no van los controles: el subtítulo dice el periodo y esta línea, la sucursal y cuándo se imprimió */}
+      <p className="solo-impresion text-xs" style={{ color: '#4A5664' }}>
+        {sucursalId ? nombreSucursal(sucursalId) : 'Todas las sucursales'} · impreso el {fechaHora(new Date().toISOString())}
+      </p>
+
       {/* Filters */}
-      <div className="card overflow-hidden mb-6">
+      <div className="card overflow-hidden mb-6 no-imprimir">
         <div className="data-toolbar">
           <div className="data-toolbar-row">
             {tipo.conFechas ? (
@@ -80,12 +98,12 @@ export default function Reportes() {
             ) : (
               <p className="text-xs font-semibold" style={{ color: '#627080' }}>Este reporte muestra el estado actual: no depende del periodo.</p>
             )}
-            <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas={active !== 'inventario'} className="filter-input ml-auto" />
+            <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas={active !== 'inventario'} className="ml-auto" />
             {conFiltros && (
               <button
                 onClick={() => { periodo.elegirPreset('semana'); setSucursalId('') }}
                 style={{ fontSize: '.72rem', fontWeight: 700, color: '#627080', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 8, transition: 'color .15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#C97A6D'}
+                onMouseEnter={e => e.currentTarget.style.color = '#8A4A42'}
                 onMouseLeave={e => e.currentTarget.style.color = '#627080'}
               >
                 <X size={12} /> Limpiar
@@ -96,18 +114,21 @@ export default function Reportes() {
             <div className="data-toolbar-footer">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#627080' }}>Agrupar por:</span>
-                <div className="filter-bar">
-                  {['Día', 'Semana', 'Mes', 'Sucursal'].map(g => (
-                    <button key={g} onClick={() => setGroupBy(g)} className={`chip ${groupBy === g ? 'active' : ''}`}>{g}</button>
-                  ))}
-                </div>
+                <Segmentado
+                  opciones={['Día', 'Semana', 'Mes', 'Sucursal'].map(g => ({ valor: g, texto: g }))}
+                  value={groupBy}
+                  onChange={setGroupBy}
+                  etiqueta="Agrupar por"
+                />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <tipo.Reporte key={tipo.id} filtro={filtro} groupBy={groupBy} nombreCorto={nombreCorto} nombreSucursal={nombreSucursal} />
+      <div id="reporte-activo" role="tabpanel" aria-labelledby={`pestana-${tipo.id}`}>
+        <tipo.Reporte key={tipo.id} filtro={filtro} groupBy={groupBy} nombreCorto={nombreCorto} nombreSucursal={nombreSucursal} />
+      </div>
     </div>
   )
 }

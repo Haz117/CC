@@ -1,32 +1,9 @@
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import KpiBar from '../../components/KpiBar'
 
 /* ── Piezas compartidas ──────────────────────────────────── */
+// Indicadores del reporte con el mismo aspecto que los de las demás pantallas, ícono incluido
 export function Kpis({ items }) {
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {items.map((c, i) => (
-        <div key={c.label} className="card card-glow p-4 animate-fade-in-up" style={{ animationDelay: `${Math.min(i * 60, 200)}ms` }}>
-          <div className="flex items-start justify-between mb-2">
-            <p className="text-xs font-medium leading-tight" style={{ color: '#627080' }}>{c.label}</p>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: c.mal ? 'rgba(201,122,109,.1)' : 'rgba(5,150,105,.1)' }}>
-              {c.mal
-                ? <ArrowDownRight className="w-3.5 h-3.5" style={{ color: '#C97A6D' }} />
-                : <ArrowUpRight className="w-3.5 h-3.5" style={{ color: '#059669' }} />
-              }
-            </div>
-          </div>
-          <p className="text-xl font-black mb-2" style={{ color: '#263442' }}>{c.value}</p>
-          <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full"
-            style={c.mal
-              ? { color: '#C97A6D', background: 'rgba(201,122,109,.1)' }
-              : { color: '#059669', background: 'rgba(5,150,105,.1)' }
-            }
-          >{c.nota}</span>
-        </div>
-      ))}
-    </div>
-  )
+  return <KpiBar items={items.map(c => ({ icon: c.icon, label: c.label, value: c.value, sub: c.nota, alert: c.mal }))} />
 }
 
 export const Parcial = ({ consulta }) => consulta?.truncado ? (
@@ -37,4 +14,17 @@ export const Parcial = ({ consulta }) => consulta?.truncado ? (
 
 export const SinDatos = ({ children }) => (
   <p className="text-sm text-center py-16" style={{ color: '#627080' }}>{children}</p>
+)
+
+// Leyenda de una gráfica con varias series: muestra de color y nombre en tinta de texto
+// (la leyenda de Recharts pinta el nombre del color de la serie, y en tonos claros no se lee).
+export const Leyenda = ({ series }) => (
+  <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2" style={{ listStyle: 'none' }}>
+    {series.map(s => (
+      <li key={s.nombre} className="flex items-center gap-1.5 text-xs" style={{ color: '#263442' }}>
+        <span aria-hidden="true" style={{ width: 10, height: 10, borderRadius: 3, background: s.color, flexShrink: 0 }} />
+        {s.nombre}
+      </li>
+    ))}
+  </ul>
 )

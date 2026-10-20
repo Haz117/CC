@@ -14,12 +14,14 @@ export const esCompletada = (venta) => venta.estado === 'COMPLETADA'
 export const esCancelada  = (venta) => venta.estado === 'CANCELADA'
 
 export const etiquetaEstado = (estado) => capital(estado) || '—'
+// Códigos de la base para la gente: 'VENTA_CANCELADA' → 'Venta cancelada'
+export const etiquetaCodigo = (codigo) => capital(codigo) || '—'
 export const colorEstado    = (estado) => ({ COMPLETADA: 'green', CANCELADA: 'red' })[estado] ?? 'amber'
 
 const ETIQUETA_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', TRANSFERENCIA: 'Transferencia' }
-const COLOR_METODO    = { EFECTIVO: '#059669', TARJETA: '#F97316', TRANSFERENCIA: '#7c3aed' }
+const COLOR_METODO    = { EFECTIVO: '#047857', TARJETA: '#C2410C', TRANSFERENCIA: '#6D28D9' }
 export const etiquetaMetodo = (metodo) => ETIQUETA_METODO[metodo] ?? capital(metodo)
-export const colorMetodo    = (metodo) => COLOR_METODO[metodo] ?? '#8FA1B2'
+export const colorMetodo    = (metodo) => COLOR_METODO[metodo] ?? '#627080'
 
 // Un ticket puede pagarse con varios métodos.
 export function metodoDeVenta(venta) {
@@ -102,6 +104,44 @@ export function pagosPorMetodo(ventas) {
   return [...mapa.values()].sort((a, b) => b.centavos - a.centavos)
 }
 
+// Cobrado en el tiempo por método, solo ventas completadas: por hora si es un solo día, si no por día
+// (con los días sin cobro en cero). Cada renglón trae { etiqueta, [METODO]: pesos }; `metodos` va en
+// orden fijo (efectivo, tarjeta, transferencia y luego los demás) para que cada uno conserve su color.
+const ORDEN_METODOS = ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA']
+export function pagosEnElTiempo(ventas, primerDia, ultimoDia) {
+  const porHora = primerDia === ultimoDia
+  const grupos = new Map()
+  if (!porHora) {
+    const fin = inicioDelDia(ultimoDia)
+    for (let d = inicioDelDia(primerDia); d <= fin; d = sumarDias(d, 1)) {
+      grupos.set(diaLocal(d), { clave: diaLocal(d), etiqueta: diaCorto(d), centavos: {} })
+    }
+  }
+  const metodos = new Set()
+  for (const v of ventas) {
+    if (!esCompletada(v)) continue
+    const clave = porHora ? new Date(v.fecha).getHours() : diaLocal(v.fecha)
+    if (!porHora && !grupos.has(clave)) continue
+    const g = grupos.get(clave) ?? { clave, etiqueta: `${String(clave).padStart(2, '0')}:00`, centavos: {} }
+    for (const p of v.venta_pagos ?? []) {
+      metodos.add(p.metodo)
+      g.centavos[p.metodo] = (g.centavos[p.metodo] ?? 0) + p.monto_centavos
+    }
+    grupos.set(clave, g)
+  }
+  // Por hora: de la primera a la última hora con cobro, sin huecos
+  if (porHora && grupos.size) {
+    for (let h = Math.min(...grupos.keys()); h <= Math.max(...grupos.keys()); h++) {
+      if (!grupos.has(h)) grupos.set(h, { clave: h, etiqueta: `${String(h).padStart(2, '0')}:00`, centavos: {} })
+    }
+  }
+  const orden = [...ORDEN_METODOS.filter(m => metodos.has(m)), ...[...metodos].filter(m => !ORDEN_METODOS.includes(m)).sort()]
+  const filas = [...grupos.values()]
+    .sort((a, b) => (a.clave < b.clave ? -1 : 1))
+    .map(g => ({ clave: g.clave, etiqueta: g.etiqueta, ...Object.fromEntries(orden.map(m => [m, (g.centavos[m] ?? 0) / 100])) }))
+  return { filas, metodos: orden, porHora }
+}
+
 /* ── Turnos de caja ──────────────────────────────────────── */
 const esRetiro = (movimiento) => /RETIRO|SALIDA/i.test(movimiento.tipo ?? '')
 
@@ -116,13 +156,30 @@ export function movimientosDeTurno(turno) {
 
 export const signoMovimiento = (movimiento) => (esRetiro(movimiento) ? -1 : 1)
 
+// Cortes agrupados por quien atendió la caja: cuántos hizo, cuántos con faltante o sobrante
+// y la diferencia neta (contado − esperado). Primero quien más faltante acumula.
+export function diferenciasPorCajero(cortes, nombreDe = (c) => c.cajero?.nombre_completo ?? '—') {
+  const mapa = new Map()
+  for (const c of cortes) {
+    const nombre = nombreDe(c)
+    const x = mapa.get(nombre) ?? { nombre, cortes: 0, faltantes: 0, sobrantes: 0, neta: 0 }
+    const d = c.diferencia_centavos ?? 0
+    x.cortes++
+    x.neta += d
+    if (d < 0) x.faltantes++
+    else if (d > 0) x.sobrantes++
+    mapa.set(nombre, x)
+  }
+  return [...mapa.values()].sort((a, b) => a.neta - b.neta || b.faltantes - a.faltantes || a.nombre.localeCompare(b.nombre, 'es'))
+}
+
 /* ── Inventario ──────────────────────────────────────────── */
 export const NIVEL = {
-  CRITICO: { clave: 'CRITICO', label: 'Crítico',    color: 'red',   tono: '#C97A6D' },
-  BAJO:    { clave: 'BAJO',    label: 'Bajo',       color: 'amber', tono: '#d97706' },
-  NORMAL:  { clave: 'NORMAL',  label: 'Normal',     color: 'green', tono: '#059669' },
-  LIBRE:   { clave: 'LIBRE',   label: 'Sin mínimo', color: 'gray',  tono: '#8FA1B2' },
-  SIN:     { clave: 'SIN',     label: 'Sin existencia', color: 'gray', tono: '#8FA1B2' },
+  CRITICO: { clave: 'CRITICO', label: 'Crítico',    color: 'red',   tono: '#8A4A42' },
+  BAJO:    { clave: 'BAJO',    label: 'Bajo',       color: 'amber', tono: '#92400E' },
+  NORMAL:  { clave: 'NORMAL',  label: 'Normal',     color: 'green', tono: '#047857' },
+  LIBRE:   { clave: 'LIBRE',   label: 'Sin mínimo', color: 'gray',  tono: '#627080' },
+  SIN:     { clave: 'SIN',     label: 'Sin existencia', color: 'gray', tono: '#627080' },
 }
 
 // Bajar del mínimo dispara el reabastecimiento; a la mitad del mínimo (o agotado) ya es crítico.

@@ -4,6 +4,7 @@ import { Building, Percent, CreditCard, Printer, ClipboardList, ChevronRight, Sa
 import toast from '../utils/toast'
 import PageHeader from '../components/PageHeader'
 import FormField from '../components/FormField'
+import Segmentado from '../components/Segmentado'
 import { Toggle, SettingRow } from './configuracion/piezas'
 import MiCuenta from './configuracion/MiCuenta'
 import Sistema from './configuracion/Sistema'
@@ -25,7 +26,9 @@ const payMethods = ['Efectivo', 'Tarjeta de crédito', 'Tarjeta de débito', 'Tr
 /* ═══════════════════════════════════════════════════════════ */
 export default function Configuracion() {
   const [params] = useSearchParams()
-  const visibles = sections
+  // Las secciones `local` mostraban opciones que no se guardan (la base no tiene dónde): se ocultan,
+  // igual que los módulos de ejemplo. Su código se queda para cuando Luis agregue las tablas.
+  const visibles = sections.filter(s => !s.local)
   // El menú de perfil abre una sección concreta con ?seccion=
   const [activeSection, setActiveSection] = useState(() => {
     const pedida = params.get('seccion')
@@ -50,12 +53,19 @@ export default function Configuracion() {
   const ticketRfc = 'XAXX010101000'
 
   const togglePayment = (m) => setEnabledPayments(p => p.includes(m) ? p.filter(x => x !== m) : [...p, m])
-  const handleGuardar = () => toast.info('Aún no se guarda en la base', 'Esta sección todavía no tiene tabla: el cambio solo vive en esta pantalla')
+  const handleGuardar = () => toast.info('Esta sección es una vista previa', 'Aún no tiene tabla en la base: los cambios no se guardan al salir de la pantalla')
+
+  const btnLocalStyle = {
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    padding: '8px 16px', borderRadius: 10, fontSize: '.875rem', fontWeight: 600, cursor: 'pointer',
+    background: 'rgba(124,58,237,.1)', color: '#7c3aed', border: '1px solid rgba(124,58,237,.3)',
+    transition: 'background .15s',
+  }
 
   return (
     <div>
 
-      <PageHeader breadcrumb="Configuración" title="Configuración" subtitle="Tu cuenta, la bitácora y los parámetros del sistema" />
+      <PageHeader breadcrumb="Configuración" title="Configuración" />
 
       {/* ── Mobile horizontal tab nav ── */}
       <div className="lg:hidden mb-2">
@@ -73,7 +83,7 @@ export default function Configuracion() {
                     : { color: '#627080', border: '1px solid transparent' }
                   }
                 >
-                  <s.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#F97316' : '#FED7AA' }} />
+                  <s.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#C2410C' : '#627080' }} aria-hidden="true" />
                   {s.label}
                 </button>
               )
@@ -92,7 +102,7 @@ export default function Configuracion() {
               return (
                 <div key={s.id}>
                   {s.local && !visibles[i - 1]?.local && (
-                    <p className="px-4 pt-3 pb-1.5 text-[9px] font-extrabold uppercase tracking-[.14em]" style={{ color: '#7c3aed', background: 'rgba(124,58,237,.05)' }}>
+                    <p className="px-4 pt-3 pb-1.5 text-xs font-semibold" style={{ color: '#7c3aed', background: 'rgba(124,58,237,.05)' }}>
                       Sin conexión a la base
                     </p>
                   )}
@@ -102,18 +112,18 @@ export default function Configuracion() {
                     style={{
                       color:      active ? '#C2410C' : '#627080',
                       background: active ? '#FFF7ED' : 'transparent',
-                      borderLeft: `3px solid ${active ? '#F97316' : 'transparent'}`,
+                      borderLeft: `3px solid ${active ? '#C2410C' : 'transparent'}`,
                       borderBottom: i < visibles.length - 1 ? '1px solid #F2F3F5' : 'none',
                     }}
                   >
                     <s.icon
                       className="w-4 h-4 flex-shrink-0"
-                      style={{ color: active ? '#F97316' : '#FED7AA' }}
+                      style={{ color: active ? '#C2410C' : '#627080' }}
                     />
                     <span className="flex-1 text-left">{s.label}</span>
                     <ChevronRight
                       className="w-3.5 h-3.5"
-                      style={{ color: active ? '#F97316' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
+                      style={{ color: active ? '#C2410C' : '#D4DDE6', transform: active ? 'translateX(1px)' : 'none' }}
                     />
                   </button>
                 </div>
@@ -170,14 +180,14 @@ export default function Configuracion() {
                     className="w-24 h-24 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden flex-shrink-0"
                     style={{ background: logoSrc ? 'transparent' : '#FFF7ED', border: '2px dashed #FED7AA' }}
                     onClick={() => logoInputRef.current?.click()}
-                    onMouseEnter={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#F97316'; e.currentTarget.style.background='#FDBA74' } }}
+                    onMouseEnter={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#C2410C'; e.currentTarget.style.background='#FDBA74' } }}
                     onMouseLeave={e => { if (!logoSrc) { e.currentTarget.style.borderColor='#FED7AA'; e.currentTarget.style.background='#FFF7ED' } }}
                   >
                     {logoSrc
                       ? <img src={logoSrc} alt="Logo" className="w-full h-full object-contain" />
                       : <>
-                          <Upload className="w-6 h-6 mb-1" style={{ color: '#F97316' }} />
-                          <span className="text-xs font-semibold" style={{ color: '#F97316' }}>Subir logo</span>
+                          <Upload className="w-6 h-6 mb-1" style={{ color: '#C2410C' }} />
+                          <span className="text-xs font-semibold" style={{ color: '#C2410C' }}>Subir logo</span>
                         </>
                     }
                   </div>
@@ -185,7 +195,7 @@ export default function Configuracion() {
                     <button
                       onClick={() => { setLogoSrc(null); if (logoInputRef.current) logoInputRef.current.value = '' }}
                       className="text-xs font-semibold flex items-center gap-1 px-2 py-0.5 rounded-lg transition-colors"
-                      style={{ color: '#C97A6D', background: 'rgba(201,122,109,.1)' }}
+                      style={{ color: '#8A4A42', background: 'rgba(201,122,109,.1)' }}
                     >
                       <X className="w-3 h-3" /> Quitar
                     </button>
@@ -213,7 +223,7 @@ export default function Configuracion() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <button className="btn-primary" onClick={handleGuardar}>
+                <button style={btnLocalStyle} onClick={handleGuardar}>
                   <Save className="w-4 h-4" /> Guardar cambios
                 </button>
               </div>
@@ -231,13 +241,13 @@ export default function Configuracion() {
               </div>
               <div className="space-y-5 max-w-md">
                 <FormField label="IVA aplicado">
-                  <div className="filter-bar">
-                    {['0', '8', '16'].map(v => (
-                      <button key={v} onClick={() => setIva(v)} className={`chip flex-1 ${iva === v ? 'active' : ''}`}>
-                        {v}%
-                      </button>
-                    ))}
-                  </div>
+                  <Segmentado
+                    opciones={['0', '8', '16'].map(v => ({ valor: v, texto: `${v}%` }))}
+                    value={iva}
+                    onChange={setIva}
+                    etiqueta="IVA aplicado"
+                    className="segmentado-ancho"
+                  />
                 </FormField>
                 <FormField label="Descuento máximo (%)">
                   <input
@@ -263,7 +273,7 @@ export default function Configuracion() {
                 />
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
               </div>
             </div>
           )}
@@ -296,7 +306,7 @@ export default function Configuracion() {
                           className="w-8 h-8 rounded-xl flex items-center justify-center"
                           style={{ background: on ? 'rgba(249,115,22,.15)' : '#F2F3F5' }}
                         >
-                          <CreditCard className="w-4 h-4" style={{ color: on ? '#F97316' : '#8FA1B2' }} />
+                          <CreditCard className="w-4 h-4" style={{ color: on ? '#C2410C' : '#627080' }} />
                         </div>
                         <span className="text-sm font-semibold" style={{ color: on ? '#263442' : '#627080' }}>{m}</span>
                       </div>
@@ -306,7 +316,7 @@ export default function Configuracion() {
                 })}
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar cambios</button>
               </div>
             </div>
           )}
@@ -355,7 +365,7 @@ export default function Configuracion() {
                   className="rounded-2xl p-4"
                   style={{ background: '#F2F3F5', border: '1.5px dashed #D4DDE6' }}
                 >
-                  <p className="text-xs font-bold uppercase tracking-widest text-center mb-3" style={{ color: '#627080' }}>
+                  <p className="text-[13px] font-semibold text-center mb-3" style={{ color: '#627080' }}>
                     Vista previa
                   </p>
                   <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #FDE8D0', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
@@ -375,12 +385,12 @@ export default function Configuracion() {
                     <p className="font-bold" style={{ color: '#C2410C' }}>TOTAL: $128.00</p>
                     <p className="text-[10px]" style={{ color: '#627080' }}>IVA incluido (16%): $17.66</p>
                     <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
-                    <p className="text-center font-medium" style={{ color: '#F97316' }}>{ticketMensaje || 'Mensaje de pie'}</p>
+                    <p className="text-center font-medium" style={{ color: '#C2410C' }}>{ticketMensaje || 'Mensaje de pie'}</p>
                   </div>
                 </div>
               </div>
               <div className="flex justify-end mt-6">
-                <button className="btn-primary" onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar configuración</button>
+                <button style={btnLocalStyle} onClick={handleGuardar}><Save className="w-4 h-4" /> Guardar configuración</button>
               </div>
             </div>
           )}

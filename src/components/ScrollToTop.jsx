@@ -18,8 +18,8 @@ export default function ScrollToTop() {
 
   if (!visible) return null
   return (
-    <button className="scroll-top-btn" onClick={scrollUp} title="Volver arriba">
-      <ArrowUp className="w-4 h-4" />
+    <button type="button" className="scroll-top-btn" onClick={scrollUp} aria-label="Volver arriba" title="Volver arriba">
+      <ArrowUp className="w-4 h-4" aria-hidden="true" />
     </button>
   )
 }

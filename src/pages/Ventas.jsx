@@ -1,11 +1,12 @@
 import { Fragment, useState, useEffect, useMemo } from 'react'
-import { ShoppingCart, Search, Eye, XCircle, Download, DollarSign, CreditCard, Smartphone, TrendingDown, AlertTriangle, CheckCircle2, Milk, TrendingUp, Wallet, Info, ChevronRight } from 'lucide-react'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { ShoppingCart, Search, Eye, XCircle, Download, DollarSign, CreditCard, Smartphone, AlertTriangle, CheckCircle2, Banknote, Clock, CalendarDays, Wallet, Info, ChevronRight, ReceiptText, Printer } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { downloadCSV } from '../utils/csv'
 import Modal from '../components/Modal'
 import SortTh from '../components/SortTh'
 import { SkeletonTableRows, SkeletonLine } from '../components/Skeleton'
 import Badge from '../components/Badge'
+import Estado from '../components/Estado'
 import Pagination from '../components/Pagination'
 import SearchInput from '../components/SearchInput'
 import PageHeader from '../components/PageHeader'
@@ -18,6 +19,7 @@ import AvisoError from '../components/AvisoError'
 import EnVivo from '../components/EnVivo'
 import SelectorSucursal from '../components/SelectorSucursal'
 import FiltroPeriodo from '../components/FiltroPeriodo'
+import Segmentado from '../components/Segmentado'
 import ChartTooltip from '../components/ChartTooltip'
 import { useSort } from '../hooks/useSort'
 import { usePersistedState } from '../hooks/usePersistedState'
@@ -31,7 +33,10 @@ import {
   resumenVentas, ventasPorDia, ventasPorHora, pagosPorMetodo, metodoDeVenta,
   etiquetaEstado, colorEstado, etiquetaMetodo, colorMetodo, esCancelada, esCompletada,
 } from '../lib/calculos'
-import { pesos, cantidad, fecha, hora, fechaHora, diaCorto, fmtDec } from '../utils/fmt'
+import { pesos, pesosEje, plural, cantidad, fecha, hora, fechaHora, diaCorto, fmtDec } from '../utils/fmt'
+import Grafica from '../components/Grafica'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
+import Logo from '../components/Logo'
 
 const PER_PAGE = 10
 const metodoIcon = { Efectivo: DollarSign, Tarjeta: CreditCard, Transferencia: Smartphone, Mixto: Wallet }
@@ -58,7 +63,7 @@ function Ticket({ venta, onClose }) {
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-bold" style={{ color: '#263442' }}>{venta.folio}</h3>
-            <Badge label={etiquetaEstado(venta.estado)} color={colorEstado(venta.estado)} />
+            {!esCompletada(venta) && <Badge label={etiquetaEstado(venta.estado)} color={colorEstado(venta.estado)} />}
           </div>
           <p className="text-xs mt-0.5" style={{ color: '#627080' }}>{fechaHora(venta.fecha)}</p>
         </div>
@@ -67,17 +72,15 @@ function Ticket({ venta, onClose }) {
       <div className="p-0">
         {/* Receipt header */}
         <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #FDE8D0' }}>
-          <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center" style={{ background: '#FFF7ED' }}>
-            <Milk className="w-6 h-6" style={{ color: '#F97316' }} />
-          </div>
-          <p className="font-black text-sm" style={{ color: '#263442' }}>{venta.sucursal}</p>
+          <Logo size={44} className="mx-auto mb-3" style={{ display: 'block' }} />
+          <p className="font-bold text-sm" style={{ color: '#263442' }}>{venta.sucursal}</p>
           <p className="text-xs mt-0.5" style={{ color: '#627080' }}>Atendió: {venta.cajeroNombre}</p>
         </div>
 
         {cancelada && (
           <div className="mx-6 mt-4 flex items-center gap-2.5 rounded-xl px-3 py-2.5" style={{ background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.25)' }}>
-            <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#C97A6D' }} />
-            <p className="text-xs font-semibold" style={{ color: '#A05A52' }}>Esta venta fue cancelada y no cuenta en los totales</p>
+            <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#8A4A42' }} />
+            <p className="text-xs font-semibold" style={{ color: '#8A4A42' }}>Esta venta fue cancelada y no cuenta en los totales</p>
           </div>
         )}
 
@@ -111,22 +114,22 @@ function Ticket({ venta, onClose }) {
 
         {/* Total */}
         <div className="px-6 py-5 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: cancelada ? '#C97A6D' : '#F97316' }}>
+          <p className="text-xs font-semibold mb-2" style={{ color: cancelada ? '#8A4A42' : '#C2410C' }}>
             Total de venta
           </p>
-          <p className="text-4xl font-black" style={{ color: cancelada ? '#C97A6D' : '#C2410C' }}>
+          <p className="text-4xl font-bold" style={{ color: cancelada ? '#8A4A42' : '#C2410C' }}>
             {pesos(venta.total_centavos)}
           </p>
           {esCompletada(venta) && (
-            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold" style={{ background: 'rgba(5,150,105,.1)', color: '#047857' }}>
               <CheckCircle2 className="w-3.5 h-3.5" /> Pago recibido
             </div>
           )}
         </div>
       </div>
-      <div className="px-6 py-4 flex justify-between gap-3" style={{ borderTop: '1px solid #FDE8D0' }}>
+      <div className="px-6 py-4 flex justify-between gap-3 no-imprimir" style={{ borderTop: '1px solid #FDE8D0' }}>
         <button className="btn-secondary flex items-center gap-2" onClick={() => window.print()}>
-          <Download className="w-4 h-4" /> Imprimir ticket
+          <Printer className="w-4 h-4" aria-hidden="true" /> Imprimir ticket
         </button>
         <button onClick={onClose} className="btn-primary">Cerrar</button>
       </div>
@@ -140,9 +143,9 @@ export default function Ventas() {
   const [search, setSearch] = usePersistedState('ventas-search', '')
   const debouncedSearch = useDebounce(search)
   const [filterEstado, setFilterEstado] = useState('Todas')
-  const periodo = usePeriodo('hoy')
+  const periodo = usePeriodo('hoy', 'ventas')
   const { dateFrom, dateTo, desde, hasta } = periodo
-  const [sucursalId, setSucursalId] = useState('')
+  const [sucursalId, setSucursalId] = useEstadoSesion('ventas:sucursal', '')
   const [page, setPage] = useState(1)
   const [ticket, setTicket] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
@@ -184,6 +187,14 @@ export default function Ventas() {
   const filtrado  = useMemo(() => resumenVentas(filtered), [filtered])
   const metodos   = useMemo(() => pagosPorMetodo(ventas), [ventas])
   const canceladas = useMemo(() => ventas.filter(esCancelada), [ventas])
+  // Para las notas de los indicadores: en cuántas sucursales hubo venta y el ticket más alto
+  const notas = useMemo(() => {
+    const completadas = ventas.filter(esCompletada)
+    return {
+      sucursales: new Set(completadas.map(v => v.sucursal_id)).size,
+      maximo: completadas.reduce((m, v) => Math.max(m, v.total_centavos), 0),
+    }
+  }, [ventas])
   const unSoloDia = dateFrom === dateTo
   const tendencia = useMemo(
     () => unSoloDia ? ventasPorHora(ventas) : ventasPorDia(ventas, dateFrom, dateTo),
@@ -209,26 +220,26 @@ export default function Ventas() {
   const sinDatos = datos === undefined
   const estadoKpi = cargando ? 'cargando' : sinDatos ? 'error' : null
 
-  const periodoTexto = unSoloDia ? fecha(desde) : `${fecha(desde)} – ${fecha(dateTo + 'T12:00')}`
-
   return (
     <div className="space-y-6">
 
-      <PageHeader
-        breadcrumb="Ventas"
-        title="Registro de Ventas"
-        subtitle={`${periodoTexto}${sinDatos ? '' : ` · ${ventas.length} ticket${ventas.length !== 1 ? 's' : ''}`}`}
-      >
-        <EnVivo actualizando={actualizando} />
+      <PageHeader breadcrumb="Ventas" title="Ventas">
+        <EnVivo actualizando={actualizando} error={error} />
         <button onClick={handleExportCSV} className="btn-secondary" disabled={sorted.length === 0}>
           <Download className="w-4 h-4" /> Exportar CSV
         </button>
       </PageHeader>
 
+      {/* ══ Filtros: cambian los totales, las gráficas y la tabla ═══ */}
+      <div className="barra-filtros">
+        <FiltroPeriodo periodo={periodo} />
+        <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas />
+      </div>
+
       <KpiBar estado={estadoKpi} items={[
-        { icon: TrendingUp, label: 'Total vendido',   value: pesos(resumen.vendido),        sub: 'ventas completadas',  good: true },
-        { icon: ShoppingCart, label: 'Tickets', value: resumen.completadas,           sub: 'completados' },
-        { icon: Wallet, label: 'Ticket promedio', value: pesos(resumen.ticketPromedio), sub: 'por venta' },
+        { icon: Banknote, label: 'Total vendido',   value: pesos(resumen.vendido),        sub: 'sin contar canceladas' },
+        { icon: ShoppingCart, label: 'Tickets', value: resumen.completadas,           sub: notas.sucursales ? `en ${plural(notas.sucursales, 'sucursal', 'sucursales')}` : 'ninguno en el periodo' },
+        { icon: Wallet, label: 'Ticket promedio', value: pesos(resumen.ticketPromedio), sub: notas.maximo ? `el más alto, ${pesos(notas.maximo)}` : ' ' },
         { icon: XCircle, label: 'Canceladas', value: resumen.canceladas,            sub: resumen.canceladas ? pesos(resumen.cancelado) : 'sin cancelaciones', alert: resumen.canceladas > 0 },
       ]} />
 
@@ -236,7 +247,7 @@ export default function Ventas() {
 
       {datos?.truncado && (
         <div className="flex items-center gap-2.5 rounded-2xl px-4 py-3" style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}>
-          <Info className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
+          <Info className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} />
           <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
             El periodo tiene {datos.total.toLocaleString('es-MX')} ventas y se cargaron las {ventas.length.toLocaleString('es-MX')} más recientes: los totales son parciales. Acorta el rango o elige una sucursal.
           </p>
@@ -244,20 +255,25 @@ export default function Ventas() {
       )}
 
       {/* ══ Resumen visual — solo desktop ══════════════════════════ */}
-      {!sinDatos && <div className="hidden lg:grid lg:grid-cols-5 gap-5">
+      {/* Sin ventas en el periodo las dos gráficas solo repetirían "sin ventas": basta el aviso de la tabla */}
+      {!sinDatos && ventas.length > 0 && <div className="hidden lg:grid lg:grid-cols-5 gap-5">
         <div className="card p-5 lg:col-span-3">
-          <TituloTarjeta icon={TrendingUp} titulo={unSoloDia ? 'Ventas por hora' : 'Ventas por día'}>solo completadas</TituloTarjeta>
+          <TituloTarjeta icon={unSoloDia ? Clock : CalendarDays} titulo={unSoloDia ? 'Ventas por hora' : 'Ventas por día'}>solo completadas</TituloTarjeta>
           {tendencia.length === 0 ? (
             <p className="text-xs text-center py-14" style={{ color: '#627080' }}>Sin ventas completadas en este periodo</p>
           ) : (
-            <ResponsiveContainer width="100%" height={148}>
+            <Grafica titulo={unSoloDia ? 'Ventas por hora' : 'Ventas por día'} datos={tendencia} etiqueta="etiqueta" valor="total">
+            <ResponsiveContainer width="100%" height={160}>
               <BarChart data={tendencia} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#FDE8D0" />
                 <XAxis dataKey="etiqueta" tick={{ fontSize: 11, fill: '#627080' }} axisLine={false} tickLine={false} minTickGap={12} />
+                {/* Eje con montos para leer la gráfica sin pasar el ratón */}
+                <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickCount={4} tickFormatter={pesosEje} />
                 <Tooltip cursor={{ fill: '#FFF7ED' }} content={props => <ChartTooltip {...props} format={fmtDec} />} />
-                <Bar dataKey="total" radius={[5, 5, 0, 0]} fill="#F97316" />
+                <Bar dataKey="total" radius={[5, 5, 0, 0]} fill="#C2410C" />
               </BarChart>
             </ResponsiveContainer>
+            </Grafica>
           )}
         </div>
 
@@ -266,13 +282,13 @@ export default function Ventas() {
           <div className="flex flex-col gap-3 flex-1 justify-center">
             {metodos.map(m => {
               const pct = cobrado ? Math.round(m.centavos / cobrado * 100) : 0
-              return <FilaDesglose key={m.metodo} cuenta={m.pagos} etiqueta={etiquetaMetodo(m.metodo)} derecha={`${pesos(m.centavos)} · ${pct}%`} pct={pct} color={colorMetodo(m.metodo)} />
+              return <FilaDesglose key={m.metodo} etiqueta={etiquetaMetodo(m.metodo)} cuenta={plural(m.pagos, 'pago')} derecha={`${pesos(m.centavos)} · ${pct}%`} pct={pct} color={colorMetodo(m.metodo)} />
             })}
             {metodos.length === 0 && <p className="text-xs text-center" style={{ color: '#627080' }}>Sin pagos en este periodo</p>}
           </div>
           <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
             <span className="text-xs" style={{ color: '#627080' }}>Total cobrado</span>
-            <span className="text-sm font-black" style={{ color: '#F97316' }}>{pesos(cobrado)}</span>
+            <span className="text-sm font-bold" style={{ color: '#263442' }}>{pesos(cobrado)}</span>
           </div>
         </div>
       </div>}
@@ -296,28 +312,21 @@ export default function Ventas() {
               <SearchInput
                 value={search}
                 onChange={setSearch}
-                placeholder="Buscar por folio, cajero, sucursal..."
+                placeholder="Buscar por folio, cajero, sucursal…"
                 resultCount={filtered.length}
               />
             </div>
-            <div className="filter-group">
-              <FiltroPeriodo periodo={periodo} />
-              <SelectorSucursal value={sucursalId} onChange={setSucursalId} sucursales={sucursales} soloTiendas />
-            </div>
+            {/* Con un solo estado en el periodo (todas completadas) el filtro no separa nada */}
+            {estados.length > 2 && (
+              <Segmentado
+                opciones={estados.map(s => ({ valor: s, texto: s === 'Todas' ? s : etiquetaEstado(s) }))}
+                value={filterEstado}
+                onChange={setFilterEstado}
+                etiqueta="Estado de la venta"
+              />
+            )}
           </div>
           <div className="data-toolbar-footer">
-            <div className="filter-bar flex-wrap">
-              {estados.map(s => (
-                <button
-                  key={s}
-                  onClick={() => setFilterEstado(s)}
-                  className={`chip ${filterEstado === s ? 'active' : ''}`}
-                  style={s === 'CANCELADA' && filterEstado === s ? { background: 'rgba(201,122,109,.15)', color: '#A05A52', borderColor: 'rgba(201,122,109,.35)' } : {}}
-                >
-                  {s === 'Todas' ? s : etiquetaEstado(s)}
-                </button>
-              ))}
-            </div>
             {!sinDatos && <div className="toolbar-summary">
               <span><b>{filtered.length}</b> venta{filtered.length !== 1 ? 's' : ''}</span>
               <span className="sep">·</span>
@@ -329,10 +338,9 @@ export default function Ventas() {
         {/* Section head */}
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
+            <ReceiptText className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
             <span className="section-head-text"><strong>Transacciones</strong></span>
-            {!sinDatos && <span style={{ fontSize: '.7rem', color: '#627080' }}>{sorted.length} resultado{sorted.length !== 1 ? 's' : ''}</span>}
-            {canceladas.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{canceladas.length} canceladas</span>}
+            {canceladas.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{canceladas.length} cancelada{canceladas.length !== 1 ? 's' : ''}</span>}
           </div>
         </div>
 
@@ -346,7 +354,7 @@ export default function Ventas() {
                 <button type="button" onClick={() => setTicket(v)} className="lista-movil-fila" style={rowStyle(v)} aria-label={`Ver ticket ${v.folio}`}>
                   <span className="flex items-center justify-between gap-3">
                     <span className="folio">{v.folio}</span>
-                    <span className="text-base font-black flex-shrink-0" style={{ color: cancelada ? '#C97A6D' : '#263442', textDecoration: cancelada ? 'line-through' : 'none' }}>
+                    <span className="text-base font-bold flex-shrink-0" style={{ color: cancelada ? '#8A4A42' : '#263442', textDecoration: cancelada ? 'line-through' : 'none' }}>
                       {pesos(v.total_centavos)}
                     </span>
                   </span>
@@ -358,9 +366,9 @@ export default function Ventas() {
                   </span>
                   <span className="flex items-center justify-between gap-3 mt-2">
                     <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#627080' }}>
-                      <MIcon className="w-3.5 h-3.5" style={{ color: '#FDBA74' }} /> {v.metodo}
+                      <MIcon className="w-3.5 h-3.5" style={{ color: '#627080' }} aria-hidden="true" /> {v.metodo}
                     </span>
-                    <Badge label={etiquetaEstado(v.estado)} color={colorEstado(v.estado)} />
+                    {!esCompletada(v) && <Badge label={etiquetaEstado(v.estado)} color={colorEstado(v.estado)} />}
                   </span>
                 </button>
               </li>
@@ -369,8 +377,8 @@ export default function Ventas() {
         </ul>
 
         {/* Table */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="table-modern animate-rows">
+        <div className="hidden sm:block overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de ventas">
+          <table className="table-modern">
             <thead>
               <tr>
                 <SortTh col="folio" label="Folio" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
@@ -397,15 +405,11 @@ export default function Ventas() {
                     >
                       <td>
                         <div className="flex items-center gap-1.5">
-                          <span
-                            className="inline-block w-3.5 h-3.5 rounded-sm text-center leading-none transition-transform duration-200 flex-shrink-0"
-                            style={{
-                              background: isExpanded ? '#F97316' : '#FFF7ED',
-                              color: isExpanded ? '#fff' : '#F97316',
-                              fontSize: 9, fontWeight: 800,
-                              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                            }}
-                          >▶</span>
+                          <ChevronRight
+                            className="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                            style={{ color: isExpanded ? '#C2410C' : '#8FA1B2', transform: isExpanded ? 'rotate(90deg)' : 'none' }}
+                            aria-hidden="true"
+                          />
                           <span className="folio">{v.folio}</span>
                         </div>
                       </td>
@@ -421,17 +425,17 @@ export default function Ventas() {
                       </td>
                       <td className="hidden lg:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <MIcon className="w-3.5 h-3.5" style={{ color: '#FED7AA' }} />
+                          <MIcon className="w-3.5 h-3.5" style={{ color: '#627080' }} aria-hidden="true" />
                           <span className="text-sm" style={{ color: '#627080' }}>{v.metodo}</span>
                         </div>
                       </td>
                       <td>
-                        <span className="text-sm font-bold" style={{ color: cancelada ? '#C97A6D' : '#263442' }}>
-                          {cancelada && <TrendingDown className="w-3 h-3 inline mr-1 opacity-70" />}
+                        {/* Cancelada: tachada, como en el panel y en el teléfono (antes llevaba una flechita) */}
+                        <span className="text-sm font-bold" style={{ color: cancelada ? '#8A4A42' : '#263442', textDecoration: cancelada ? 'line-through' : 'none' }}>
                           {pesos(v.total_centavos)}
                         </span>
                       </td>
-                      <td><Badge label={etiquetaEstado(v.estado)} color={colorEstado(v.estado)} /></td>
+                      <td><Estado label={etiquetaEstado(v.estado)} color={colorEstado(v.estado)} normal={esCompletada(v)} /></td>
                       <td onClick={e => e.stopPropagation()}>
                         <button onClick={() => setTicket(v)} className="action-btn" title="Ver ticket completo" aria-label={`Ver ticket ${v.folio}`}>
                           <Eye className="w-4 h-4" />
@@ -449,13 +453,13 @@ export default function Ventas() {
                               ...(v.venta_pagos ?? []).map(p => [etiquetaMetodo(p.metodo), pesos(p.monto_centavos)]),
                             ].map(([k, valor], i) => (
                               <div key={`${k}-${i}`} className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#627080' }}>{k}</span>
+                                <span className="text-xs font-semibold" style={{ color: '#627080' }}>{k}</span>
                                 <span className="text-xs font-semibold" style={{ color: '#263442' }}>{valor}</span>
                               </div>
                             ))}
                             <button
                               className="ml-auto text-xs font-semibold px-3 py-1 rounded-lg transition-colors"
-                              style={{ color: '#F97316', background: 'rgba(249,115,22,.1)' }}
+                              style={{ color: '#C2410C', background: 'rgba(249,115,22,.1)' }}
                               onClick={() => { setTicket(v); setExpandedId(null) }}
                             >
                               Ver ticket completo →
@@ -471,9 +475,9 @@ export default function Ventas() {
           </table>
         </div>
         {filtered.length === 0 && (sinDatos
-          ? <EmptyState icon={Search} title="No se pudieron cargar las ventas" subtitle="Revisa el aviso de arriba y vuelve a intentar." />
+          ? <EmptyState icon={ReceiptText} title="No se pudieron cargar las ventas" subtitle="Revisa el aviso de arriba y vuelve a intentar." />
           : <EmptyState
-              icon={Search}
+              icon={ventas.length === 0 ? ReceiptText : Search}
               title={ventas.length === 0 ? 'Sin ventas en este periodo' : 'Sin resultados'}
               subtitle={ventas.length === 0
                 ? 'Las cajas suben sus ventas cada 10 segundos cuando tienen internet.'

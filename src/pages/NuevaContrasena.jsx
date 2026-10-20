@@ -57,7 +57,7 @@ export default function NuevaContrasena() {
         {campo('repetir-contrasena', 'Repite la contraseña', repetida, setRepetida, false)}
         <button type="submit" disabled={loading} className="btn-primary w-full" style={{ padding: '16px 24px', fontSize: 15, borderRadius: 14, marginTop: 8 }}>
           {loading
-            ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Guardando...</>
+            ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Guardando…</>
             : <>Guardar contraseña <ArrowRight style={{ width: 16, height: 16 }} /></>
           }
         </button>

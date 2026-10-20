@@ -22,7 +22,7 @@ export default function MiCuenta() {
       </div>
 
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0" style={{ background: '#FFF7ED', color: '#F97316' }}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0" style={{ background: '#FFF7ED', color: '#C2410C' }}>
           {iniciales(perfil.nombre)}
         </div>
         <div className="min-w-0">

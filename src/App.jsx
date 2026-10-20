@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import ErrorBoundary from './components/ErrorBoundary'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
@@ -7,7 +7,6 @@ import { PAGINAS } from './lib/navegacion'
 import Layout from './components/Layout'
 import ModuloDemo from './components/ModuloDemo'
 import ToastContainer from './components/ToastContainer'
-import NotificationBanner from './components/NotificationBanner'
 import SplashScreen from './components/SplashScreen'
 import PwaInstallPrompt from './components/PwaInstallPrompt'
 import OfflineIndicator from './components/OfflineIndicator'
@@ -39,13 +38,12 @@ function PageLoader({ pantallaCompleta = false }) {
 
 function pantallaDe(pagina) {
   const Pantalla = PANTALLAS[pagina.path]
-  return pagina.demo ? <ModuloDemo nombre={pagina.label}><Pantalla /></ModuloDemo> : <Pantalla />
+  const contenido = pagina.demo ? <ModuloDemo nombre={pagina.label}><Pantalla /></ModuloDemo> : <Pantalla />
+  return <ErrorBoundary>{contenido}</ErrorBoundary>
 }
 
 function Contenido() {
   const { estado, recuperando } = useAuth()
-  const [splashDone, setSplashDone] = useState(false)
-  const terminarSplash = useCallback(() => setSplashDone(true), [])
 
   // Mientras la persona escribe su contraseña se adelanta la descarga del panel (y de las gráficas),
   // para que aparezca al instante después de entrar.
@@ -59,8 +57,7 @@ function Contenido() {
     return () => cancelIdleCallback(turno)
   }, [])
 
-  if (!splashDone) return <SplashScreen onDone={terminarSplash} />
-  if (estado === 'cargando') return <PageLoader pantallaCompleta />
+  if (estado === 'cargando') return <SplashScreen />
   if (estado !== 'dentro') return <Login />
   if (recuperando) return <NuevaContrasena />
 
@@ -68,9 +65,7 @@ function Contenido() {
     <Router>
       <OfflineIndicator />
       <PwaInstallPrompt />
-      <NotificationBanner />
       <Layout>
-        <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -80,7 +75,6 @@ function Contenido() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        </ErrorBoundary>
       </Layout>
     </Router>
   )

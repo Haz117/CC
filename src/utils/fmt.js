@@ -6,6 +6,11 @@ export const fmtDec = (n) => new Intl.NumberFormat('es-MX', { style: 'currency',
    Se divide entre 100 solo al mostrar. */
 export const pesos      = (centavos) => fmtDec((Number(centavos) || 0) / 100)
 export const pesosCorto = (centavos) => fmt((Number(centavos) || 0) / 100)
+// Eje de las gráficas (en pesos, no centavos): "$850", "$12.5k", "-$1.2k"
+export const pesosEje   = (v) => `${v < 0 ? '-' : ''}$${Math.abs(v) >= 1000 ? `${Math.round(Math.abs(v) / 100) / 10}k` : Math.abs(v)}`
+
+// "1 corte", "3 cortes"; el plural irregular va como tercer argumento.
+export const plural = (n, uno, varios = `${uno}s`) => `${n} ${n === 1 ? uno : varios}`
 
 /* ── Cantidades ──────────────────────────────────────────────
    numeric(14,3) en la unidad base del producto: piezas, o kilos con 3 decimales (0.250 = 250 g). */
@@ -23,10 +28,38 @@ const fHora     = new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2
 const fMes      = new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' })
 
 export const fecha     = (iso) => iso ? fFecha.format(new Date(iso)) : '—'
-export const diaCorto  = (iso) => iso ? fDiaCorto.format(new Date(iso)) : '—'
+// Chrome escribe "19-oct" en es-MX; se arma con las partes para que siempre diga "19 oct"
+export const diaCorto  = (iso) => {
+  if (!iso) return '—'
+  const partes = Object.fromEntries(fDiaCorto.formatToParts(new Date(iso)).map(p => [p.type, p.value]))
+  return `${partes.day} ${String(partes.month).replace('.', '')}`
+}
 export const hora      = (iso) => iso ? fHora.format(new Date(iso)) : '—'
 export const fechaHora = (iso) => iso ? `${fecha(iso)} · ${hora(iso)}` : '—'
+// Horario de un turno: "08:00 – 20:17" si abrió y cerró el mismo día; si no, con los dos días.
+export const horario = (inicio, fin) => {
+  if (!fin) return `desde ${hora(inicio)}`
+  return diaLocal(inicio) === diaLocal(fin)
+    ? `${hora(inicio)} – ${hora(fin)}`
+    : `${diaCorto(inicio)} ${hora(inicio)} – ${diaCorto(fin)} ${hora(fin)}`
+}
 export const mesLargo  = (d = new Date()) => fMes.format(d)
+const fMesNombre = new Intl.DateTimeFormat('es-MX', { month: 'long' })
+export const mesNombre = (d = new Date()) => fMesNombre.format(d)
+// "Lunes 20 de octubre": el día de la semana con mayúscula porque abre el renglón
+const fDiaLargo = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+export const diaLargo  = (d = new Date()) => {
+  const t = fDiaLargo.format(d).replace(',', '')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+// Cuánto hace de un momento (ms), para "Actualizado justo ahora / hace 3 min / a las 13:05".
+export const haceCuanto = (desde, ahora = Date.now()) => {
+  const segundos = Math.max(0, (ahora - desde) / 1000)
+  if (segundos < 45) return 'justo ahora'
+  const minutos = Math.max(1, Math.round(segundos / 60))
+  return minutos < 60 ? `hace ${minutos} min` : `a las ${hora(desde)}`
+}
 
 const dos = (n) => String(n).padStart(2, '0')
 
@@ -61,6 +94,19 @@ export const rangoISO = (primerDia, ultimoDia = primerDia) => ({
   desde: inicioDelDia(primerDia).toISOString(),
   hasta: sumarDias(inicioDelDia(ultimoDia), 1).toISOString(),
 })
+
+// Rango 'yyyy-mm-dd' en corto para el botón del filtro: "19 oct 2026", "13 – 19 oct 2026",
+// "28 sep – 19 oct 2026" o "28 dic 2025 – 3 ene 2026". Solo repite lo que cambia.
+const fMesCorto = new Intl.DateTimeFormat('es-MX', { month: 'short' })
+export const rangoCorto = (primerDia, ultimoDia = primerDia) => {
+  const [a, b] = [inicioDelDia(primerDia), inicioDelDia(ultimoDia)]
+  const mes = (d) => fMesCorto.format(d).replace('.', '')
+  const fin = `${b.getDate()} ${mes(b)} ${b.getFullYear()}`
+  if (primerDia === ultimoDia) return fin
+  if (a.getFullYear() !== b.getFullYear()) return `${a.getDate()} ${mes(a)} ${a.getFullYear()} – ${fin}`
+  if (a.getMonth() !== b.getMonth()) return `${a.getDate()} ${mes(a)} – ${fin}`
+  return `${a.getDate()} – ${fin}`
+}
 
 export const iniciales = (nombre) =>
   (nombre || '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '—'

@@ -35,7 +35,7 @@ export default function OfflineIndicator() {
       aria-live="polite"
       className="fixed inset-x-0 top-0 z-[80] flex items-center justify-center gap-2"
       style={{
-        background: online ? '#059669' : '#C97A6D',
+        background: online ? '#047857' : '#8A4A42',
         color: '#fff',
         paddingTop: 'max(10px, env(safe-area-inset-top))',
         paddingBottom: 10,

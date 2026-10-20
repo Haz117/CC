@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Lock, Mail, User, Loader2, CheckCircle2, ArrowRight, ArrowLeft, PlugZap } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, User, Loader2, ArrowLeft, PlugZap } from 'lucide-react'
 import PantallaAcceso from '../components/PantallaAcceso'
 import { useAuth } from '../auth/contexto'
 import { getRecordarSesion, aCorreo } from '../lib/supabase'
@@ -7,7 +7,7 @@ import { esCorreo } from '../utils/validar'
 
 const etiqueta   = { fontSize: 12, fontWeight: 700, color: '#627080', letterSpacing: '.02em' }
 const iconoCampo = { position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: '#FB923C', pointerEvents: 'none' }
-const enlace     = { fontSize: 12, fontWeight: 600, color: '#F97316', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }
+const enlace     = { fontSize: 12, fontWeight: 600, color: '#C2410C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }
 
 // Solo hay inicio de sesión y recuperar contraseña: el registro libre está desactivado en la base.
 export default function Login() {
@@ -98,8 +98,8 @@ export default function Login() {
           {campoCorreo}
           <button type="submit" disabled={loading || enviado} className="btn-primary w-full" style={{ padding: '16px 24px', fontSize: 15, borderRadius: 14 }}>
             {loading
-              ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Enviando...</>
-              : <>Enviar enlace <ArrowRight style={{ width: 16, height: 16 }} /></>
+              ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Enviando…</>
+              : 'Enviar enlace'
             }
           </button>
         </form>
@@ -144,14 +144,14 @@ export default function Login() {
               type={showPass ? 'text' : 'password'}
               value={password}
               onChange={e => { setPassword(e.target.value); limpiar() }}
-              placeholder="••••••••"
+              placeholder="tu contraseña"
               autoComplete="current-password"
               disabled={!supabaseConfigurado}
               className="input-field"
               style={{ paddingLeft: 44, paddingRight: 48, paddingTop: 15, paddingBottom: 15, fontSize: 14 }}
             />
             <button type="button" onClick={() => setShowPass(v => !v)} aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#8FA1B2', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
+              style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#627080', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 4 }}>
               {showPass ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
             </button>
           </div>
@@ -159,19 +159,18 @@ export default function Login() {
 
         {/* Recordar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-          <button type="button" role="checkbox" aria-checked={remember} aria-label="Mantener sesión iniciada" onClick={() => setRemember(v => !v)}
-            style={{ width: 20, height: 20, borderRadius: 6, border: '2px solid', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', ...(remember ? { background: '#F97316', borderColor: '#F97316' } : { background: '#fff', borderColor: '#D4DDE6' }) }}>
-            {remember && <CheckCircle2 style={{ width: 11, height: 11, color: '#fff' }} strokeWidth={3} />}
-          </button>
-          <span style={{ fontSize: 13, color: '#627080', cursor: 'pointer', userSelect: 'none' }} onClick={() => setRemember(v => !v)}>
+          {/* Casilla del sistema (con el color de la marca): se marca con el teclado y la lee el lector de pantalla sin trucos */}
+          <input id="login-recordar" type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
+            style={{ width: 18, height: 18, margin: 0, accentColor: '#C2410C', cursor: 'pointer', flexShrink: 0 }} />
+          <label htmlFor="login-recordar" style={{ fontSize: 13, color: '#627080', cursor: 'pointer', userSelect: 'none' }}>
             Mantener sesión iniciada
-          </span>
+          </label>
         </div>
 
         <button type="submit" disabled={loading || !supabaseConfigurado} className="btn-primary w-full" style={{ padding: '16px 24px', fontSize: 15, borderRadius: 14 }}>
           {loading
-            ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Verificando...</>
-            : <>Iniciar sesión <ArrowRight style={{ width: 16, height: 16 }} /></>
+            ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Entrando…</>
+            : 'Iniciar sesión'
           }
         </button>
       </form>
@@ -180,7 +179,7 @@ export default function Login() {
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '40px 0 24px' }}>
             <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#627080', letterSpacing: '.12em', textTransform: 'uppercase' }}>demostración</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: '#627080' }}>Demostración</span>
             <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
           </div>
           <p style={{ fontSize: 12, color: '#627080', marginBottom: 12, lineHeight: 1.5 }}>

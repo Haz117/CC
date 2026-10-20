@@ -14,22 +14,22 @@ function BottomTab({ path, icon: Icon, label, badge = 0 }) {
       to={path}
       aria-current={isActive ? 'page' : undefined}
       className="flex flex-col items-center justify-center gap-1 py-2 relative"
-      style={{ color: isActive ? '#C2410C' : '#8FA1B2', minHeight: 56, WebkitTapHighlightColor: 'transparent' }}
+      style={{ color: isActive ? '#C2410C' : '#627080', minHeight: 56, WebkitTapHighlightColor: 'transparent' }}
     >
       {/* Active indicator */}
-      {isActive && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:3, borderRadius:'0 0 4px 4px', background:'#F97316' }} />}
+      {isActive && <span style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:3, borderRadius:'0 0 4px 4px', background:'#C2410C' }} />}
 
       {/* Icon pill con badge */}
       <div style={{ position: 'relative' }}>
         <div className="flex items-center justify-center rounded-2xl transition-all duration-200"
           style={{ width:48, height:30, background: isActive ? 'rgba(249,115,22,.12)' : 'transparent', transform: isActive ? 'scale(1.06)' : 'scale(1)' }}>
-          <Icon size={isActive ? 20 : 19} style={{ color: isActive ? '#F97316' : '#8FA1B2', transition: 'all .2s' }} strokeWidth={isActive ? 2.3 : 1.8} />
+          <Icon size={isActive ? 20 : 19} style={{ color: isActive ? '#C2410C' : '#627080', transition: 'all .2s' }} strokeWidth={isActive ? 2.3 : 1.8} />
         </div>
         {badge > 0 && (
-          <span className="red-badge-pulse" style={{
+          <span style={{
             position: 'absolute', top: -2, right: 2,
             minWidth: 16, height: 16, borderRadius: 99,
-            background: '#C97A6D', color: '#fff',
+            background: '#8A4A42', color: '#fff',
             fontSize: '.6rem', fontWeight: 800,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '0 4px', border: '1.5px solid #fff',
@@ -52,7 +52,7 @@ export default function BottomNav({ onMoreClick, globos = {} }) {
 
   return (
     <nav
-      aria-label="Navegación principal"
+      aria-label="Accesos rápidos"
       className="lg:hidden fixed bottom-0 inset-x-0 z-20 grid grid-cols-5"
       style={{
         background: '#fff',

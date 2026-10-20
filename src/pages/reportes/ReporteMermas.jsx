@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Trash2, Banknote, Package, Tags } from 'lucide-react'
 import { SkeletonReport } from '../../components/Skeleton'
+import FilaDesglose from '../../components/FilaDesglose'
 import Pagination from '../../components/Pagination'
 import ChartCard from '../../components/ChartCard'
 import TableCard from '../../components/TableCard'
@@ -8,8 +9,8 @@ import AvisoError from '../../components/AvisoError'
 import { downloadCSV } from '../../utils/csv'
 import { useConsulta } from '../../hooks/useConsulta'
 import { listarMermas } from '../../api/inventario'
-import { pesos, cantidad, fecha, hora, fmtDec } from '../../utils/fmt'
-import { PAGE_SIZE, tooltipStyle, ejeMiles, tick, celdaTotal } from './constantes'
+import { pesos, cantidad, fecha, hora, plural } from '../../utils/fmt'
+import { PAGE_SIZE, celdaTotal } from './constantes'
 import { Kpis, SinDatos } from './piezas'
 
 /* ── MERMAS ──────────────────────────────────────────────── */
@@ -31,7 +32,14 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
       porMotivo.set(motivo, g)
     }
     const motivos = [...porMotivo.values()].sort((a, b) => b.centavos - a.centavos).map(g => ({ ...g, costo: g.centavos / 100 }))
-    return { filas, motivos, costo: filas.reduce((s, m) => s + (m.costo_centavos ?? 0), 0) }
+    // El producto que más dinero se perdió en el periodo
+    const porProducto = new Map()
+    for (const m of filas) {
+      const nombre = m.productos?.nombre ?? 'Sin producto'
+      porProducto.set(nombre, (porProducto.get(nombre) ?? 0) + (m.costo_centavos ?? 0))
+    }
+    const [producto, costoProducto] = [...porProducto.entries()].sort((a, b) => b[1] - a[1])[0] ?? []
+    return { filas, motivos, producto, costoProducto, costo: filas.reduce((s, m) => s + (m.costo_centavos ?? 0), 0) }
   }, [mermas])
 
   useEffect(() => { setPage(1) }, [filtro.desde, filtro.hasta, filtro.sucursalId])
@@ -39,33 +47,32 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
   if (q.cargando) return <SkeletonReport />
   // Sin respuesta no hay nada que resumir: solo el aviso, en vez de un reporte en ceros.
   if (q.datos === undefined) return <AvisoError error={q.error} onReintentar={q.recargar} />
-  const { filas, motivos, costo } = r
+  const { filas, motivos, costo, producto, costoProducto } = r
 
   return (
     <>
       <AvisoError error={q.error} onReintentar={q.recargar} className="mb-6" />
       <Kpis items={[
-        { label: 'Mermas registradas', value: filas.length,                 nota: 'en el periodo', mal: filas.length > 0 },
-        { label: 'Costo total',        value: pesos(costo),                 nota: 'producto perdido o dañado', mal: costo > 0 },
-        { label: 'Costo promedio',     value: pesos(filas.length ? costo / filas.length : 0), nota: 'por merma' },
-        { label: 'Principal motivo',   value: motivos[0]?.motivo ?? '—',    nota: motivos[0] ? `${motivos[0].casos} de ${filas.length} casos` : 'sin mermas' },
+        { icon: Trash2,   label: 'Mermas registradas', value: filas.length,              nota: 'en el periodo', mal: filas.length > 0 },
+        { icon: Banknote, label: 'Costo total',        value: pesos(costo),              nota: 'producto perdido o dañado', mal: costo > 0 },
+        { icon: Package,  label: 'Más perdido',        value: producto ?? '—',           nota: producto ? pesos(costoProducto) : 'sin mermas' },
+        { icon: Tags,     label: 'Principal motivo',   value: motivos[0]?.motivo ?? '—', nota: motivos[0] ? `${motivos[0].casos} de ${plural(filas.length, 'merma')}` : 'sin mermas' },
       ]} />
-      <ChartCard title="Costo de las mermas por motivo" subtitle={`Total: ${pesos(costo)} · ${filas.length} merma${filas.length !== 1 ? 's' : ''}`}>
+      {/* Pocos motivos: una lista con su barra se lee mejor que una gráfica de barras sueltas */}
+      <ChartCard title="Costo por motivo" subtitle={`Total: ${pesos(costo)} · ${plural(filas.length, 'merma')}`}>
         {motivos.length === 0 ? <SinDatos>Sin mermas en este periodo</SinDatos> : (
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={motivos} barCategoryGap="35%" maxBarSize={56}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
-              <XAxis dataKey="motivo" tick={tick} axisLine={false} tickLine={false} />
-              <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <Tooltip formatter={v => [fmtDec(v), 'Costo']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
-              <Bar dataKey="costo" fill="#C97A6D" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="flex flex-col gap-3.5" style={{ maxWidth: 720 }}>
+            {motivos.map(m => (
+              <FilaDesglose key={m.motivo} etiqueta={m.motivo} cuenta={plural(m.casos, 'merma')}
+                derecha={`${pesos(m.centavos)} · ${costo ? Math.round(m.centavos / costo * 100) : 0}%`}
+                pct={costo ? Math.round(m.centavos / costo * 100) : 0} color="#8A4A42" />
+            ))}
+          </div>
         )}
       </ChartCard>
       <TableCard title="Historial de mermas" exportLabel="Exportar CSV"
         onExport={() => downloadCSV(filas.map(m => ({ folio: m.folio, fecha: `${fecha(m.fecha)} ${hora(m.fecha)}`, producto: m.productos?.nombre ?? '', cantidad: m.cantidad, unidad: m.productos?.unidad ?? '', motivo: m.motivo ?? '', sucursal: nombreCorto(m.sucursal_id), costo: ((m.costo_centavos ?? 0) / 100).toFixed(2) })), 'reporte_mermas')}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Folio', 'Fecha', 'Producto', 'Cantidad', 'Motivo', 'Sucursal', 'Costo'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>
@@ -76,15 +83,15 @@ export default function ReporteMermas({ filtro, nombreCorto }) {
                   <td className="font-medium" style={{ color: '#263442' }}>{m.productos?.nombre ?? '—'}</td>
                   <td style={{ color: '#627080' }}>{cantidad(m.cantidad, m.productos?.unidad)}</td>
                   <td className="text-xs" style={{ color: '#627080' }}>{m.motivo ?? '—'}</td>
-                  <td><span className="tag tag-gray">{nombreCorto(m.sucursal_id)}</span></td>
-                  <td className="font-bold" style={{ color: '#C97A6D' }}>{pesos(m.costo_centavos)}</td>
+                  <td style={{ color: '#627080' }}>{nombreCorto(m.sucursal_id)}</td>
+                  <td className="font-bold" style={{ color: '#8A4A42' }}>{pesos(m.costo_centavos)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr style={{ background: 'rgba(201,122,109,.06)', borderTop: '1px solid rgba(201,122,109,.2)' }}>
                 <td className={celdaTotal} style={{ color: '#263442' }} colSpan={6}>Costo total de mermas</td>
-                <td className={celdaTotal} style={{ color: '#C97A6D' }}>{pesos(costo)}</td>
+                <td className={celdaTotal} style={{ color: '#8A4A42' }}>{pesos(costo)}</td>
               </tr>
             </tfoot>
           </table>

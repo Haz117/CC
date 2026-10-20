@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { escucharTabla } from '../lib/tiempoReal'
 import { esDemo } from '../api/fuente'
+import { marcarSincronizado } from '../lib/sincronizacion'
 
 const ESPERA_EN_VIVO = 1500          // junta varios cambios seguidos en una sola recarga
 const MINIMO_ENTRE_RECARGAS = 10000  // con muchas ventas seguidas no se recarga más de una vez cada 10 s
@@ -24,6 +25,7 @@ export function useConsulta(consultar, deps = [], { enVivo = [], activo = true }
     setEstado(e => ({ ...e, cargando: e.datos === undefined, actualizando: e.datos !== undefined }))
     try {
       const datos = await consultaRef.current()
+      marcarSincronizado()
       if (id === pedido.current) setEstado({ datos, error: null, cargando: false, actualizando: false })
     } catch (error) {
       if (id === pedido.current) setEstado(e => ({ ...e, error, cargando: false, actualizando: false }))

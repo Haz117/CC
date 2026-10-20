@@ -1,10 +1,13 @@
-// Filtro por sucursal: sin elegir una, se ven todas juntas.
-export default function SelectorSucursal({ value, onChange, sucursales, soloTiendas = false, className = 'filter-input' }) {
-  const opciones = soloTiendas ? sucursales.filter(s => !s.es_almacen) : sucursales
-  return (
-    <select value={value} onChange={e => onChange(e.target.value)} className={className} aria-label="Sucursal">
-      <option value="">Todas las sucursales</option>
-      {opciones.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
-    </select>
-  )
+import { Store } from 'lucide-react'
+import Selector from './Selector'
+
+// Filtro por sucursal: sin elegir una, se ven todas juntas. El valor viaja como texto,
+// igual que con el <select> de antes.
+export default function SelectorSucursal({ value, onChange, sucursales, soloTiendas = false, className = '' }) {
+  const lista = soloTiendas ? sucursales.filter(s => !s.es_almacen) : sucursales
+  const opciones = [
+    { valor: '', texto: 'Todas las sucursales' },
+    ...lista.map(s => ({ valor: String(s.id), texto: s.nombre })),
+  ]
+  return <Selector value={String(value ?? '')} onChange={onChange} opciones={opciones} etiqueta="Sucursal" icono={Store} className={className} />
 }

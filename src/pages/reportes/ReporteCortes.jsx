@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts'
+import { Scissors, CheckCircle2, TrendingDown, TrendingUp } from 'lucide-react'
 import { SkeletonReport } from '../../components/Skeleton'
+import Estado from '../../components/Estado'
 import Pagination from '../../components/Pagination'
 import ChartCard from '../../components/ChartCard'
 import TableCard from '../../components/TableCard'
@@ -8,9 +10,10 @@ import AvisoError from '../../components/AvisoError'
 import { downloadCSV } from '../../utils/csv'
 import { useConsulta } from '../../hooks/useConsulta'
 import { listarCortes } from '../../api/cajas'
-import { pesos, fecha, hora, diaCorto, fmtDec, diaLocal } from '../../utils/fmt'
+import { pesos, fecha, hora, diaCorto, fmtDec, diaLocal, plural } from '../../utils/fmt'
 import { PAGE_SIZE, tooltipStyle, ejeMiles, tick } from './constantes'
 import { Kpis, SinDatos } from './piezas'
+import Grafica from '../../components/Grafica'
 
 /* ── CORTES DE CAJA ──────────────────────────────────────── */
 export default function ReporteCortes({ filtro, nombreCorto }) {
@@ -55,29 +58,32 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
     <>
       <AvisoError error={q.error} onReintentar={q.recargar} className="mb-6" />
       <Kpis items={[
-        { label: 'Cortes del periodo', value: filas.length,       nota: 'turnos cerrados' },
-        { label: 'Sin diferencia',     value: cuadrados,          nota: filas.length ? `${Math.round(cuadrados / filas.length * 100)}% de los cortes` : 'sin cortes' },
-        { label: 'Faltantes',          value: pesos(-faltante),   nota: 'contado menor al esperado', mal: faltante < 0 },
-        { label: 'Sobrantes',          value: pesos(sobrante),    nota: 'contado mayor al esperado', mal: sobrante > 0 },
+        { icon: Scissors,     label: 'Cortes del periodo', value: filas.length, nota: filas.length ? `de ${plural(new Set(filas.map(c => `${c.sucursal_id}|${c.caja?.nombre}`)).size, 'caja')}` : 'ninguno en el periodo' },
+        { icon: CheckCircle2, label: 'Sin diferencia',    value: cuadrados,          nota: filas.length ? `${Math.round(cuadrados / filas.length * 100)}% de los cortes` : 'sin cortes' },
+        { icon: TrendingDown, label: 'Faltantes',         value: pesos(-faltante),   nota: 'contado menor al esperado', mal: faltante < 0 },
+        { icon: TrendingUp,   label: 'Sobrantes',         value: pesos(sobrante),    nota: 'contado mayor al esperado', mal: sobrante > 0 },
       ]} />
-      <ChartCard title="Diferencia de los cortes por día" subtitle={`Neto del periodo: ${faltante + sobrante < 0 ? '-' : ''}${pesos(Math.abs(faltante + sobrante))}`}>
+      <ChartCard title="Diferencia de los cortes por día" subtitle={`Neto del periodo: ${faltante + sobrante < 0 ? '−' : ''}${pesos(Math.abs(faltante + sobrante))}`}>
         {dias.length === 0 ? <SinDatos>Sin cortes en este periodo</SinDatos> : (
+          <Grafica titulo="Diferencia de los cortes por día" datos={dias} etiqueta="etiqueta" valor="diferencia">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dias} barCategoryGap="35%" maxBarSize={48}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F3F5" vertical={false} />
               <XAxis dataKey="etiqueta" tick={tick} axisLine={false} tickLine={false} minTickGap={10} />
               <YAxis tick={tick} axisLine={false} tickLine={false} tickFormatter={ejeMiles} width={52} />
-              <ReferenceLine y={0} stroke="#D4DDE6" />
-              <Tooltip formatter={v => [fmtDec(v), 'Diferencia']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
+              {/* El eje siempre incluye el cero (sin él, una barra de −$12.50 parecía enorme) y conserva marcas redondas */}
+              <ReferenceLine y={0} stroke="#D4DDE6" ifOverflow="extendDomain" />
+              <Tooltip separator=": " formatter={v => [fmtDec(v), 'Diferencia']} contentStyle={tooltipStyle} cursor={{ fill: '#FFF7ED' }} />
               <Bar dataKey="diferencia" radius={[4, 4, 4, 4]} minPointSize={3}>
-                {dias.map(d => <Cell key={d.dia} fill={d.diferencia < 0 ? '#C97A6D' : d.diferencia > 0 ? '#d97706' : '#059669'} />)}
+                {dias.map(d => <Cell key={d.dia} fill={d.diferencia < 0 ? '#8A4A42' : d.diferencia > 0 ? '#92400E' : '#047857'} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          </Grafica>
         )}
       </ChartCard>
       <TableCard title="Detalle de cortes" exportLabel="Exportar CSV" onExport={exportar}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del reporte">
           <table className="table-modern">
             <thead><tr>{['Caja', 'Sucursal', 'Cajero', 'Cierre', 'Esperado', 'Contado', 'Diferencia'].map(t => <th key={t}>{t}</th>)}</tr></thead>
             <tbody>
@@ -86,13 +92,13 @@ export default function ReporteCortes({ filtro, nombreCorto }) {
                 return (
                   <tr key={c.id}>
                     <td className="font-semibold" style={{ color: '#263442' }}>{c.caja?.nombre ?? 'Caja'}</td>
-                    <td><span className="tag tag-gray">{nombreCorto(c.sucursal_id)}</span></td>
+                    <td style={{ color: '#627080' }}>{nombreCorto(c.sucursal_id)}</td>
                     <td style={{ color: '#627080' }}>{c.cajero?.nombre_completo ?? '—'}</td>
                     <td className="text-xs" style={{ color: '#627080' }}>{fecha(c.cerrado_en)} · {hora(c.cerrado_en)}</td>
                     <td style={{ color: '#627080' }}>{pesos(c.efectivo_esperado_centavos)}</td>
                     <td className="font-semibold" style={{ color: '#263442' }}>{pesos(c.efectivo_contado_centavos)}</td>
-                    <td className="font-bold" style={{ color: d < 0 ? '#C97A6D' : d > 0 ? '#d97706' : '#059669' }}>
-                      {d === 0 ? 'Sin diferencia' : `${d < 0 ? '-' : '+'}${pesos(Math.abs(d))}`}
+                    <td>
+                      <Estado label={d === 0 ? 'Sin diferencia' : `${d < 0 ? 'Faltante' : 'Sobrante'} ${pesos(Math.abs(d))}`} color={d < 0 ? 'red' : 'amber'} normal={d === 0} />
                     </td>
                   </tr>
                 )

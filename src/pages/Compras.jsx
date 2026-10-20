@@ -9,9 +9,8 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import PageHeader from '../components/PageHeader'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
-import { INIT_PROVEEDORES, INIT_ORDENES } from '../data/compras'
+import { listarProveedores, listarOrdenes } from '../api/compras'
 import { fmt } from '../utils/fmt'
-import { useLoadDelay } from '../hooks/useLoadDelay'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useDebounce } from '../hooks/useDebounce'
 import { usePersistedState } from '../hooks/usePersistedState'
@@ -27,16 +26,21 @@ const EMPTY_PROV = { nombre: '', rfc: '', contacto: '', telefono: '', email: '',
 
 export default function Compras() {
   const PER_PAGE = 5
-  const loaded = useLoadDelay()
+  const [loaded, setLoaded]           = useState(false)
   const [tab,             setTab]             = usePersistedState('compras-tab', 'ordenes')
   const [page,            setPage]            = useState(1)
-  const [ordenes,         setOrdenes]         = useState(INIT_ORDENES)
+  const [ordenes,         setOrdenes]         = useState([])
   const [showOrdenModal,  setShowOrdenModal]  = useState(false)
   const [showProvModal,   setShowProvModal]   = useState(false)
-  const [editingProv,     setEditingProv]     = useState(null)  // null = new, object = editing
+  const [editingProv,     setEditingProv]     = useState(null)
   const [search,          setSearch]          = usePersistedState('compras-search', '')
   const debouncedSearch = useDebounce(search)
-  const [proveedores,     setProveedores]     = useState(INIT_PROVEEDORES)
+  const [proveedores,     setProveedores]     = useState([])
+
+  useEffect(() => {
+    Promise.all([listarProveedores(), listarOrdenes()])
+      .then(([p, o]) => { setProveedores(p); setOrdenes(o); setLoaded(true) })
+  }, [])
   const [provForm,        setProvForm]        = useState(EMPTY_PROV)
   const [provErrors,      setProvErrors]      = useState({})
   const [ordenErrors,     setOrdenErrors]     = useState({})
@@ -231,7 +235,7 @@ export default function Compras() {
           <div className="card overflow-hidden">
             <div className="data-toolbar">
               <div className="data-toolbar-row">
-                <SearchInput value={search} onChange={setSearch} placeholder="Buscar por folio o proveedor..." resultCount={filtered.length} />
+                <SearchInput value={search} onChange={setSearch} placeholder="Buscar por folio o proveedor…" resultCount={filtered.length} />
               </div>
             </div>
             <div className="section-head">
@@ -414,7 +418,7 @@ export default function Compras() {
                 </select>
               </FormField>
               <FormField label="Observaciones">
-                <textarea rows={2} placeholder="Notas adicionales..." className="input-field resize-none"
+                <textarea rows={2} placeholder="Notas adicionales…" className="input-field resize-none"
                   value={ordenForm.notas} onChange={e=>setOrdenForm(f=>({...f,notas:e.target.value}))} />
               </FormField>
             </div>

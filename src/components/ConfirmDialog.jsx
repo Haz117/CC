@@ -10,9 +10,9 @@ export default function ConfirmDialog({
   onCancel,
 }) {
   const isDanger   = type === 'danger'
-  const accentColor = isDanger ? '#C97A6D' : '#F97316'
+  const accentColor = isDanger ? '#8A4A42' : '#C2410C'
   const iconBg      = isDanger ? 'rgba(201,122,109,.12)' : '#FFF7ED'
-  const btnBg       = isDanger ? '#C97A6D' : '#F97316'
+  const btnBg       = isDanger ? '#8A4A42' : '#C2410C'
   const ringColor   = isDanger ? 'rgba(201,122,109,.14)' : 'rgba(249,115,22,.14)'
 
   return (
@@ -39,7 +39,7 @@ export default function ConfirmDialog({
             </div>
           </div>
 
-          <h3 className="text-base font-black mb-2 tracking-tight" style={{ color: '#263442' }}>{title}</h3>
+          <h3 className="text-base font-bold mb-2 tracking-tight" style={{ color: '#263442' }}>{title}</h3>
           <p className="text-sm leading-relaxed max-w-[260px]" style={{ color: '#627080' }}>{message}</p>
         </div>
 

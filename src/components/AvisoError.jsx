@@ -13,10 +13,10 @@ export default function AvisoError({ error, onReintentar, className = '' }) {
       className={`flex items-center gap-3 flex-wrap rounded-2xl px-4 py-3.5${className ? ' ' + className : ''}`}
       style={{ background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.25)' }}
     >
-      <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: '#C97A6D' }} />
+      <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: '#8A4A42' }} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold" style={{ color: '#A05A52' }}>No se pudieron cargar los datos</p>
-        <p className="text-xs mt-0.5" style={{ color: '#C97A6D' }}>{error.message}</p>
+        <p className="text-sm font-bold" style={{ color: '#8A4A42' }}>No se pudieron cargar los datos</p>
+        <p className="text-xs mt-0.5" style={{ color: '#8A4A42' }}>{error.message}</p>
       </div>
       {sesionVencida ? (
         <button onClick={cerrarSesion} className="btn-primary">

@@ -45,7 +45,7 @@ export default function CambiarContrasena({ onClose }) {
             onKeyDown={e => { if (e.key === 'Enter') guardar() }} />
         </FormField>
       </div>
-      <ModalFooter onCancel={onClose} onConfirm={guardar} disabled={guardando} confirmLabel={guardando ? 'Guardando...' : 'Cambiar contraseña'} />
+      <ModalFooter onCancel={onClose} onConfirm={guardar} disabled={guardando} confirmLabel={guardando ? 'Guardando…' : 'Cambiar contraseña'} />
     </Modal>
   )
 }

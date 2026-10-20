@@ -4,7 +4,11 @@ import { pesos, fechaHora } from '../utils/fmt'
 
 const TECNICAS = new Set(['id', 'creado_en', 'actualizado_en', 'eliminado_en', 'sincronizado_en', 'activo'])
 
-const titulo = (columna) => columna.replace(/_centavos$|_id$/, '').replace(/_/g, ' ')
+// "cantidad_sugerida" → "Cantidad sugerida" (antes la mayúscula la ponía el CSS en toda la palabra)
+const titulo = (columna) => {
+  const t = columna.replace(/_centavos$|_id$/, '').replace(/_/g, ' ')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
 
 function texto(columna, valor) {
   if (valor == null || valor === '') return '—'
@@ -21,18 +25,19 @@ function texto(columna, valor) {
    (*_centavos → pesos, fechas ISO → hora local, estado → etiqueta). Las llaves *_id solo
    se muestran si `resolver` trae cómo convertirlas a un nombre; `resolver` también puede
    dar formato a cualquier otra columna y recibe (valor, fila). `primero` fija columnas al
-   inicio y `titulos` cambia el encabezado de las que lo necesiten.
+   inicio y `titulos` cambia el encabezado de las que lo necesiten. `ocultar` quita columnas que
+   valen lo mismo en todas las filas (p. ej. el estado de una lista que ya viene filtrada por estado).
    En móvil cada fila se vuelve una tarjeta con la etiqueta de cada columna. */
-export default function TablaGenerica({ filas, resolver = {}, primero = [], titulos = {} }) {
+export default function TablaGenerica({ filas, resolver = {}, primero = [], titulos = {}, ocultar = [] }) {
   const presentes = [...new Set(filas.flatMap(f => Object.keys(f)))]
   const resto = presentes.filter(c =>
-    !primero.includes(c) && !TECNICAS.has(c) && (!/_id$/.test(c) || resolver[c]),
+    !primero.includes(c) && !TECNICAS.has(c) && !ocultar.includes(c) && (!/_id$/.test(c) || resolver[c]),
   )
   const columnas = [...primero.filter(c => presentes.includes(c)), ...resto]
   const encabezado = (c) => titulos[c] ?? titulo(c)
 
   return (
-    <div className="overflow-x-auto table-card sin-acciones">
+    <div className="overflow-x-auto table-card sin-acciones" tabIndex={0} role="region" aria-label="Tabla del reporte">
       <table className="table-modern">
         <thead>
           <tr>{columnas.map(c => <th key={c}>{encabezado(c)}</th>)}</tr>

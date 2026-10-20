@@ -1,7 +1,7 @@
 // Pruebas del formato de dinero y cantidades, y de los rangos de fechas que se mandan a la base.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset } from '../src/utils/fmt.js'
+import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto, pesosEje, plural, horario, diaLargo, mesNombre } from '../src/utils/fmt.js'
 
 test('pesos: la base guarda centavos enteros', () => {
   assert.equal(pesos(1250), '$12.50')
@@ -41,6 +41,29 @@ test('rangoISO: de la medianoche local del primer día a la del día siguiente a
   assert.equal(rangoISO('2026-10-31').hasta, new Date(2026, 10, 1).toISOString())
 })
 
+test('rangoCorto: solo repite el mes y el año cuando cambian', () => {
+  assert.equal(rangoCorto('2026-10-19'), '19 oct 2026')
+  assert.equal(rangoCorto('2026-10-19', '2026-10-19'), '19 oct 2026')
+  assert.equal(rangoCorto('2026-10-13', '2026-10-19'), '13 – 19 oct 2026')
+  assert.equal(rangoCorto('2026-09-28', '2026-10-19'), '28 sep – 19 oct 2026')
+  assert.equal(rangoCorto('2025-12-28', '2026-01-03'), '28 dic 2025 – 3 ene 2026')
+})
+
+test('diaCorto: día y mes separados por espacio, sin guion ni punto', () => {
+  assert.equal(diaCorto(new Date(2026, 9, 19, 12).toISOString()), '19 oct')
+  assert.equal(diaCorto(new Date(2026, 8, 3, 12).toISOString()), '03 sep')
+  assert.equal(diaCorto(null), '—')
+})
+
+test('haceCuanto: justo ahora, minutos y, pasada una hora, la hora', () => {
+  const t = new Date(2026, 9, 19, 13, 5).getTime()
+  assert.equal(haceCuanto(t, t + 10_000), 'justo ahora')
+  assert.equal(haceCuanto(t, t - 5_000), 'justo ahora') // reloj desfasado: nunca "hace -1 min"
+  assert.equal(haceCuanto(t, t + 50_000), 'hace 1 min')
+  assert.equal(haceCuanto(t, t + 12 * 60_000), 'hace 12 min')
+  assert.equal(haceCuanto(t, t + 2 * 3600_000), 'a las 13:05')
+})
+
 test('diaLocal e inicioDelDia usan la hora local, no UTC', () => {
   const casiMedianoche = new Date(2026, 9, 8, 23, 59)
   assert.equal(diaLocal(casiMedianoche), '2026-10-08')
@@ -69,4 +92,31 @@ test('rangoPreset: los atajos de los filtros terminan hoy (salvo "ayer")', () =>
   const [hace90, finTrimestre] = rangoPreset('trimestre')
   assert.equal(hace90, diaLocal(sumarDias(new Date(), -89)))
   assert.equal(finTrimestre, hoy)
+})
+
+test('pesosEje: montos cortos para el eje de las gráficas', () => {
+  assert.equal(pesosEje(0), '$0')
+  assert.equal(pesosEje(850), '$850')
+  assert.equal(pesosEje(12500), '$12.5k')
+  assert.equal(pesosEje(-1250), '-$1.3k')
+})
+
+test('plural: singular solo con uno', () => {
+  assert.equal(plural(1, 'corte'), '1 corte')
+  assert.equal(plural(0, 'corte'), '0 cortes')
+  assert.equal(plural(3, 'faltante'), '3 faltantes')
+  assert.equal(plural(2, 'sucursal', 'sucursales'), '2 sucursales')
+})
+
+test('horario: un solo día muestra solo las horas', () => {
+  const el = (dia, h, m = 0) => new Date(2026, 9, dia, h, m).toISOString()
+  assert.equal(horario(el(19, 8), el(19, 20, 17)), '08:00 – 20:17')
+  assert.equal(horario(el(19, 22), el(20, 6, 10)), '19 oct 22:00 – 20 oct 06:10')
+  assert.equal(horario(el(19, 7, 45), null), 'desde 07:45')
+})
+
+test('diaLargo y mesNombre: para el encabezado del panel', () => {
+  assert.equal(diaLargo(new Date(2026, 9, 20)), 'Martes 20 de octubre')
+  assert.equal(diaLargo(new Date(2026, 0, 1)), 'Jueves 1 de enero')
+  assert.equal(mesNombre(new Date(2026, 9, 20)), 'octubre')
 })

@@ -14,9 +14,8 @@ import toast from '../utils/toast'
 import PageHeader from '../components/PageHeader'
 import KpiBar from '../components/KpiBar'
 import Pagination from '../components/Pagination'
-import { rutas } from '../data/rutas'
+import { listarRutas } from '../api/rutas'
 import { fmt } from '../utils/fmt'
-import { useLoadDelay } from '../hooks/useLoadDelay'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useDebounce } from '../hooks/useDebounce'
 import { usePersistedState } from '../hooks/usePersistedState'
@@ -70,7 +69,7 @@ const routeIcon = (color, active = false) => divIcon({
 
 export default function Rutas() {
   const PER_PAGE = 5
-  const loaded = useLoadDelay()
+  const [loaded, setLoaded] = useState(false)
   const [filter, setFilter]           = usePersistedState('rutas-filter', 'Todas')
   const [search, setSearch]           = usePersistedState('rutas-search', '')
   const debouncedSearch = useDebounce(search)
@@ -78,11 +77,14 @@ export default function Rutas() {
   const [showModal, setShowModal]     = useState(false)
   const [selected, setSelected]       = useState(null)
   const [confirmDel, setConfirmDel]   = useState(null)
-  const [data, setData]               = useState(rutas)
+  const [data, setData]               = useState([])
   const [rutaForm, setRutaForm]       = useState(BLANK_RUTA)
   const [rutaErrors, setRutaErrors]   = useState({})
   const [shake, setShake]             = useState(false)
   const shakeTimer = useRef(null)
+
+  useEffect(() => { listarRutas().then(d => { setData(d); setLoaded(true) }) }, [])
+
   const { sortKey, sortDir, handleSort } = useSort('nombre')
   const [showEditModal, setShowEditModal] = useState(false)
   const [editRuta, setEditRuta]           = useState(null)
@@ -210,7 +212,7 @@ export default function Rutas() {
             </div>
             <button onClick={() => setShowModal(true)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#FFF0E5', color: '#F97316' }} title="Nueva ruta"><Plus className="w-3.5 h-3.5" /></button>
           </div>
-          <SearchInput className="flex-none" value={search} onChange={setSearch} placeholder="Buscar ruta..." resultCount={filtered.length} />
+          <SearchInput className="flex-none" value={search} onChange={setSearch} placeholder="Buscar ruta…" resultCount={filtered.length} />
           <div className="mt-3 space-y-2 overflow-y-auto" style={{ maxHeight: 450 }}>
             {data.map(route => {
               const meta = mapRoutes[route.id]
@@ -443,7 +445,7 @@ export default function Rutas() {
       <div className="card overflow-hidden mb-5 hidden lg:block" style={{ marginTop: '1.75rem' }}>
         <div className="data-toolbar">
           <div className="data-toolbar-row">
-            <SearchInput value={search} onChange={setSearch} placeholder="Buscar ruta o distribuidor..." resultCount={filtered.length} />
+            <SearchInput value={search} onChange={setSearch} placeholder="Buscar ruta o distribuidor…" resultCount={filtered.length} />
             <div className="filter-bar flex-wrap">
               {['Todas', 'En proceso', 'Finalizada', 'Pendiente', 'Cancelada'].map(s => (
                 <button key={s} onClick={() => setFilter(s)} className={`chip ${filter === s ? 'active' : ''}`}
@@ -567,7 +569,7 @@ export default function Rutas() {
       <div className="card overflow-hidden lg:hidden">
         <div className="data-toolbar">
           <div className="data-toolbar-row">
-            <SearchInput value={search} onChange={setSearch} placeholder="Buscar ruta o distribuidor..." resultCount={filtered.length} />
+            <SearchInput value={search} onChange={setSearch} placeholder="Buscar ruta o distribuidor…" resultCount={filtered.length} />
             <div className="filter-bar flex-wrap">
               {['Todas', 'En proceso', 'Finalizada', 'Pendiente', 'Cancelada'].map(s => (
                 <button key={s} onClick={() => setFilter(s)} className={`chip ${filter === s ? 'active' : ''}`}
