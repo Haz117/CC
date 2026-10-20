@@ -25,7 +25,7 @@ export function SettingRow({ label, sub, on, onChange }) {
   return (
     <div
       className="flex items-center justify-between p-4 rounded-xl cursor-pointer select-none transition-colors"
-      style={{ background: on ? '#FFF7ED' : '#F2F3F5', border: `1px solid ${on ? '#FDBA74' : '#FDE8D0'}` }}
+      style={{ background: on ? '#FFF7ED' : '#F2F3F5', border: `1px solid ${on ? '#FDBA74' : '#E8EBEF'}` }}
       onClick={onChange}
     >
       <div className="min-w-0 mr-4">

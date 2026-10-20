@@ -178,9 +178,9 @@ export default function Login() {
       {demoDisponible && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '40px 0 24px' }}>
-            <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
+            <div style={{ flex: 1, height: 1, background: '#E8EBEF' }} />
             <span style={{ fontSize: 13, fontWeight: 500, color: '#627080' }}>Demostración</span>
-            <div style={{ flex: 1, height: 1, background: '#FDE8D0' }} />
+            <div style={{ flex: 1, height: 1, background: '#E8EBEF' }} />
           </div>
           <p style={{ fontSize: 12, color: '#627080', marginBottom: 12, lineHeight: 1.5 }}>
             Datos de ejemplo, sin conexión a la base.
@@ -190,7 +190,7 @@ export default function Login() {
             onClick={handleDemo}
             disabled={loading}
             style={{ width: '100%', padding: '12px 8px', borderRadius: 12, background: '#FFF7ED', color: '#C2410C', border: '1px solid #FDBA74', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'background .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#FDE8D0' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#E8EBEF' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#FFF7ED' }}
           >
             Entrar en modo demostración

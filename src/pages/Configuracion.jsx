@@ -297,7 +297,7 @@ export default function Configuracion() {
                       className="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
                       style={{
                         background:   on ? '#FFF7ED' : '#F2F3F5',
-                        borderColor:  on ? '#FDBA74' : '#FDE8D0',
+                        borderColor:  on ? '#FDBA74' : '#E8EBEF',
                         opacity:      on ? 1 : 0.65,
                       }}
                     >
@@ -368,23 +368,23 @@ export default function Configuracion() {
                   <p className="text-[13px] font-semibold text-center mb-3" style={{ color: '#627080' }}>
                     Vista previa
                   </p>
-                  <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #FDE8D0', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
+                  <div className="bg-white rounded-xl p-4 font-mono text-xs" style={{ color: '#263442', border: '1px solid #E8EBEF', boxShadow: '0 1px 4px rgba(38,52,66,.06)' }}>
                     <p className="text-center font-bold text-sm mb-0.5">{ticketNombre || 'Nombre de empresa'}</p>
                     <p className="text-center text-[10px]" style={{ color: '#627080' }}>{ticketDir || 'Dirección'}</p>
                     <p className="text-center text-[10px]" style={{ color: '#627080' }}>Tel: {ticketTel || '—'}</p>
                     {ticketOpts.rfc && <p className="text-center text-[10px]" style={{ color: '#627080' }}>RFC: {ticketRfc || '—'}</p>}
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E8EBEF' }} />
                     <p>Venta: V-00522</p>
                     <p>Fecha: 29/07/2026 09:45</p>
                     <p>Cajero: María López</p>
                     <p>Caja: Caja 1 - Centro</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E8EBEF' }} />
                     <p>Queso Oaxaca 500g x2 &nbsp;$90.00</p>
                     <p>Crema Ácida 1L x1 &nbsp;&nbsp;&nbsp;&nbsp;$38.00</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E8EBEF' }} />
                     <p className="font-bold" style={{ color: '#C2410C' }}>TOTAL: $128.00</p>
                     <p className="text-[10px]" style={{ color: '#627080' }}>IVA incluido (16%): $17.66</p>
-                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#FDE8D0' }} />
+                    <div className="my-2 border-t border-dashed" style={{ borderColor: '#E8EBEF' }} />
                     <p className="text-center font-medium" style={{ color: '#C2410C' }}>{ticketMensaje || 'Mensaje de pie'}</p>
                   </div>
                 </div>

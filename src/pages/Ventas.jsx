@@ -71,7 +71,7 @@ function Ticket({ venta, onClose }) {
     >
       <div className="p-0">
         {/* Receipt header */}
-        <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #FDE8D0' }}>
+        <div className="px-6 pt-6 pb-5 text-center" style={{ borderBottom: '2px dashed #E8EBEF' }}>
           <Logo size={44} className="mx-auto mb-3" style={{ display: 'block' }} />
           <p className="font-bold text-sm" style={{ color: '#263442' }}>{venta.sucursal}</p>
           <p className="text-xs mt-0.5" style={{ color: '#627080' }}>Atendió: {venta.cajeroNombre}</p>
@@ -85,7 +85,7 @@ function Ticket({ venta, onClose }) {
         )}
 
         {/* Renglones */}
-        <div className="px-6 py-4 space-y-2.5" style={{ borderBottom: '2px dashed #FDE8D0' }}>
+        <div className="px-6 py-4 space-y-2.5" style={{ borderBottom: '2px dashed #E8EBEF' }}>
           {cargando && <><SkeletonLine h="h-3" /><SkeletonLine w="w-2/3" h="h-3" /><SkeletonLine h="h-3" /></>}
           <AvisoError error={error} onReintentar={recargar} />
           {renglones.map(r => (
@@ -103,7 +103,7 @@ function Ticket({ venta, onClose }) {
         </div>
 
         {/* Pagos */}
-        <div className="px-6 py-4 space-y-2" style={{ borderBottom: '2px dashed #FDE8D0' }}>
+        <div className="px-6 py-4 space-y-2" style={{ borderBottom: '2px dashed #E8EBEF' }}>
           {(venta.venta_pagos ?? []).map((p, i) => (
             <div key={`${p.metodo}-${i}`} className="flex justify-between items-center">
               <span className="text-xs font-medium" style={{ color: '#627080' }}>Pago · {etiquetaMetodo(p.metodo)}</span>
@@ -127,7 +127,7 @@ function Ticket({ venta, onClose }) {
           )}
         </div>
       </div>
-      <div className="px-6 py-4 flex justify-between gap-3 no-imprimir" style={{ borderTop: '1px solid #FDE8D0' }}>
+      <div className="px-6 py-4 flex justify-between gap-3 no-imprimir" style={{ borderTop: '1px solid #E8EBEF' }}>
         <button className="btn-secondary flex items-center gap-2" onClick={() => window.print()}>
           <Printer className="w-4 h-4" aria-hidden="true" /> Imprimir ticket
         </button>
@@ -265,7 +265,7 @@ export default function Ventas() {
             <Grafica titulo={unSoloDia ? 'Ventas por hora' : 'Ventas por día'} datos={tendencia} etiqueta="etiqueta" valor="total">
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={tendencia} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="#FDE8D0" />
+                <CartesianGrid vertical={false} stroke="#E8EBEF" />
                 <XAxis dataKey="etiqueta" tick={{ fontSize: 11, fill: '#627080' }} axisLine={false} tickLine={false} minTickGap={12} />
                 {/* Eje con montos para leer la gráfica sin pasar el ratón */}
                 <YAxis tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} width={46} tickCount={4} tickFormatter={pesosEje} />
@@ -286,7 +286,7 @@ export default function Ventas() {
             })}
             {metodos.length === 0 && <p className="text-xs text-center" style={{ color: '#627080' }}>Sin pagos en este periodo</p>}
           </div>
-          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #FDE8D0' }}>
+          <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid #E8EBEF' }}>
             <span className="text-xs" style={{ color: '#627080' }}>Total cobrado</span>
             <span className="text-sm font-bold" style={{ color: '#263442' }}>{pesos(cobrado)}</span>
           </div>
@@ -338,7 +338,7 @@ export default function Ventas() {
         {/* Section head */}
         <div className="section-head">
           <div className="flex items-center gap-2">
-            <ReceiptText className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+            <ReceiptText className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
             <span className="section-head-text"><strong>Transacciones</strong></span>
             {canceladas.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{canceladas.length} cancelada{canceladas.length !== 1 ? 's' : ''}</span>}
           </div>

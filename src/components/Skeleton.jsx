@@ -25,7 +25,7 @@ export function SkeletonTableRows({ rows = 5 }) {
         ))}
       </div>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #FDE8D0' }}>
+        <div key={i} className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: '1px solid #E8EBEF' }}>
           {widths.map((w, j) => (
             <div key={j} style={{ width: w }}>
               <SkeletonLine h={j === 0 ? 'h-4' : 'h-3'} />

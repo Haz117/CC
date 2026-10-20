@@ -3,7 +3,7 @@
 export default function TableCard({ title, onExport, exportLabel = 'Exportar PDF', className = '', children }) {
   return (
     <div className={`card overflow-hidden tabla-fija ${className}`}>
-      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #FDE8D0' }}>
+      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #E8EBEF' }}>
         <h2 className="font-bold tracking-tight" style={{ color: '#263442' }}>{title}</h2>
         {onExport && (
           <button

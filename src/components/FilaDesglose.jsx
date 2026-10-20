@@ -13,7 +13,7 @@ export default function FilaDesglose({ etiqueta, cuenta, derecha, tonoDerecha = 
           <span className="text-[0.8125rem] font-semibold flex-shrink-0" style={{ color: tonoDerecha, fontVariantNumeric: 'tabular-nums' }}>{derecha}</span>
         )}
       </div>
-      <div className="h-1.5 rounded-full" style={{ background: '#FDE8D0' }}>
+      <div className="h-1.5 rounded-full" style={{ background: '#E8EBEF' }}>
         <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
       </div>
     </div>

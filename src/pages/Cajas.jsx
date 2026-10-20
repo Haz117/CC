@@ -74,8 +74,8 @@ function DetalleTurno({ turno, onClose }) {
           <InfoCell label="Cierre" value={abierto ? '—' : `${diaCorto(turno.cerrado_en)} ${hora(turno.cerrado_en)}`} center />
         </div>
 
-        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
-          <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #FDE8D0' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E8EBEF' }}>
+          <div className="px-4 py-2.5" style={{ background: '#F2F3F5', borderBottom: '1px solid #E8EBEF' }}>
             <p className="text-[0.8125rem] font-semibold" style={{ color: '#627080' }}>{abierto ? 'Efectivo del turno' : 'Corte de caja'}</p>
           </div>
           <div>
@@ -86,7 +86,7 @@ function DetalleTurno({ turno, onClose }) {
               !abierto && { label: 'Efectivo esperado', value: pesos(turno.efectivo_esperado_centavos), color: '#263442', icon: TrendingUp },
               !abierto && { label: 'Efectivo contado',  value: pesos(turno.efectivo_contado_centavos),  color: '#263442', icon: Scissors },
             ].filter(Boolean).map(item => (
-              <div key={item.label} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #FDE8D0' }}>
+              <div key={item.label} className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #E8EBEF' }}>
                 <div className="flex items-center gap-2.5">
                   <item.icon className="w-4 h-4 flex-shrink-0" style={{ color: item.color }} />
                   <span className="text-sm" style={{ color: '#627080' }}>{item.label}</span>
@@ -143,7 +143,7 @@ function DetalleTurno({ turno, onClose }) {
           <p className="text-xs" style={{ color: '#627080' }}>Cerró el turno: <strong style={{ color: '#627080' }}>{turno.cerro.nombre_completo}</strong></p>
         )}
       </div>
-      <div className="px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #FDE8D0' }}>
+      <div className="px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #E8EBEF' }}>
         <button onClick={onClose} className="btn-primary">Cerrar</button>
       </div>
     </Modal>
@@ -249,7 +249,7 @@ export default function Cajas() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2 flex-wrap">
-              <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+              <Monitor className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Abiertas ahora</strong></span>
               {abiertas.datos !== undefined && <span style={{ fontSize: '.75rem', color: '#627080' }}>{plural(modelo.abiertas.length, 'caja')} · no dependen del periodo</span>}
             </div>
@@ -374,14 +374,14 @@ export default function Cajas() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2 flex-wrap">
-              <Scissors className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+              <Scissors className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Cortes de caja</strong></span>
               <span style={{ fontSize: '.75rem', color: '#627080' }}>{rangoCorto(dateFrom, dateTo)}</span>
               {conDiferencia > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{conDiferencia} con diferencia</span>}
             </div>
           </div>
           {totalCortes > MAX_CORTES && (
-            <p className="px-5 py-2 text-xs font-semibold" style={{ color: '#C2410C', background: '#FFF7ED', borderBottom: '1px solid #FDE8D0' }}>
+            <p className="px-5 py-2 text-xs font-semibold" style={{ color: '#C2410C', background: '#FFF7ED', borderBottom: '1px solid #E8EBEF' }}>
               El periodo tiene {totalCortes} cortes; se muestran los {MAX_CORTES} más recientes. Acorta el rango para verlos todos.
             </p>
           )}

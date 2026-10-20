@@ -56,7 +56,7 @@ export default function BottomNav({ onMoreClick, globos = {} }) {
       className="lg:hidden fixed bottom-0 inset-x-0 z-20 grid grid-cols-5"
       style={{
         background: '#fff',
-        borderTop: '1px solid #FDE8D0',
+        borderTop: '1px solid #E8EBEF',
         boxShadow: '0 -4px 24px rgba(194,65,12,.10)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}

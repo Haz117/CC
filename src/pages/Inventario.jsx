@@ -63,9 +63,9 @@ function DetalleProducto({ producto: p, nombreSucursal, onClose }) {
 
         <div>
           <p className="text-[0.8125rem] font-semibold mb-2" style={{ color: '#627080' }}>Existencia por sucursal</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #FDE8D0' }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E8EBEF' }}>
             {p.porSucursal.map(s => (
-              <div key={s.sucursal_id} className="flex items-center justify-between gap-3 px-4 py-2.5" style={{ borderBottom: '1px solid #FDE8D0' }}>
+              <div key={s.sucursal_id} className="flex items-center justify-between gap-3 px-4 py-2.5" style={{ borderBottom: '1px solid #E8EBEF' }}>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-snug" style={{ color: '#263442' }}>{nombreSucursal(s.sucursal_id)}</p>
                   <p className="text-xs" style={{ color: '#627080' }}>
@@ -113,7 +113,7 @@ function DetalleProducto({ producto: p, nombreSucursal, onClose }) {
           </div>
         )}
       </div>
-      <div className="px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #FDE8D0' }}>
+      <div className="px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #E8EBEF' }}>
         <button onClick={onClose} className="btn-primary">Cerrar</button>
       </div>
     </Modal>
@@ -277,13 +277,13 @@ export default function Inventario() {
               <Grafica titulo="Productos más bajos, en porcentaje de su mínimo" datos={masBajos} etiqueta="nombre" valor="pct" unidad="porcentaje">
               <ResponsiveContainer width="100%" height={148}>
                 <BarChart data={masBajos.map(p => ({ ...p, barra: Math.min(p.pct, 300) }))} maxBarSize={28} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                  <CartesianGrid vertical={false} stroke="#FDE8D0" />
+                  <CartesianGrid vertical={false} stroke="#E8EBEF" />
                   <XAxis dataKey="clave" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} minTickGap={6} />
                   <ReferenceLine y={100} stroke="#059669" strokeDasharray="5 3" label={{ value: 'Mínimo', position: 'insideBottomLeft', fontSize: 9, fill: '#047857', fontWeight: 700 }} />
                   <Tooltip
                     cursor={{ fill: '#FFF7ED' }}
                     content={({ active, payload }) => active && payload?.length ? (
-                      <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
+                      <div style={{ background: '#fff', border: '1px solid #E8EBEF', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
                         <p style={{ fontSize: 11, color: '#627080', fontWeight: 700 }}>{payload[0].payload.nombre} · {nombreSucursal(payload[0].payload.sucursal_id)}</p>
                         <p style={{ fontSize: 13, fontWeight: 800, color: tono(payload[0].payload.nivel) }}>{cantidad(payload[0].payload.existencia, payload[0].payload.unidad)} · {payload[0].payload.pct}%</p>
                         <p style={{ fontSize: 11, color: '#627080' }}>Mínimo: {cantidad(payload[0].payload.minimo, payload[0].payload.unidad)}</p>
@@ -324,7 +324,7 @@ export default function Inventario() {
         <div className="card overflow-hidden">
           <div className="section-head">
             <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+              <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Reabastecimiento pendiente</strong></span>
               <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{ordenes.length} pedido{ordenes.length !== 1 ? 's' : ''}</span>
             </div>
@@ -357,7 +357,7 @@ export default function Inventario() {
             />
           </div>
           {ordenes.length > MAX_ORDENES && (
-            <p className="px-5 py-2.5 text-xs" style={{ color: '#627080', borderTop: '1px solid #FDE8D0' }}>
+            <p className="px-5 py-2.5 text-xs" style={{ color: '#627080', borderTop: '1px solid #E8EBEF' }}>
               Se muestran {MAX_ORDENES} de {ordenes.length} pedidos pendientes.
             </p>
           )}
@@ -378,7 +378,7 @@ export default function Inventario() {
               style={{ animationDelay: `${Math.min(i * 40, 200)}ms`, fontFamily: 'inherit' }}
             >
               <div className="flex items-start justify-between mb-3">
-                <IconoProducto categoria={p.categoria} nombre={p.nombre} size={28} color={esBajo(p.nivel) ? p.nivel.tono : '#C2410C'} />
+                <IconoProducto categoria={p.categoria} nombre={p.nombre} size={28} color={esBajo(p.nivel) ? p.nivel.tono : '#627080'} />
                 {/* La tarjeta solo avisa cuando hay algo que hacer: un producto en orden no lleva etiqueta */}
                 {(bajo(p) || p.nivel === NIVEL.SIN) && <Badge label={p.nivel.label} color={p.nivel.color} />}
               </div>
@@ -423,7 +423,7 @@ export default function Inventario() {
           {toolbar}
           <div className="section-head">
             <div className="flex items-center gap-2">
-              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} aria-hidden="true" />
+              <Package className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
               <span className="section-head-text"><strong>Existencias</strong></span>
               <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} producto{filtered.length !== 1 ? 's' : ''}</span>
               {bajos.length > 0 && <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#8A4A42' }}>{bajos.length} bajo mínimo</span>}

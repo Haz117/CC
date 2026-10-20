@@ -39,7 +39,7 @@ export default function PwaInstallPrompt() {
         bottom: 'calc(4.5rem + env(safe-area-inset-bottom))',
         left: 12, right: 12,
         background: '#fff',
-        border: '1px solid #FDE8D0',
+        border: '1px solid #E8EBEF',
         borderRadius: 18,
         boxShadow: '0 8px 32px rgba(194,65,12,.18)',
         padding: '14px 16px',

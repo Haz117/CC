@@ -58,7 +58,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
       className="flex items-center px-4 gap-3 flex-shrink-0 sticky top-0 z-10 relative app-header"
       style={{
         background: '#FFFFFF',
-        borderBottom: '1px solid #FDE8D0',
+        borderBottom: '1px solid #E8EBEF',
         boxShadow: '0 1px 0 rgba(194,65,12,.06)',
       }}
     >
@@ -159,7 +159,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                 role="menu"
                 aria-label="Notificaciones"
                 className="absolute right-0 top-12 w-80 max-sm:fixed max-sm:left-3 max-sm:right-3 max-sm:top-16 max-sm:w-auto rounded-2xl overflow-hidden animate-scale-in z-50"
-                style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
+                style={{ background: '#fff', border: '1px solid #E8EBEF', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
               >
                 <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid #F2F3F5' }}>
                   {hasErrors && <span className="red-dot" />}
@@ -248,7 +248,7 @@ export default function Header({ onMenuClick, onOpenPalette, avisos = [] }) {
                 role="menu"
                 aria-label="Menú de perfil"
                 className="absolute right-0 top-12 w-56 rounded-2xl overflow-hidden animate-scale-in z-50"
-                style={{ background: '#fff', border: '1px solid #FDE8D0', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
+                style={{ background: '#fff', border: '1px solid #E8EBEF', boxShadow: '0 16px 48px rgba(194,65,12,.14)' }}
               >
                 {/* Profile card */}
                 <div className="px-4 py-3.5" style={{ borderBottom: '1px solid #F2F3F5' }}>
