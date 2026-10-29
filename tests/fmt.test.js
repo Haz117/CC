@@ -1,7 +1,9 @@
 // Pruebas del formato de dinero y cantidades, y de los rangos de fechas que se mandan a la base.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto, pesosEje, plural, horario, diaLargo, mesNombre } from '../src/utils/fmt.js'
+import {
+  pesos, pesosCorto, cantidad, iniciales, diaLocal, inicioDelDia, sumarDias, rangoISO, rangoPreset, rangoCorto, haceCuanto, diaCorto, pesosEje, plural, horario, diaLargo, mesNombre, sinAcentos, contiene,
+} from '../src/utils/fmt.js'
 
 test('pesos: la base guarda centavos enteros', () => {
   assert.equal(pesos(1250), '$12.50')
@@ -119,4 +121,11 @@ test('diaLargo y mesNombre: para el encabezado del panel', () => {
   assert.equal(diaLargo(new Date(2026, 9, 20)), 'Martes 20 de octubre')
   assert.equal(diaLargo(new Date(2026, 0, 1)), 'Jueves 1 de enero')
   assert.equal(mesNombre(new Date(2026, 9, 20)), 'octubre')
+})
+
+test('buscar: sin acentos ni mayúsculas', () => {
+  assert.equal(sinAcentos('José PÉREZ'), 'jose perez')
+  assert.equal(contiene('Crema Ácida 1 L', sinAcentos('crema acida')), true)
+  assert.equal(contiene('Requesón', sinAcentos('REQUESON')), true)
+  assert.equal(contiene(null, 'x'), false)
 })

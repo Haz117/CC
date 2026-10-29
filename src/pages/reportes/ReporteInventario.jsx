@@ -61,7 +61,7 @@ export default function ReporteInventario({ filtro, nombreCorto }) {
         { icon: AlertCircle,   label: 'Críticos',          value: criticos,         nota: 'a la mitad del mínimo o menos', mal: criticos > 0 },
         { icon: CircleSlash,   label: 'Sin mínimo',        value: sinMinimo,        nota: 'sin límite configurado' },
       ]} />
-      <ChartCard title="Existencia contra el mínimo" subtitle="Los 10 productos más cerca o más abajo de su mínimo, en % del mínimo de la sucursal donde peor están">
+      <ChartCard title="Existencia contra el mínimo" subtitle="Los 10 más cerca de su mínimo (% en la sucursal donde peor están)">
         {grafica.length === 0 ? <SinDatos>No hay mínimos configurados</SinDatos> : (
           <Grafica titulo="Existencia contra mínimo" resumen={`Existencia contra mínimo. ${grafica.map(g => `${g.clave}: ${cantidad(g.existencia, g.unidad)} de ${cantidad(g.minimo, g.unidad)} de mínimo (${g.pct}%)`).join('; ')}.`}>
           <ResponsiveContainer width="100%" height={280}>

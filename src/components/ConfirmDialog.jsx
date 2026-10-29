@@ -1,5 +1,9 @@
+import { useEffect, useId, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle, Info } from 'lucide-react'
 
+// Se monta en <body>, como Modal: dentro de la página quedaba debajo de la barra de navegación del
+// celular y sus botones no se podían tocar. El foco entra en "Cancelar", la opción segura.
 export default function ConfirmDialog({
   title,
   message,
@@ -14,10 +18,16 @@ export default function ConfirmDialog({
   const iconBg      = isDanger ? 'rgba(201,122,109,.12)' : '#FFF7ED'
   const btnBg       = isDanger ? '#8A4A42' : '#C2410C'
   const ringColor   = isDanger ? 'rgba(201,122,109,.14)' : 'rgba(249,115,22,.14)'
+  const idTitulo = useId()
+  const idMensaje = useId()
+  // En un efecto y no con autoFocus: si se abre al cerrar otra ventana, esa devuelve el foco a su botón
+  // después de montar esta, y el efecto corre después de esa limpieza.
+  const cancelar = useRef(null)
+  useEffect(() => { cancelar.current?.focus() }, [])
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>
-      <div className="modal-card max-w-sm" style={{ overflow: 'hidden' }}>
+      <div className="modal-card max-w-sm" role="alertdialog" aria-modal="true" aria-labelledby={idTitulo} aria-describedby={idMensaje} style={{ overflowX: 'hidden', overflowY: 'auto', maxHeight: 'calc(100dvh - 2rem)' }}>
         {/* Top accent stripe */}
         <div className="h-[3px] w-full" style={{ background: accentColor }} />
 
@@ -39,8 +49,8 @@ export default function ConfirmDialog({
             </div>
           </div>
 
-          <h3 className="text-base font-bold mb-2 tracking-tight" style={{ color: '#263442' }}>{title}</h3>
-          <p className="text-sm leading-relaxed max-w-[260px]" style={{ color: '#627080' }}>{message}</p>
+          <h3 id={idTitulo} className="text-base font-bold mb-2 tracking-tight" style={{ color: '#263442' }}>{title}</h3>
+          <p id={idMensaje} className="text-sm leading-relaxed max-w-[260px]" style={{ color: '#627080' }}>{message}</p>
         </div>
 
         <div className="px-6 pb-6 flex gap-3">
@@ -48,6 +58,7 @@ export default function ConfirmDialog({
             className="btn-secondary flex-1"
             onClick={onCancel}
             style={{ fontWeight: 700 }}
+            ref={cancelar}
           >
             {cancelLabel}
           </button>
@@ -63,6 +74,7 @@ export default function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

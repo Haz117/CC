@@ -21,7 +21,7 @@ import { listarVentasResumen } from '../api/ventas'
 import { listarTurnosAbiertos } from '../api/cajas'
 import { listarMetas, listarSaldosCredito, listarUsuariosSlim } from '../api/organizacion'
 import { ventasPorSucursal } from '../lib/calculos'
-import { pesos, pesosCorto, pesosEje, inicioDelMes, mesLargo } from '../utils/fmt'
+import { pesos, pesosCorto, pesosEje, inicioDelMes, mesLargo, sinAcentos, contiene } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 
 const PER_PAGE = 8
@@ -96,9 +96,9 @@ export default function Sucursales() {
   }, [sucursales, datos])
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase()
+    const q = sinAcentos(debouncedSearch.trim())
     return data.filter(s =>
-      (!q || String(s.nombre ?? '').toLowerCase().includes(q) || String(s.direccion ?? '').toLowerCase().includes(q)) &&
+      (!q || contiene(s.nombre, q) || contiene(s.direccion, q)) &&
       (filterStatus === 'Todas' || (filterStatus === 'Activas' ? s.activa : !s.activa))
     )
   }, [data, debouncedSearch, filterStatus])
@@ -128,7 +128,7 @@ export default function Sucursales() {
   const paginadas = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
   // No tener sucursales (o no poder cargarlas) no es lo mismo que una búsqueda sin resultados
   const vacio = error || errorSucursales
-    ? { icon: Store, title: 'No se pudieron cargar las sucursales', subtitle: 'Revisa el aviso de arriba y vuelve a intentar.' }
+    ? { icon: Store, title: 'No se pudieron cargar las sucursales' }
     : data.length === 0
       ? { icon: Store, title: 'Todavía no hay sucursales', subtitle: 'Aparecen aquí en cuanto se dan de alta en la caja del almacén y se sincronizan.' }
       : { icon: Search, title: 'Sin resultados', subtitle: 'Intenta con otro término o limpia los filtros.' }

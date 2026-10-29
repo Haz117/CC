@@ -1,537 +1,327 @@
-﻿import { useState, useEffect, useMemo } from 'react'
-import { Truck, Plus, Package, DollarSign, Eye, Edit, Trash2, Users, TrendingUp } from 'lucide-react'
-import Modal from '../components/Modal'
-import SortTh from '../components/SortTh'
-import { useSort } from '../hooks/useSort'
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { SkeletonTableRows } from '../components/Skeleton'
-import Badge from '../components/Badge'
-import ConfirmDialog from '../components/ConfirmDialog'
-import toast from '../utils/toast'
-import SearchInput from '../components/SearchInput'
+﻿import { useMemo, useState } from 'react'
+import { Users, Plus, Edit, UserX, Navigation, ShoppingCart, AlertTriangle, KeyRound, Truck, ChevronRight } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
+import EnVivo from '../components/EnVivo'
 import KpiBar from '../components/KpiBar'
-import Pagination from '../components/Pagination'
-import { listarDistribuidores } from '../api/distribuidores'
-import { fmt } from '../utils/fmt'
+import AvisoError from '../components/AvisoError'
+import FiltroPeriodo from '../components/FiltroPeriodo'
+import SearchInput from '../components/SearchInput'
+import Segmentado from '../components/Segmentado'
+import Selector from '../components/Selector'
+import Badge from '../components/Badge'
+import Estado from '../components/Estado'
+import Modal from '../components/Modal'
+import ModalFooter from '../components/ModalFooter'
+import FormField from '../components/FormField'
+import ConfirmDialog from '../components/ConfirmDialog'
+import EmptyState from '../components/EmptyState'
+import { SkeletonTableRows } from '../components/Skeleton'
+import { useConsulta } from '../hooks/useConsulta'
+import { usePeriodo } from '../hooks/usePeriodo'
+import { useEstadoSesion } from '../hooks/useEstadoSesion'
 import { useEscapeKey } from '../hooks/useEscapeKey'
 import { useDebounce } from '../hooks/useDebounce'
 import { usePersistedState } from '../hooks/usePersistedState'
-import ModalFooter from '../components/ModalFooter'
-import EmptyState from '../components/EmptyState'
-import FormField from '../components/FormField'
-import InfoCell from '../components/InfoCell'
+import { listarPersonalRuta, guardarPersonalRuta, quitarPersonalRuta, etiquetaRolRuta, ROL_RUTA } from '../api/distribuidores'
+import { listarJornadas, listarCamiones } from '../api/rutas'
+import { listarUsuarios } from '../api/organizacion'
+import { jornadasPorChofer, resumenJornadas } from '../lib/calculos'
+import { pesos, plural, rangoCorto, sinAcentos, contiene } from '../utils/fmt'
+import toast from '../utils/toast'
 
-const statusColor = { Activo: 'green', 'En ruta': 'blue', 'Saldo pendiente': 'red' }
-const BLANK_FORM = { nombre: '', telefono: '', ruta: 'Sin ruta', listaPrecio: 'Lista general', credito: '' }
+/* Distribuidores: el personal de la app de ruta. Choferes (venden), encargados (autorizan
+   cancelaciones) y almacenistas (firman la carga y el cierre), cada uno con su PIN de 4 dígitos.
+   Las personas salen de `usuarios`; aquí solo se les da acceso a la app del camión. */
+
+const ORDEN_ROL = [ROL_RUTA.CHOFER, ROL_RUTA.ENCARGADO, ROL_RUTA.ALMACEN]
+const COLOR_ROL = { CHOFER: 'orange', ENCARGADO: 'purple', ALMACEN: 'teal' }
+const QUE_HACE = {
+  CHOFER: 'Vende en ruta.',
+  ENCARGADO: 'Autoriza cancelaciones.',
+  ALMACEN: 'Firma carga y cierre.',
+}
+
+function FormPersona({ persona, personal, camiones, onClose, onGuardado, onQuitar }) {
+  const nueva = !persona
+  // Al devolver el acceso también hace falta PIN nuevo: el viejo pudo dársele a otra persona mientras
+  const pidePin = nueva || !persona.activo
+  const usuarios = useConsulta(listarUsuarios, [], { activo: nueva })
+  const [form, setForm] = useState(() => ({
+    usuarioId: persona?.usuario_id ?? '',
+    rol: persona?.rol_ruta ?? ROL_RUTA.CHOFER,
+    sucursalId: persona?.sucursal_id ?? '',
+    pin: '',
+  }))
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const cambiar = (campo) => (valor) => { setForm(f => ({ ...f, [campo]: valor })); setError('') }
+  const yaEstan = new Set(personal.map(p => p.usuario_id))
+  const candidatos = (usuarios.datos ?? []).filter(u => u.activo && !yaEstan.has(u.id))
+
+  const guardar = async () => {
+    if (!form.usuarioId) return setError('Elige a la persona')
+    if (pidePin && !form.pin) return setError(nueva ? 'Asigna un PIN de 4 números' : 'Para devolverle el acceso asigna un PIN nuevo')
+    if (form.pin && !/^\d{4}$/.test(form.pin)) return setError('El PIN son 4 números')
+    setGuardando(true)
+    try {
+      await guardarPersonalRuta(form)
+      const nombre = persona?.usuario?.nombre_completo ?? candidatos.find(u => u.id === form.usuarioId)?.nombre_completo ?? ''
+      toast.success(nueva ? 'Acceso dado' : 'Cambios guardados', nombre)
+      onGuardado()
+    } catch (e) {
+      setError(e.message)
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <Modal title={nueva ? 'Dar acceso' : persona.usuario?.nombre_completo} subtitle={nueva ? undefined : persona.usuario?.usuario} onClose={onClose}>
+      <div className="p-6 space-y-4">
+        {nueva && (
+          <FormField label="Persona" required>
+            <AvisoError error={usuarios.error} onReintentar={usuarios.recargar} />
+            {usuarios.cargando ? <p className="text-sm" style={{ color: '#627080' }}>Cargando usuarios…</p> : candidatos.length ? (
+              <Selector value={form.usuarioId} onChange={cambiar('usuarioId')} etiqueta="Persona"
+                opciones={[{ valor: '', texto: 'Elige a la persona' }, ...candidatos.map(u => ({ valor: u.id, texto: `${u.nombre_completo} · ${u.usuario}` }))]} />
+            ) : (
+              <p className="text-sm" style={{ color: '#627080' }}>No hay usuarios sin acceso. Da de alta a la persona en la caja del almacén.</p>
+            )}
+          </FormField>
+        )}
+        <FormField label="Qué hace en la ruta" required>
+          <Segmentado opciones={ORDEN_ROL.map(r => ({ valor: r, texto: etiquetaRolRuta(r) }))} value={form.rol} onChange={cambiar('rol')} etiqueta="Rol en la ruta" />
+          <p className="text-xs mt-1.5" style={{ color: '#627080' }}>{QUE_HACE[form.rol]}</p>
+        </FormField>
+        <FormField label="Camión">
+          <Selector value={form.sucursalId} onChange={cambiar('sucursalId')} etiqueta="Camión"
+            opciones={[{ valor: '', texto: 'Cualquier camión' }, ...camiones.map(c => ({ valor: c.sucursal_id, texto: `${c.sucursal?.nombre ?? c.nombre} · ${c.nombre}` }))]} />
+        </FormField>
+        <FormField label={nueva ? 'PIN' : 'PIN nuevo'} required={pidePin}>
+          <input
+            className="input-field"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder={pidePin ? '4 números' : 'Déjalo vacío para conservar el actual'}
+            value={form.pin}
+            onChange={e => cambiar('pin')(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            style={{ letterSpacing: form.pin ? '.4em' : undefined, fontVariantNumeric: 'tabular-nums' }}
+          />
+          <p className="text-xs mt-1" style={{ color: '#627080' }}>4 dígitos, distinto para cada persona.</p>
+        </FormField>
+        {error && <p className="text-sm font-semibold" role="alert" style={{ color: '#8A4A42' }}>{error}</p>}
+        {/* En celular la tabla no trae columna de acciones: quitar el acceso también se hace desde aquí */}
+        {!nueva && persona.activo && (
+          <button type="button" onClick={() => onQuitar(persona)} className="text-sm font-semibold flex items-center gap-1.5" style={{ color: '#8A4A42', minHeight: 44 }}>
+            <UserX className="w-4 h-4" aria-hidden="true" /> Quitar acceso a la app de ruta
+          </button>
+        )}
+      </div>
+      <ModalFooter onCancel={onClose} onConfirm={guardar} disabled={guardando || (nueva && !candidatos.length)} confirmLabel={guardando ? 'Guardando…' : nueva ? 'Dar acceso' : !persona.activo ? 'Devolver acceso' : 'Guardar'} />
+    </Modal>
+  )
+}
 
 export default function Distribuidores() {
-  const PER_PAGE = 5
-  const [loaded, setLoaded]       = useState(false)
-  const [search, setSearch]       = usePersistedState('distribuidores-search', '')
+  const periodo = usePeriodo('semana', 'distribuidores')
+  const { dateFrom, dateTo, desde, hasta } = periodo
+  const [search, setSearch] = usePersistedState('distribuidores-search', '')
   const debouncedSearch = useDebounce(search)
-  const [page, setPage]           = useState(1)
-  const [showModal, setShowModal] = useState(false)
-  const [selected, setSelected]   = useState(null)
-  const [editItem, setEditItem]   = useState(null)
-  const [editForm, setEditForm]   = useState(null)
-  const [confirmDel, setConfirmDel] = useState(null)
-  const [newForm, setNewForm]     = useState(BLANK_FORM)
-  const [data, setData]           = useState([])
-  const { sortKey, sortDir, handleSort } = useSort('nombre')
+  const [rol, setRol] = useEstadoSesion('distribuidores:rol', 'TODOS')
+  const [editando, setEditando] = useState(undefined) // undefined: cerrado · null: nueva · persona: editar
+  const [quitando, setQuitando] = useState(null)
 
-  useEffect(() => { listarDistribuidores().then(d => { setData(d); setLoaded(true) }) }, [])
+  const personal = useConsulta(listarPersonalRuta)
+  const jornadas = useConsulta(() => listarJornadas({ desde, hasta }), [desde, hasta], { enVivo: ['ruta_envios'] })
+  const camiones = useConsulta(listarCamiones)
+  useEscapeKey(() => { setEditando(undefined); setQuitando(null) })
 
-  const filtered = useMemo(() => data.filter(d =>
-    d.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) || d.ruta.toLowerCase().includes(debouncedSearch.toLowerCase())
-  ), [data, debouncedSearch])
+  const nombreCamion = useMemo(() => {
+    const porId = new Map((camiones.datos ?? []).map(c => [c.sucursal_id, `${c.sucursal?.nombre ?? c.nombre} · ${c.nombre}`]))
+    return (id) => (id ? porId.get(id) ?? '—' : 'Cualquier camión')
+  }, [camiones.datos])
 
-  const sorted = useMemo(() => [...filtered].sort((a, b) => {
-    const mult = sortDir === 'asc' ? 1 : -1
-    if (['mercancia', 'vendido', 'saldo', 'devoluciones', 'clientes'].includes(sortKey))
-      return mult * (a[sortKey] - b[sortKey])
-    return mult * String(a[sortKey]).localeCompare(String(b[sortKey]))
-  }), [filtered, sortKey, sortDir])
-  const paginated = useMemo(() => sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE), [sorted, page])
+  const porChofer = useMemo(() => new Map(jornadasPorChofer(jornadas.datos ?? []).map(f => [f.chofer_id, f])), [jornadas.datos])
+  const r = useMemo(() => resumenJornadas(jornadas.datos ?? []), [jornadas.datos])
 
-  const totalRutas = new Set(data.map(d => d.ruta)).size
-  const distCounts = useMemo(() => {
-    let activos = 0, enRuta = 0, saldo = 0
-    let totalMercancia = 0, totalVendido = 0, totalSaldo = 0, totalDevoluciones = 0
-    const withSales = []
-    for (const d of data) {
-      if (d.status === 'Activo')           activos++
-      else if (d.status === 'En ruta')     enRuta++
-      else if (d.status === 'Saldo pendiente') saldo++
-      if (d.mercancia > 0) withSales.push(d)
-      totalMercancia    += d.mercancia
-      totalVendido      += d.vendido
-      totalSaldo        += d.saldo
-      totalDevoluciones += d.devoluciones
+  const filas = useMemo(() => {
+    const q = sinAcentos(debouncedSearch.trim())
+    return (personal.datos ?? [])
+      .filter(p => rol === 'TODOS' || p.rol_ruta === rol)
+      .filter(p => !q || [p.usuario?.nombre_completo, p.usuario?.usuario].some(x => contiene(x, q)))
+      .sort((a, b) => (b.activo - a.activo) || (ORDEN_ROL.indexOf(a.rol_ruta) - ORDEN_ROL.indexOf(b.rol_ruta))
+        || String(a.usuario?.nombre_completo).localeCompare(String(b.usuario?.nombre_completo), 'es'))
+  }, [personal.datos, rol, debouncedSearch])
+
+  const activos = (personal.datos ?? []).filter(p => p.activo)
+  const cuantos = (rolRuta) => activos.filter(p => p.rol_ruta === rolRuta).length
+  const error = personal.error || jornadas.error
+  const estadoKpi = personal.cargando || jornadas.cargando ? 'cargando' : personal.datos === undefined || jornadas.datos === undefined ? 'error' : null
+
+  const quitar = async () => {
+    const p = quitando
+    setQuitando(null)
+    try {
+      await quitarPersonalRuta(p.usuario_id)
+      toast.success('Acceso quitado', p.usuario?.nombre_completo)
+      personal.recargar()
+    } catch (e) {
+      toast.error('No se pudo quitar el acceso', e.message)
     }
-    return { activos, enRuta, saldo, withSales, totalMercancia, totalVendido, totalSaldo, totalDevoluciones }
-  }, [data])
-
-  const openEdit = (d) => {
-    setEditItem(d)
-    setEditForm({ nombre: d.nombre, telefono: d.telefono, ruta: d.ruta })
   }
-
-  const saveEdit = () => {
-    setData(d => d.map(x => x.id === editItem.id ? { ...x, ...editForm } : x))
-    toast.success('Distribuidor actualizado', `Los datos de ${editForm.nombre} fueron guardados`)
-    setEditItem(null)
-  }
-
-  const deleteItem = (d) => {
-    setData(arr => arr.filter(x => x.id !== d.id))
-    toast.error('Distribuidor eliminado', `${d.nombre} fue removido del sistema`)
-    setConfirmDel(null)
-  }
-
-  const saveNew = () => {
-    if (!newForm.nombre.trim()) return toast.error('Falta nombre', 'Ingresa el nombre del distribuidor')
-    const nextId = Math.max(...data.map(d => d.id)) + 1
-    setData(arr => [...arr, {
-      id: nextId, codigo: `D-00${nextId}`,
-      nombre: newForm.nombre, ruta: newForm.ruta, telefono: newForm.telefono,
-      clientes: 0, mercancia: 0, vendido: 0, saldo: 0, devoluciones: 0, status: 'Activo'
-    }])
-    toast.success('Distribuidor guardado', `${newForm.nombre} fue registrado en el sistema`)
-    setShowModal(false)
-    setNewForm(BLANK_FORM)
-  }
-
-  useEffect(() => { setPage(1) }, [debouncedSearch, sortKey, sortDir])
-  useEscapeKey(() => { setShowModal(false); setSelected(null); setEditItem(null) })
 
   return (
     <div className="space-y-6">
-
-      <PageHeader breadcrumb="Distribuidores" title="Distribuidores" subtitle={`${data.length} distribuidores registrados`}>
-        <button onClick={() => setShowModal(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Nuevo distribuidor
+      <PageHeader title="Distribuidores">
+        <EnVivo actualizando={personal.actualizando || jornadas.actualizando} error={error} />
+        <button className="btn-primary" onClick={() => setEditando(null)} disabled={personal.datos === undefined}>
+          <Plus className="w-4 h-4" /> Dar acceso
         </button>
       </PageHeader>
-      <KpiBar items={[
-        { label: 'Total', value: data.length, sub: 'distribuidores' },
-        { label: 'Activos', value: distCounts.activos, good: true, sub: 'en operación' },
-        { label: 'En ruta', value: distCounts.enRuta, sub: 'activos ahora' },
-        { label: 'Saldo pendiente', value: distCounts.saldo, alert: distCounts.saldo > 0, sub: 'por cobrar' },
-        { label: 'Total mercancía', value: fmt(distCounts.totalMercancia), sub: 'en distribución' },
+
+      <div className="barra-filtros">
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o usuario…" resultCount={filas.length} className="barra-filtros-busqueda" />
+        <FiltroPeriodo periodo={periodo} />
+      </div>
+
+      <KpiBar estado={estadoKpi} items={[
+        { icon: Users, label: 'Choferes', value: cuantos(ROL_RUTA.CHOFER), sub: `${plural(cuantos(ROL_RUTA.ENCARGADO), 'encargado')} · ${cuantos(ROL_RUTA.ALMACEN)} de almacén` },
+        { icon: Navigation, label: 'En ruta ahora', value: r.enRuta, good: r.enRuta > 0, sub: r.sinCerrar ? `${r.sinCerrar} sin cerrar` : '—' },
+        { icon: ShoppingCart, label: 'Vendido', value: pesos(r.vendido), sub: rangoCorto(dateFrom, dateTo) },
+        { icon: AlertTriangle, label: 'A cargo de choferes', value: pesos(r.aCargo), alert: r.aCargo > 0, sub: r.conCargo ? plural(r.conCargo, 'jornada') : '—' },
       ]} />
 
-      {/* ══ Resumen visual ════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        {/* Mercancía vs vendido */}
-        <div className="card p-5 lg:col-span-3">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Mercancía vs vendido</span>
-            <div className="ml-auto flex items-center gap-3">
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#F97316' }} /><span className="text-xs" style={{ color: '#627080' }}>Vendido</span></div>
-              <div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded" style={{ background: '#FDBA74' }} /><span className="text-xs" style={{ color: '#627080' }}>Mercancía</span></div>
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={148}>
-            <BarChart data={data.map(d => ({ name: d.nombre.split(' ')[0], vendido: d.vendido, mercancia: d.mercancia - d.vendido }))} barSize={14} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="#FDE8D0" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#627080' }} axisLine={false} tickLine={false} />
-              <Tooltip
-                cursor={{ fill: '#FFF7ED' }}
-                content={({ active, payload, label }) => active && payload?.length ? (
-                  <div style={{ background: '#fff', border: '1px solid #FDE8D0', borderRadius: 10, padding: '6px 12px', boxShadow: '0 4px 16px rgba(249,115,22,.12)' }}>
-                    <p style={{ fontSize: 10, color: '#627080', fontWeight: 700 }}>{label}</p>
-                    {payload.map(p => <p key={p.name} style={{ fontSize: 12, color: p.fill, fontWeight: 700 }}>{p.name === 'vendido' ? 'Vendido' : 'Restante'}: {fmt(p.value)}</p>)}
-                  </div>
-                ) : null}
-              />
-              <Bar dataKey="vendido" stackId="a" radius={[0, 0, 0, 0]} fill="#F97316" name="vendido" />
-              <Bar dataKey="mercancia" stackId="a" radius={[4, 4, 0, 0]} fill="#FDBA74" name="mercancia" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <AvisoError error={error} onReintentar={() => { personal.recargar(); jornadas.recargar() }} />
 
-        {/* Métricas clave */}
-        <div className="card p-5 flex flex-col gap-3 lg:col-span-2">
-          <div className="flex items-center gap-2 mb-1">
-            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="text-sm font-bold" style={{ color: '#263442' }}>Métricas clave</span>
-          </div>
-          {[
-            { label: 'Total vendido',    value: fmt(distCounts.totalVendido),      color: '#059669', bg: 'rgba(5,150,105,.08)' },
-            { label: 'Saldo por cobrar', value: fmt(distCounts.totalSaldo),        color: '#C97A6D', bg: 'rgba(201,122,109,.08)' },
-            { label: 'Devoluciones',     value: fmt(distCounts.totalDevoluciones), color: '#d97706', bg: 'rgba(217,119,6,.08)' },
-          ].map(m => (
-            <div key={m.label} className="rounded-xl p-3 flex items-center justify-between" style={{ background: m.bg }}>
-              <span className="text-xs font-semibold" style={{ color: '#627080' }}>{m.label}</span>
-              <span className="text-sm font-black" style={{ color: m.color }}>{m.value}</span>
+      {personal.cargando ? <SkeletonTableRows /> : (
+        <div className="card overflow-hidden">
+          <div className="section-head">
+            <div className="flex items-center gap-2 flex-wrap">
+              <KeyRound className="w-4 h-4 flex-shrink-0" style={{ color: '#627080' }} aria-hidden="true" />
+              <span className="section-head-text"><strong>Personal de ruta</strong></span>
+              <span style={{ fontSize: '.75rem', color: '#627080' }}>{rangoCorto(dateFrom, dateTo)}</span>
             </div>
-          ))}
-          <div className="rounded-xl p-3 mt-auto" style={{ background: '#FFF7ED' }}>
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#627080' }}>Eficiencia promedio</p>
-            <div className="flex items-end gap-1.5">
-              <span className="text-2xl font-black" style={{ color: '#F97316' }}>
-                {distCounts.withSales.length
-                  ? Math.round(distCounts.withSales.reduce((a, d) => a + (d.vendido / d.mercancia * 100), 0) / distCounts.withSales.length)
-                  : 0}%
-              </span>
-              <span className="text-xs mb-1" style={{ color: '#627080' }}>de mercancía vendida</span>
-            </div>
+            <Segmentado
+              opciones={[{ valor: 'TODOS', texto: 'Todos' }, ...ORDEN_ROL.map(x => ({ valor: x, texto: etiquetaRolRuta(x) }))]}
+              value={rol}
+              onChange={setRol}
+              etiqueta="Filtrar por rol"
+            />
           </div>
-        </div>
-      </div>
-
-      {/* ── TABLE / CARDS ── */}
-      {!loaded ? <SkeletonTableRows /> : <>
-      <div className="card overflow-hidden mb-6 hidden lg:block">
-        <div className="data-toolbar">
-          <div className="data-toolbar-row">
-            <SearchInput value={search} onChange={setSearch} placeholder="Buscar distribuidor o ruta…" resultCount={filtered.length} />
-          </div>
-        </div>
-        <div className="section-head">
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 flex-shrink-0" style={{ color: '#F97316' }} />
-            <span className="section-head-text"><strong>Distribuidores</strong></span>
-            <span style={{ fontSize: '.7rem', color: '#627080' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
-            <span className="badge" style={{ background: 'rgba(5,150,105,.1)', color: '#059669' }}>{distCounts.activos} activos</span>
-            {distCounts.saldo > 0 && (
-              <span className="badge" style={{ background: 'rgba(201,122,109,.1)', color: '#A05A52' }}>{distCounts.saldo} saldo</span>
-            )}
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="table-modern">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <SortTh col="nombre" label="Distribuidor" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                <SortTh col="ruta" label="Ruta" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                <SortTh col="clientes" label="Clientes" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                <th>Mercancía</th>
-                <th>Vendido</th>
-                <th className="hidden xl:table-cell">Devoluciones</th>
-                <SortTh col="saldo" label="Saldo" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                <SortTh col="status" label="Estado" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginated.map(d => {
-                const pct = d.mercancia > 0 ? Math.min(100, Math.round((d.vendido / d.mercancia) * 100)) : 0
-                return (
-                  <tr key={d.id}>
-                    <td><span className="folio">{d.codigo}</span></td>
-                    <td>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
-                          <Truck className="w-4 h-4" style={{ color: '#F97316' }} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-xs truncate" style={{ color: '#263442' }}>{d.nombre}</p>
-                          <p className="text-xs truncate" style={{ color: '#627080' }}>{d.telefono}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span style={{ color: '#627080' }}>{d.ruta}</span></td>
-                    <td>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" style={{ color: '#FED7AA' }} />
-                        <span className="font-semibold" style={{ color: '#263442' }}>{d.clientes}</span>
+          {/* Celular: un renglón por persona; al tocarlo se edita (y desde ahí se quita el acceso) */}
+          <ul className="sm:hidden lista-movil">
+            {filas.map(p => {
+              const stats = porChofer.get(p.usuario_id)
+              const esChofer = p.rol_ruta === ROL_RUTA.CHOFER
+              return (
+                <li key={p.usuario_id} style={p.activo ? undefined : { opacity: 0.6 }}>
+                  <button type="button" onClick={() => setEditando(p)} className="lista-movil-fila" aria-label={`Editar a ${p.usuario?.nombre_completo}`}>
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold truncate" style={{ color: '#263442' }}>{p.usuario?.nombre_completo ?? '—'}</span>
+                      <Badge label={etiquetaRolRuta(p.rol_ruta)} color={COLOR_ROL[p.rol_ruta]} />
+                    </span>
+                    <span className="flex items-center justify-between gap-3 mt-1">
+                      <span className="text-xs truncate" style={{ color: '#627080' }}>
+                        {[
+                          !p.activo && 'Sin acceso',
+                          stats?.enRuta && 'en ruta ahora',
+                          esChofer && `${pesos(stats?.vendido ?? 0)} en ${plural(stats?.jornadas ?? 0, 'jornada')}`,
+                          esChofer && stats?.aCargo > 0 && `a cargo ${pesos(stats.aCargo)}`,
+                          !esChofer && nombreCamion(p.sucursal_id),
+                        ].filter(Boolean).join(' · ')}
                       </span>
-                    </td>
-                    <td><span className="font-medium" style={{ color: '#627080' }}>{fmt(d.mercancia)}</span></td>
-                    <td>
-                      <div>
-                        <span className="font-bold" style={{ color: '#059669' }}>{fmt(d.vendido)}</span>
-                        <div className="progress-track mt-1">
-                          <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
-                        </div>
-                        <p className="text-xs mt-0.5" style={{ color: '#627080' }}>{pct}%</p>
-                      </div>
-                    </td>
-                    <td className="hidden xl:table-cell"><span style={{ color: '#627080' }}>{fmt(d.devoluciones)}</span></td>
-                    <td>
-                      {d.saldo > 0
-                        ? <span className="font-bold" style={{ color: '#C97A6D' }}>{fmt(d.saldo)}</span>
-                        : <span className="text-xs" style={{ color: '#627080' }}>—</span>}
-                    </td>
-                    <td><Badge label={d.status} color={statusColor[d.status]} /></td>
-                    <td>
-                      <div className="flex gap-1">
-                        <button className="action-btn" title="Ver detalle" onClick={() => setSelected(d)}>
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="action-btn" title="Editar" onClick={() => openEdit(d)}>
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="action-btn danger" title="Eliminar" onClick={() => setConfirmDel(d)}>
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-              {filtered.length === 0 && (
+                      <ChevronRight className="w-4 h-4 flex-shrink-0" style={{ color: '#D4DDE6' }} aria-hidden="true" />
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <div className="hidden sm:block overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla del personal de ruta">
+            <table className="table-modern">
+              <thead>
                 <tr>
-                  <td colSpan={10}>
-                    <EmptyState icon={Truck} title="Sin resultados" subtitle="No hay distribuidores que coincidan con la búsqueda." />
-                  </td>
+                  <th>Persona</th>
+                  <th>Rol</th>
+                  <th className="hidden md:table-cell">Camión</th>
+                  <th>Vendido</th>
+                  <th className="hidden md:table-cell">A cargo</th>
+                  <th>Acceso</th>
+                  <th>Acciones</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <Pagination total={sorted.length} page={page} perPage={PER_PAGE} onChange={setPage} />
-      </div>
-
-      {/* ── CARDS (mobile / tablet) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-6 lg:hidden">
-        {filtered.map((d, i) => (
-          <div
-            key={d.id}
-            className="card p-5 animate-fade-in-up"
-            style={{ animationDelay: `${Math.min(i * 60, 200)}ms`, ...(d.saldo > 0 ? { borderColor: 'rgba(201,122,109,.25)' } : {}) }}
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: '#FFF7ED' }}
-                >
-                  <Truck className="w-5 h-5" style={{ color: '#F97316' }} />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-sm truncate" style={{ color: '#263442' }}>{d.nombre}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                    <span className="folio text-xs flex-shrink-0">{d.codigo}</span>
-                    <span style={{ color: '#D4DDE6' }}>·</span>
-                    <span className="text-xs truncate" style={{ color: '#627080' }}>{d.telefono}</span>
-                  </div>
-                  <p className="text-xs font-medium mt-0.5 truncate" style={{ color: '#F97316' }}>{d.ruta}</p>
-                </div>
-              </div>
-              <Badge label={d.status} color={statusColor[d.status]} />
-            </div>
-
-            {/* KPI grid */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              {[
-                { label: 'Clientes', value: d.clientes, color: '#263442' },
-                { label: 'Mercancía', value: fmt(d.mercancia), color: '#263442' },
-                { label: 'Vendido', value: fmt(d.vendido), color: '#059669' },
-                { label: 'Devoluciones', value: fmt(d.devoluciones), color: d.devoluciones > 0 ? '#C97A6D' : '#8FA1B2' },
-              ].map(item => (
-                <div key={item.label} className="rounded-xl p-2.5" style={{ background: '#F2F3F5' }}>
-                  <p className="text-[10px] mb-0.5" style={{ color: '#627080' }}>{item.label}</p>
-                  <p className="text-sm font-bold" style={{ color: item.color }}>{item.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Saldo pendiente */}
-            {d.saldo > 0 && (
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl mb-3" style={{ background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.2)' }}>
-                <p className="text-xs font-semibold" style={{ color: '#A05A52' }}>Saldo pendiente</p>
-                <p className="text-sm font-black" style={{ color: '#C97A6D' }}>{fmt(d.saldo)}</p>
-              </div>
-            )}
-
-            {/* Mercancía utilization */}
-            <div className="mb-3">
-              <div className="flex justify-between text-[10px] mb-1" style={{ color: '#627080' }}>
-                <span>Utilización de mercancía</span>
-                <span className="font-bold" style={{ color: '#F97316' }}>
-                  {d.mercancia > 0 ? Math.round((d.vendido / d.mercancia) * 100) : 0}%
-                </span>
-              </div>
-              <div className="progress-track">
-                <div
-                  className="progress-fill progress-fill-orange transition-all duration-700"
-                  style={{ width: `${d.mercancia > 0 ? Math.min(100, (d.vendido / d.mercancia) * 100) : 0}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={() => setSelected(d)} className="btn-soft-blue flex-1 py-2 text-xs font-medium rounded-xl flex items-center justify-center gap-1">
-                <Eye className="w-3.5 h-3.5" /> Ver detalle
-              </button>
-              <button onClick={() => openEdit(d)} className="btn-secondary flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1">
-                <Edit className="w-3.5 h-3.5" /> Editar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      </>}
-
-      {/* ── MODAL: Detalle distribuidor ── */}
-      {selected && (
-        <Modal onClose={() => setSelected(null)} header={<div><h3 className="font-bold" style={{ color: '#263442' }}>{selected.nombre}</h3><span className="folio">{selected.codigo}</span></div>}>
-            <div className="p-6 space-y-3">
-              {/* Avatar + progreso */}
-              <div className="flex items-center gap-4 mb-1">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: '#FFF7ED' }}>
-                  <Truck className="w-7 h-7" style={{ color: '#F97316' }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: '#627080' }}>Utilización de mercancía</p>
-                  {(() => {
-                    const pct = selected.mercancia > 0 ? Math.min(100, Math.round((selected.vendido / selected.mercancia) * 100)) : 0
-                    return (
-                      <>
-                        <div className="progress-track" style={{ marginBottom: 4 }}>
-                          <div className="progress-fill progress-fill-orange" style={{ width: `${pct}%` }} />
+              </thead>
+              <tbody>
+                {filas.map(p => {
+                  const stats = porChofer.get(p.usuario_id)
+                  const esChofer = p.rol_ruta === ROL_RUTA.CHOFER
+                  return (
+                    <tr key={p.usuario_id} style={p.activo ? undefined : { opacity: 0.6 }}>
+                      <td>
+                        <p className="text-sm font-semibold" style={{ color: '#263442' }}>{p.usuario?.nombre_completo ?? '—'}</p>
+                        <p className="text-xs" style={{ color: '#627080' }}>{p.usuario?.usuario ?? ''}{stats?.enRuta ? ' · en ruta ahora' : ''}</p>
+                      </td>
+                      <td><Badge label={etiquetaRolRuta(p.rol_ruta)} color={COLOR_ROL[p.rol_ruta]} /></td>
+                      <td className="hidden md:table-cell"><span className="text-sm" style={{ color: '#627080' }}>{nombreCamion(p.sucursal_id)}</span></td>
+                      <td>
+                        {esChofer ? (
+                          <>
+                            <p className="text-sm font-semibold" style={{ color: '#263442', fontVariantNumeric: 'tabular-nums' }}>{pesos(stats?.vendido ?? 0)}</p>
+                            <p className="text-xs" style={{ color: '#627080' }}>{plural(stats?.jornadas ?? 0, 'jornada')}</p>
+                            {stats?.merma > 0 && <p className="text-xs" style={{ color: '#92400E' }}>merma {pesos(stats.merma)}</p>}
+                          </>
+                        ) : <span className="text-sm" style={{ color: '#627080' }}>—</span>}
+                      </td>
+                      <td className="hidden md:table-cell">
+                        {esChofer && stats?.aCargo
+                          ? <span className="text-sm font-semibold" style={{ color: '#8A4A42' }}>{pesos(stats.aCargo)}</span>
+                          : <span className="text-sm" style={{ color: '#627080' }}>—</span>}
+                      </td>
+                      <td><Estado label={p.activo ? 'Con acceso' : 'Sin acceso'} color="gray" normal={p.activo} /></td>
+                      <td>
+                        <div className="flex gap-1">
+                          <button onClick={() => setEditando(p)} className="action-btn" title={p.activo ? 'Editar' : 'Devolver acceso'} aria-label={`Editar a ${p.usuario?.nombre_completo}`}>
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          {p.activo && (
+                            <button onClick={() => setQuitando(p)} className="action-btn" title="Quitar acceso" aria-label={`Quitar acceso a ${p.usuario?.nombre_completo}`}>
+                              <UserX className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
-                        <p className="text-xs font-black" style={{ color: '#F97316' }}>{pct}% <span className="font-normal" style={{ color: '#627080' }}>de mercancía vendida</span></p>
-                      </>
-                    )
-                  })()}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Ruta', value: selected.ruta },
-                  { label: 'Teléfono', value: selected.telefono },
-                  { label: 'Clientes', value: selected.clientes },
-                  { label: 'Mercancía', value: fmt(selected.mercancia) },
-                  { label: 'Vendido', value: fmt(selected.vendido), color: '#059669' },
-                  { label: 'Devoluciones', value: fmt(selected.devoluciones), color: selected.devoluciones > 0 ? '#d97706' : undefined },
-                ].map(item => (
-                  <InfoCell key={item.label} label={item.label} value={item.value} color={item.color || '#263442'} bold />
-                ))}
-                {/* Estado — full width */}
-                <div className="col-span-2 rounded-xl p-3 flex items-center justify-between" style={{ background: '#F2F3F5' }}>
-                  <p className="text-xs" style={{ color: '#627080' }}>Estado</p>
-                  <Badge label={selected.status} color={statusColor[selected.status]} />
-                </div>
-                {/* Saldo — full width, destacado si > 0 */}
-                <div
-                  className="col-span-2 rounded-xl p-3 flex items-center justify-between"
-                  style={selected.saldo > 0
-                    ? { background: 'rgba(201,122,109,.08)', border: '1px solid rgba(201,122,109,.2)' }
-                    : { background: '#F2F3F5' }}
-                >
-                  <p className="text-xs font-semibold" style={{ color: selected.saldo > 0 ? '#A05A52' : '#627080' }}>Saldo pendiente</p>
-                  <p className="text-sm font-black" style={{ color: selected.saldo > 0 ? '#C97A6D' : '#627080' }}>
-                    {selected.saldo > 0 ? fmt(selected.saldo) : '—'}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="modal-footer px-6 py-4 flex justify-end" style={{ borderTop: '1px solid #FDE8D0' }}>
-              <button onClick={() => setSelected(null)} className="btn-secondary">Cerrar</button>
-            </div>
-        </Modal>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          {personal.datos !== undefined && filas.length === 0 && (
+            <EmptyState
+              icon={(personal.datos ?? []).length ? Users : Truck}
+              title={(personal.datos ?? []).length ? 'Sin resultados' : 'Sin personal de ruta'}
+            />
+          )}
+        </div>
       )}
 
-      {/* ── MODAL: Editar distribuidor ── */}
-      {editItem && editForm && (
-        <Modal maxWidth="lg" onClose={() => setEditItem(null)} header={<div><h3 className="font-bold" style={{ color: '#263442' }}>Editar distribuidor</h3><span className="folio">{editItem.codigo}</span></div>}>
-            <div className="p-6 grid grid-cols-2 gap-4">
-              <FormField label="Nombre completo" className="col-span-2">
-                <input
-                  type="text"
-                  value={editForm.nombre}
-                  onChange={e => setEditForm(f => ({ ...f, nombre: e.target.value }))}
-                  className="input-field"
-                  autoFocus
-                />
-              </FormField>
-              <FormField label="Teléfono">
-                <input
-                  type="tel"
-                  value={editForm.telefono}
-                  onChange={e => setEditForm(f => ({ ...f, telefono: e.target.value }))}
-                  className="input-field"
-                />
-              </FormField>
-              <FormField label="Ruta asignada">
-                <select
-                  className="input-field"
-                  value={editForm.ruta}
-                  onChange={e => setEditForm(f => ({ ...f, ruta: e.target.value }))}
-                >
-                  <option>Sin ruta</option>
-                  {['Norte', 'Sur', 'Centro', 'Oriente', 'Poniente'].map(r => <option key={r}>Ruta {r}</option>)}
-                </select>
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => setEditItem(null)} onConfirm={saveEdit} confirmLabel="Guardar cambios" />
-        </Modal>
-      )}
-
-      {/* ── CONFIRM: Eliminar distribuidor ── */}
-      {confirmDel && (
-        <ConfirmDialog
-          title="¿Eliminar distribuidor?"
-          message={`${confirmDel.nombre} (${confirmDel.codigo}) será eliminado permanentemente del sistema.`}
-          confirmLabel="Sí, eliminar"
-          onConfirm={() => deleteItem(confirmDel)}
-          onCancel={() => setConfirmDel(null)}
+      {editando !== undefined && (
+        <FormPersona
+          persona={editando}
+          personal={personal.datos ?? []}
+          camiones={camiones.datos ?? []}
+          onClose={() => setEditando(undefined)}
+          onGuardado={() => { setEditando(undefined); personal.recargar() }}
+          onQuitar={(persona) => { setEditando(undefined); setQuitando(persona) }}
         />
       )}
-
-      {/* ── MODAL: Nuevo distribuidor ── */}
-      {showModal && (
-        <Modal title="Nuevo distribuidor" maxWidth="lg" onClose={() => { setShowModal(false); setNewForm(BLANK_FORM) }}>
-            <div className="p-6 grid grid-cols-2 gap-4">
-              <FormField label="Nombre completo" className="col-span-2">
-                <input
-                  type="text"
-                  placeholder="Nombre del distribuidor"
-                  value={newForm.nombre}
-                  onChange={e => setNewForm(f => ({ ...f, nombre: e.target.value }))}
-                  className="input-field"
-                  autoFocus
-                />
-              </FormField>
-              <FormField label="Teléfono">
-                <input
-                  type="tel"
-                  placeholder="442-000-0000"
-                  value={newForm.telefono}
-                  onChange={e => setNewForm(f => ({ ...f, telefono: e.target.value }))}
-                  className="input-field"
-                />
-              </FormField>
-              <FormField label="Ruta asignada">
-                <select
-                  className="input-field"
-                  value={newForm.ruta}
-                  onChange={e => setNewForm(f => ({ ...f, ruta: e.target.value }))}
-                >
-                  <option>Sin ruta</option>
-                  {['Norte', 'Sur', 'Centro', 'Oriente', 'Poniente'].map(r => <option key={r}>Ruta {r}</option>)}
-                </select>
-              </FormField>
-              <FormField label="Lista de precios">
-                <select
-                  className="input-field"
-                  value={newForm.listaPrecio}
-                  onChange={e => setNewForm(f => ({ ...f, listaPrecio: e.target.value }))}
-                >
-                  <option>Lista general</option>
-                  <option>Lista distribuidores</option>
-                  <option>Lista especial</option>
-                </select>
-              </FormField>
-              <FormField label="Crédito máximo">
-                <input
-                  type="number"
-                  placeholder="$0.00"
-                  value={newForm.credito}
-                  onChange={e => setNewForm(f => ({ ...f, credito: e.target.value }))}
-                  className="input-field"
-                />
-              </FormField>
-            </div>
-            <ModalFooter onCancel={() => { setShowModal(false); setNewForm(BLANK_FORM) }} onConfirm={saveNew} confirmLabel="Guardar distribuidor" />
-        </Modal>
+      {quitando && (
+        <ConfirmDialog
+          title={`¿Quitar acceso a ${quitando.usuario?.nombre_completo}?`}
+          message="Ya no podrá entrar ni autorizar con su PIN. Los teléfonos se enteran al empezar el día: si está en ruta, termina su jornada. Sus ventas se conservan."
+          confirmLabel="Quitar acceso"
+          onConfirm={quitar}
+          onCancel={() => setQuitando(null)}
+        />
       )}
     </div>
   )

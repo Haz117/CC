@@ -1,7 +1,7 @@
 /* PostgREST no suma ni agrupa: los totales se calculan aquí, con las filas que llegan.
    Todo el dinero sigue en centavos; se convierte a pesos solo al mostrar. */
 // Con extensión para que `node --test` pueda importar este módulo sin pasar por Vite.
-import { diaLocal, diaCorto, inicioDelDia, sumarDias } from '../utils/fmt.js'
+import { diaLocal, diaCorto, inicioDelDia, sumarDias, pesos, pesosCorto } from '../utils/fmt.js'
 
 const capital = (texto) => {
   const t = String(texto ?? '').replace(/_/g, ' ').toLowerCase()
@@ -234,4 +234,81 @@ export function armarInventario({ productos = [], existencias = [], limites = []
       peor: comparables.length ? comparables.reduce((a, b) => (razon(b) < razon(a) ? b : a)) : null,
     }
   })
+}
+
+/* ── Ventas en ruta (camiones) ───────────────────────────── */
+// Una jornada es un día de un chofer en un camión (v_ruta_jornadas). Sigue EN_RUTA hasta que sube el cierre.
+export const enRuta = (jornada) => jornada.estado === 'EN_RUTA'
+
+// Abierta desde hace más de 18 h: nadie la cerró (teléfono perdido, sin pila o sin regresar al almacén).
+// Ya no cuenta como "en ruta ahora": hay que ir a cerrarla.
+export const HORAS_SIN_CERRAR = 18
+export function sinCerrar(jornada, ahora = Date.now()) {
+  if (!enRuta(jornada) || !jornada.salida) return false
+  return ahora - new Date(jornada.salida).getTime() > HORAS_SIN_CERRAR * 3600000
+}
+
+export function resumenJornadas(jornadas, ahora = Date.now()) {
+  const r = { jornadas: jornadas.length, enRuta: 0, sinCerrar: 0, vendido: 0, ventas: 0, aCargo: 0, conCargo: 0, merma: 0 }
+  for (const j of jornadas) {
+    if (sinCerrar(j, ahora)) r.sinCerrar++
+    else if (enRuta(j)) r.enRuta++
+    r.vendido += j.vendido_centavos ?? 0
+    r.ventas += j.ventas ?? 0
+    r.merma += j.merma_centavos ?? 0
+    if ((j.a_cargo_centavos ?? 0) > 0) {
+      r.aCargo += j.a_cargo_centavos
+      r.conCargo++
+    }
+  }
+  return r
+}
+
+// Por chofer: jornadas, vendido, merma y lo que quedó a su cargo; primero quien más debe.
+export function jornadasPorChofer(jornadas, ahora = Date.now()) {
+  const porChofer = new Map()
+  for (const j of jornadas) {
+    const clave = j.chofer_id ?? j.chofer ?? '—'
+    const fila = porChofer.get(clave) ?? { chofer_id: j.chofer_id ?? null, nombre: j.chofer ?? '—', jornadas: 0, vendido: 0, merma: 0, aCargo: 0, enRuta: false }
+    fila.jornadas++
+    fila.vendido += j.vendido_centavos ?? 0
+    fila.merma += j.merma_centavos ?? 0
+    fila.aCargo += j.a_cargo_centavos ?? 0
+    if (enRuta(j) && !sinCerrar(j, ahora)) fila.enRuta = true
+    porChofer.set(clave, fila)
+  }
+  return [...porChofer.values()].sort((a, b) => b.aCargo - a.aCargo || b.vendido - a.vendido)
+}
+
+// Con la ruta abierta, más de 15 min sin ubicación quiere decir que la app está cerrada o sin señal.
+export const MINUTOS_SIN_UBICACION = 15
+export function sinUbicacionReciente(jornada, ahora = Date.now()) {
+  if (!enRuta(jornada) || sinCerrar(jornada, ahora)) return false
+  if (!jornada.ultima_ubicacion_en) return true
+  return ahora - new Date(jornada.ultima_ubicacion_en).getTime() > MINUTOS_SIN_UBICACION * 60000
+}
+
+// Con qué se entregó el efectivo, si el almacén lo contó billete por billete en el teléfono:
+// "3 de $500, 1 de $200, monedas $15.50". Si lo escribió de un jalón no hay desglose.
+export function textoDesglose(desglose) {
+  if (!Array.isArray(desglose?.billetes)) return null
+  return [
+    ...desglose.billetes.map(b => `${b.piezas} de ${pesosCorto(b.valor_centavos)}`),
+    desglose.monedas_centavos > 0 && `monedas ${pesos(desglose.monedas_centavos)}`,
+  ].filter(Boolean).join(', ') || null
+}
+
+// Rectángulo [[sur, oeste], [norte, este]] que encierra los puntos [lat, lng], para encuadrar el mapa.
+export function limitesDe(puntos) {
+  let limites = null
+  for (const p of puntos) {
+    const [lat, lng] = p ?? []
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+    if (!limites) limites = [[lat, lng], [lat, lng]]
+    limites[0][0] = Math.min(limites[0][0], lat)
+    limites[0][1] = Math.min(limites[0][1], lng)
+    limites[1][0] = Math.max(limites[1][0], lat)
+    limites[1][1] = Math.max(limites[1][1], lng)
+  }
+  return limites
 }

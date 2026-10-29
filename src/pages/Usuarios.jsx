@@ -24,7 +24,7 @@ import { useConsulta } from '../hooks/useConsulta'
 import { useSucursales } from '../hooks/useSucursales'
 import { ROLES, etiquetaRol } from '../lib/navegacion'
 import { listarUsuarios, vincularUsuario } from '../api/organizacion'
-import { iniciales, plural } from '../utils/fmt'
+import { iniciales, plural, sinAcentos, contiene } from '../utils/fmt'
 import { esCorreo } from '../utils/validar'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
@@ -117,11 +117,11 @@ export default function Usuarios() {
   })), [datos, nombreCorto])
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase()
+    const q = sinAcentos(debouncedSearch.trim())
     return data.filter(u =>
       (filterRol === 'Todos' || u.rol === filterRol) &&
       (!sucursalId || u.sucursal_id === sucursalId) &&
-      (!q || u.nombre.toLowerCase().includes(q) || String(u.usuario ?? '').toLowerCase().includes(q))
+      (!q || contiene(u.nombre, q) || contiene(u.usuario, q))
     )
   }, [data, debouncedSearch, filterRol, sucursalId])
   const paginated = useMemo(() => filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE), [filtered, page])
@@ -318,13 +318,13 @@ export default function Usuarios() {
         </div>
         {/* Sin usuarios en la base: no hay filtro que limpiar */}
         {sinDatos && !cargando && (
-          <EmptyState icon={Users} title="No se pudieron cargar los usuarios" subtitle="Revisa el aviso de arriba y vuelve a intentar." />
+          <EmptyState icon={Users} title="No se pudieron cargar los usuarios" />
         )}
         {data.length === 0 && !sinDatos && (
-          <EmptyState icon={Users} title="Todavía no hay usuarios" subtitle="Las altas se hacen en la caja del almacén; aparecen aquí al sincronizarse." />
+          <EmptyState icon={Users} title="Sin usuarios" subtitle="Se dan de alta en la caja del almacén." />
         )}
         {data.length > 0 && filtered.length === 0 && (
-          <EmptyState icon={Search} title="Sin resultados" subtitle="No hay usuarios con ese criterio de búsqueda.">
+          <EmptyState icon={Search} title="Sin resultados">
             <button onClick={() => { setSearch(''); setFilterRol('Todos'); setSucursalId('') }} className="btn-soft-blue mt-3 px-4 py-2 text-xs font-semibold rounded-xl">
               Limpiar filtros
             </button>

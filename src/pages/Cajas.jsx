@@ -24,7 +24,7 @@ import { usePeriodo } from '../hooks/usePeriodo'
 import { useSucursales } from '../hooks/useSucursales'
 import { listarTurnosAbiertos, listarCortes } from '../api/cajas'
 import { movimientosDeTurno, signoMovimiento, diferenciasPorCajero } from '../lib/calculos'
-import { pesos, fecha, hora, fechaHora, diaCorto, rangoCorto, horario, plural } from '../utils/fmt'
+import { pesos, fecha, hora, fechaHora, diaCorto, rangoCorto, horario, plural, sinAcentos, contiene } from '../utils/fmt'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 
 const PER_PAGE = 8
@@ -106,7 +106,7 @@ function DetalleTurno({ turno, onClose }) {
         {abierto && (
           <div className="rounded-xl px-4 py-3 flex items-center gap-2" style={{ background: '#FFF7ED', border: '1px solid #FDBA74' }}>
             <Info className="w-4 h-4 flex-shrink-0" style={{ color: '#C2410C' }} />
-            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>El corte se registra en la caja al cerrar el turno; aquí aparece en cuanto se sincroniza.</p>
+            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>Turno abierto: el corte aparece al cerrarlo.</p>
           </div>
         )}
 
@@ -183,8 +183,8 @@ export default function Cajas() {
       sucursal: nombreCorto(t.sucursal_id),
       sucursalNombre: nombreSucursal(t.sucursal_id),
     })
-    const q = debouncedSearch.trim().toLowerCase()
-    const coincide = (t) => !q || [t.cajaNombre, t.cajeroNombre, t.sucursal].some(x => x.toLowerCase().includes(q))
+    const q = sinAcentos(debouncedSearch.trim())
+    const coincide = (t) => !q || [t.cajaNombre, t.cajeroNombre, t.sucursal].some(x => contiene(x, q))
     return {
       abiertas: (abiertas.datos ?? []).map(armar).filter(coincide),
       cortes:   (cortes.datos?.filas ?? []).map(armar).filter(coincide),
@@ -318,7 +318,7 @@ export default function Cajas() {
           </div>
 
           {modelo.abiertas.length === 0 && abiertas.datos !== undefined && (
-            <EmptyState icon={Monitor} title="Ninguna caja abierta" subtitle="Cuando una caja abra turno aparecerá aquí al momento." />
+            <EmptyState icon={Monitor} title="Ninguna caja abierta" />
           )}
         </div>
       )}

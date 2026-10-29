@@ -28,7 +28,7 @@ import { useConsulta } from '../hooks/useConsulta'
 import { useSucursales } from '../hooks/useSucursales'
 import { listarProductos, listarExistencias, listarLimites, listarOrdenesPendientes } from '../api/inventario'
 import { armarInventario, NIVEL, esBajo, etiquetaCodigo } from '../lib/calculos'
-import { cantidad, plural } from '../utils/fmt'
+import { cantidad, plural, sinAcentos, contiene } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 import IconoProducto from '../components/IconoProducto'
@@ -160,11 +160,11 @@ export default function Inventario() {
   }, [productos])
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase()
+    const q = sinAcentos(debouncedSearch.trim())
     return productos.filter(p =>
       (cat === 'Todos' || p.categoria === cat) &&
       (!soloBajos || bajo(p)) &&
-      (!q || p.nombre.toLowerCase().includes(q) || String(p.clave ?? '').toLowerCase().includes(q))
+      (!q || contiene(p.nombre, q) || contiene(p.clave, q))
     )
   }, [productos, debouncedSearch, cat, soloBajos])
 
@@ -205,10 +205,10 @@ export default function Inventario() {
   // Catálogo vacío no es lo mismo que una búsqueda sin coincidencias.
   // Con error se dice que no se pudo cargar; antes no salía nada debajo de "0 productos"
   const vacio = sinDatos
-    ? <EmptyState icon={Package} title="No se pudieron cargar los productos" subtitle="Revisa el aviso de arriba y vuelve a intentar." className="col-span-full" />
+    ? <EmptyState icon={Package} title="No se pudieron cargar los productos" className="col-span-full" />
     : productos.length === 0
-    ? <EmptyState icon={Package} title="Todavía no hay productos en el catálogo" subtitle="Aparecerán aquí en cuanto las cajas los sincronicen." className="col-span-full" />
-    : <EmptyState icon={Search} title="Sin resultados" subtitle="Intenta con otro término de búsqueda o limpia los filtros." className="col-span-full" />
+    ? <EmptyState icon={Package} title="Sin productos" className="col-span-full" />
+    : <EmptyState icon={Search} title="Sin resultados" className="col-span-full" />
 
   const toolbar = (
     <div className="data-toolbar">

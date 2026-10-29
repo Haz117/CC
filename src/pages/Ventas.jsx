@@ -33,7 +33,7 @@ import {
   resumenVentas, ventasPorDia, ventasPorHora, pagosPorMetodo, metodoDeVenta,
   etiquetaEstado, colorEstado, etiquetaMetodo, colorMetodo, esCancelada, esCompletada,
 } from '../lib/calculos'
-import { pesos, pesosEje, plural, cantidad, fecha, hora, fechaHora, diaCorto, fmtDec } from '../utils/fmt'
+import { pesos, pesosEje, plural, cantidad, fecha, hora, fechaHora, diaCorto, fmtDec, sinAcentos, contiene } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 import { useEstadoSesion } from '../hooks/useEstadoSesion'
 import Logo from '../components/Logo'
@@ -167,10 +167,10 @@ export default function Ventas() {
   const estados = useMemo(() => ['Todas', ...new Set(ventas.map(v => v.estado))], [ventas])
 
   const filtered = useMemo(() => {
-    const q = debouncedSearch.trim().toLowerCase()
+    const q = sinAcentos(debouncedSearch.trim())
     return ventas.filter(v =>
       (filterEstado === 'Todas' || v.estado === filterEstado) &&
-      (!q || v.folio.toLowerCase().includes(q) || v.cajeroNombre.toLowerCase().includes(q) || v.sucursal.toLowerCase().includes(q))
+      (!q || contiene(v.folio, q) || contiene(v.cajeroNombre, q) || contiene(v.sucursal, q))
     )
   }, [ventas, debouncedSearch, filterEstado])
 
@@ -475,13 +475,10 @@ export default function Ventas() {
           </table>
         </div>
         {filtered.length === 0 && (sinDatos
-          ? <EmptyState icon={ReceiptText} title="No se pudieron cargar las ventas" subtitle="Revisa el aviso de arriba y vuelve a intentar." />
+          ? <EmptyState icon={ReceiptText} title="No se pudieron cargar las ventas" />
           : <EmptyState
               icon={ventas.length === 0 ? ReceiptText : Search}
               title={ventas.length === 0 ? 'Sin ventas en este periodo' : 'Sin resultados'}
-              subtitle={ventas.length === 0
-                ? 'Las cajas suben sus ventas cada 10 segundos cuando tienen internet.'
-                : 'Intenta con otro término de búsqueda o limpia los filtros.'}
             />
         )}
 

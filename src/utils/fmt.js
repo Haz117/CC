@@ -9,6 +9,12 @@ export const pesosCorto = (centavos) => fmt((Number(centavos) || 0) / 100)
 // Eje de las gráficas (en pesos, no centavos): "$850", "$12.5k", "-$1.2k"
 export const pesosEje   = (v) => `${v < 0 ? '-' : ''}$${Math.abs(v) >= 1000 ? `${Math.round(Math.abs(v) / 100) / 10}k` : Math.abs(v)}`
 
+/* ── Buscar ───────────────────────────────────────────────
+   Sin acentos ni mayúsculas: "jose" encuentra a "José", "crema acida" a "Crema Ácida". */
+export const sinAcentos = (texto) => String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+// `q` ya pasado por sinAcentos
+export const contiene = (texto, q) => sinAcentos(texto).includes(q)
+
 // "1 corte", "3 cortes"; el plural irregular va como tercer argumento.
 export const plural = (n, uno, varios = `${uno}s`) => `${n} ${n === 1 ? uno : varios}`
 

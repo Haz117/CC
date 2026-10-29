@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 // Tablas que avisan al momento cuando cambian (también respetan la sucursal del usuario).
-export const TABLAS_EN_VIVO = ['ventas', 'turnos_caja', 'ordenes_reabastecimiento', 'bloqueos_acceso']
+export const TABLAS_EN_VIVO = ['ventas', 'turnos_caja', 'ordenes_reabastecimiento', 'bloqueos_acceso', 'ruta_envios']
 
 // Un canal por tabla, compartido entre todas las pantallas que la escuchan.
 const canales = new Map() // tabla → { canal, oyentes, cierre }

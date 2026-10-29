@@ -14,6 +14,7 @@ const NOMBRE_TABLA = {
   turnos_caja: 'turnos de caja',
   ordenes_reabastecimiento: 'pedidos de reabastecimiento',
   bloqueos_acceso: 'bloqueos de acceso',
+  ruta_envios: 'ventas en ruta',
 }
 const enVivo = TABLAS_EN_VIVO.map(t => NOMBRE_TABLA[t] ?? t.replace(/_/g, ' '))
 const listaEnVivo = enVivo.length > 1 ? `${enVivo.slice(0, -1).join(', ')} y ${enVivo.at(-1)}` : enVivo.join('')

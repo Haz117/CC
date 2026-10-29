@@ -47,8 +47,11 @@ export function useConsulta(consultar, deps = [], { enVivo = [], activo = true }
   }, [activo, recargar])
 
   const tablas = enVivo.join(',')
+  // Si la base todavía no tiene la tabla (las de ruta, antes de la migración), no se escucha:
+  // Realtime reintentaría suscribirse a ella sin fin.
+  const sinTablas = estado.error?.codigo === 'SIN_TABLAS'
   useEffect(() => {
-    if (!activo || !tablas || esDemo()) return
+    if (!activo || !tablas || esDemo() || sinTablas) return
     let temporizador
     const programar = () => {
       clearTimeout(temporizador)
@@ -60,7 +63,7 @@ export function useConsulta(consultar, deps = [], { enVivo = [], activo = true }
       clearTimeout(temporizador)
       bajas.forEach(baja => baja())
     }
-  }, [activo, tablas, recargar])
+  }, [activo, tablas, recargar, sinTablas])
 
   return { ...estado, recargar }
 }

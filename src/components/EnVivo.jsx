@@ -28,7 +28,7 @@ export default function EnVivo({ actualizando = false, error = null }) {
       type="button"
       onClick={() => window.dispatchEvent(new Event('app:refrescar'))}
       disabled={!enLinea}
-      title="Se actualiza sola cuando las cajas suben cambios. Toca para consultar ahora."
+      title="Consultar ahora"
       className={`sincronia${enLinea ? (error && !actualizando ? ' con-error' : '') : ' sin-red'}`}
     >
       <Icono className={`sincronia-icono${actualizando && enLinea ? ' animate-spin' : ''}`} aria-hidden="true" />

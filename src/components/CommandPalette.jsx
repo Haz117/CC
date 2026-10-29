@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Search, ShoppingCart, Scissors, PackageSearch, BarChart3, UserRound, X, ArrowRight } from 'lucide-react'
 import { PAGINAS } from '../lib/navegacion'
+import { sinAcentos, contiene } from '../utils/fmt'
 
 // La web es de consulta: los accesos rápidos abren vistas, no registran nada.
 const ACCESOS = [
@@ -28,8 +29,8 @@ export default function CommandPalette({ open, onClose }) {
     query.trim().length === 0
       ? todos
       : todos.filter(item =>
-          item.label.toLowerCase().includes(query.toLowerCase()) ||
-          item.group.toLowerCase().includes(query.toLowerCase())
+          contiene(item.label, sinAcentos(query)) ||
+          contiene(item.group, sinAcentos(query))
         )
   , [query, todos])
 

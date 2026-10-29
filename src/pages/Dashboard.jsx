@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { Banknote, Truck, CalendarDays, Receipt, Monitor, Target, XCircle } from 'lucide-react'
+import { Banknote, Truck, CalendarDays, Receipt, Monitor, Target, XCircle, Navigation } from 'lucide-react'
 import ChartTooltip from '../components/ChartTooltip'
 import AvisoError from '../components/AvisoError'
 import EnVivo from '../components/EnVivo'
@@ -9,12 +9,12 @@ import { SkeletonLine } from '../components/Skeleton'
 import { useConsulta } from '../hooks/useConsulta'
 import { useEnfocarTitulo } from '../hooks/useEnfocarTitulo'
 import { useSucursales } from '../hooks/useSucursales'
-import { useAuth } from '../auth/contexto'
 import { listarVentasResumen, listarUltimasVentas } from '../api/ventas'
 import { listarTurnosAbiertos } from '../api/cajas'
 import { listarOrdenesPendientes } from '../api/inventario'
 import { listarMetas } from '../api/organizacion'
-import { resumenVentas, ventasPorDia, ventasPorSucursal, esCancelada } from '../lib/calculos'
+import { listarJornadas } from '../api/rutas'
+import { resumenVentas, ventasPorDia, ventasPorSucursal, esCancelada, resumenJornadas } from '../lib/calculos'
 import { pesos, pesosCorto, pesosEje, plural, hora, fmtDec, inicioDelDia, inicioDelMes, sumarDias, diaLargo, mesNombre, diaLocal } from '../utils/fmt'
 import Grafica from '../components/Grafica'
 
@@ -50,7 +50,6 @@ function Vacio({ children }) {
 ════════════════════════════════════════════════════════════ */
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { perfil } = useAuth()
   const { nombreCorto } = useSucursales()
 
   // Una sola consulta de ventas cubre hoy, los últimos 7 días y el mes en curso.
@@ -70,6 +69,18 @@ export default function Dashboard() {
     ])
     return { ventas, ultimas, abiertas, metas, ordenes }
   }, [desdeISO, hoyISO], { enVivo: ['ventas', 'turnos_caja', 'ordenes_reabastecimiento'] })
+
+  // Los camiones van aparte: mientras la base no tenga las tablas de ruta, su error no tumba el panel.
+  // "Ventas hoy" es solo de las cajas; lo de ruta llega a `ventas` hasta la fase 2 de la migración.
+  const ruta = useConsulta(
+    () => listarJornadas({ desde: hoyISO, hasta: sumarDias(new Date(hoyISO), 1).toISOString() }),
+    [hoyISO],
+    { enVivo: ['ruta_envios'] },
+  )
+  const rRuta = useMemo(() => {
+    const jornadas = ruta.datos ?? []
+    return { ahora: resumenJornadas(jornadas), hoy: resumenJornadas(jornadas.filter(j => j.salida >= hoyISO)) }
+  }, [ruta.datos, hoyISO])
 
   const r = useMemo(() => {
     const filas = datos?.ventas.filas ?? []
@@ -105,9 +116,6 @@ export default function Dashboard() {
   const ultimas  = datos?.ultimas ?? []
   const esperado = hoy.getDate() / new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate() * 100
 
-  const nombre = perfil.nombre?.split(' ')[0]
-  const h = new Date().getHours()
-  const saludo = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
   const titulo = useEnfocarTitulo()
   const ir = (path) => () => navigate(path)
 
@@ -118,6 +126,10 @@ export default function Dashboard() {
     { Icon: Banknote, label: 'Ventas hoy',     value: pesosCorto(r.hoy.vendido), sub: r.delta == null ? 'sin contar canceladas' : `${r.delta >= 0 ? '+' : '−'}${Math.abs(r.delta)}% vs ayer a esta hora`, good: r.delta > 0, alert: r.delta < 0, iconColor: '#627080', path: '/ventas' },
     { Icon: Receipt,  label: 'Tickets hoy',    value: r.hoy.completadas,         sub: r.hoy.completadas ? `promedio ${pesos(r.hoy.ticketPromedio)}` : 'aún sin ventas', iconColor: '#627080', path: '/ventas' },
     { Icon: Monitor,  label: 'Cajas abiertas', value: abiertas.length,           sub: primeraAbierta ? `la primera desde las ${hora(primeraAbierta)}` : 'ninguna en este momento', iconColor: '#047857', path: '/cajas' },
+    { Icon: Navigation, label: 'En ruta hoy',
+      value: ruta.datos ? pesosCorto(rRuta.hoy.vendido) : '—',
+      sub: ruta.error ? 'no disponible' : ruta.datos ? `${plural(rRuta.ahora.enRuta, 'camión', 'camiones')} en ruta` : ' ',
+      iconColor: '#C2410C', path: '/rutas' },
     // Son pedidos, no productos: en Inventario "Bajo mínimo" cuenta productos y daría otra cifra
     { Icon: Truck,    label: 'Por reabastecer', value: ordenes.length,           sub: ordenes.length ? `pedidos en ${plural(sucursalesPorSurtir, 'sucursal', 'sucursales')}` : 'inventario en orden', alert: ordenes.length > 0, iconColor: ordenes.length ? '#8A4A42' : '#627080', path: '/inventario' },
   ]
@@ -128,9 +140,8 @@ export default function Dashboard() {
       {/* ══ HERO DEL PANEL (claro) ════════════════════════════ */}
       <div className="panel-hero">
         <div className="min-w-0">
-          <p className="panel-hero-crumb">{diaLargo(hoy)}</p>
-          <h1 ref={titulo} className="panel-hero-title">{saludo}, {nombre}</h1>
-          <p className="panel-hero-sub">Resumen de hoy en todas las sucursales</p>
+          <h1 ref={titulo} className="panel-hero-title">{diaLargo(hoy)}</h1>
+          <p className="panel-hero-sub">Todas las sucursales</p>
           <div className="panel-hero-tags">
             <EnVivo error={error} />
             {r.hoy.canceladas > 0 && !sinDatos && (
@@ -210,7 +221,7 @@ export default function Dashboard() {
 
         {/* Últimas ventas */}
         <div className="card p-5" style={tarjeta}>
-          <Encabezado icon={Receipt} titulo="Últimas ventas de hoy" nota="Las cajas suben sus ventas cada 10 segundos" accion="Ver todas" onAccion={ir('/ventas')} />
+          <Encabezado icon={Receipt} titulo="Últimas ventas de hoy" accion="Ver todas" onAccion={ir('/ventas')} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {ultimas.map((v, i) => {
@@ -244,7 +255,7 @@ export default function Dashboard() {
 
         {/* Meta del mes */}
         <div className="card p-5" style={tarjeta}>
-          <Encabezado icon={Target} titulo={`Meta de ${mesNombre(hoy)}`} nota="La línea gris marca el avance esperado a hoy" accion="Ver sucursales" onAccion={ir('/sucursales')} />
+          <Encabezado icon={Target} titulo={`Meta de ${mesNombre(hoy)}`} nota="Línea gris: avance esperado a hoy" accion="Ver sucursales" onAccion={ir('/sucursales')} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, justifyContent: 'space-around' }}>
             {r.metas.map(m => {
               const color = m.avance >= esperado ? '#047857' : m.avance >= esperado * 0.8 ? '#92400E' : '#8A4A42'
